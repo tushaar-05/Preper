@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PREPER - Home</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body theme="black">
+  <div class="main">
+    <header class="relative w-full h-screen overflow-hidden">
+      <div class="absolute inset-0 -z-10">
+        <video
+          class="w-full h-full object-cover"
+          src="../static/video/vid.mp4"
+          autoplay
+          loop
+          muted
+          playsinline
+        ></video>
+      </div>
+
+      <nav class="flex justify-between items-center px-[40px] py-[16px] relative z-10 text-white">
+        <div class="flex items-center font-bold">PREPER</div>
+
+        <div class="flex gap-[36px] border border-zinc-400 rounded-[30px] px-[17px] py-[10px]">
+          <a href="/">Home</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
+        </div>
+
+        <div class="flex gap-[16px]">
+          <a class="bg-[#9685fe] pt-[10px] pb-[10px] pl-[13px] pr-[13px] rounded-[6px]" href="/login">Get Started</a>
+        </div>
+      </nav>
+    </header>
+
+    <main></main>
+    <footer></footer>
+  </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" integrity="sha512-NcZdtrT77bJr4STcmsGAESr06BYGE8woZdSdEgqnpyqac7sugNO+Tr4bGwGF3MsnEkGKhU2KL2xh6Ec+BqsaHA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js" integrity="sha512-P2IDYZfqSwjcSjX0BKeNhwRUH8zRPGlgcWl5n6gBLzdi4Y5/0O4zaXrtO4K9TZK6Hn1BenYpKowuCavNandERg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@beta/bundled/locomotive-scroll.min.js"></script>
+    <script src="../static/js/script.js"></script>
+</body>
+</html>

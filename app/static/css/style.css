@@ -1,0 +1,26 @@
+:root{
+  --purple: #9685fe;
+  --black: #000;
+  --white: ■#fff;
+}
+
+body{
+  transition: background-color ease-out .5s;
+} 
+
+.vdodiv{
+  clip-path: circle(var(--clip) at 50% 50%);
+}
+
+*::selection{
+  background-color: var(--purple);
+}
+
+body[theme="black"]{
+  background-color: var(--black);
+  color: white;
+}
+
+body[theme="white"]{
+  background-color: var(--white);
+}
