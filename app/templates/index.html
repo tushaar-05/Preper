@@ -8,27 +8,38 @@
   <link rel="stylesheet" href="../static/css/style.css">
 </head>
 <body theme="black">
-  <div class="main">
+  <div class="main h-[300vh]">
     <header class="relative w-full h-screen overflow-hidden">
-      <div class="absolute inset-0 -z-10">
-        <video
-          class="w-full h-full object-cover"
-          src="../static/video/vid.mp4"
-          autoplay
-          loop
-          muted
-          playsinline
-        ></video>
+      <div class="absolute -translate-y-[50%] inset-0 -z-10 flex items-center justify-center">
+        <div class="relative scale-[2.6] w-[500px] h-[500px] rounded-full overflow-hidden">
+          <video
+            class="w-full h-full object-cover"
+            src="../static/video/DotVid.mp4"
+            autoplay
+            loop
+            muted
+            playsinline
+          ></video>
+
+          <div
+            class="pointer-events-none absolute inset-0 rounded-full
+                  bg-[radial-gradient(circle,rgba(0,0,0,0.5)_35%,rgba(0,0,0,1)_100%)]"
+          ></div>
+        </div>
       </div>
 
-      <nav class="flex justify-between items-center px-[40px] py-[16px] relative z-10 text-white">
+
+      <nav class="flex justify-between font-[BwGradual-Medium] items-center px-[40px] py-[16px] relative z-10 text-white">
         <div class="flex items-center font-bold">PREPER</div>
 
-        <div class="flex gap-[36px] border border-zinc-400 rounded-[30px] px-[17px] py-[10px]">
-          <a href="/">Home</a>
-          <a href="#about">About</a>
-          <a href="#contact">Contact</a>
+        <div
+          class="flex gap-[5px] text-[15px] rounded-[30px] px-[5px] py-[5px]
+                bg-black shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.01)]">
+          <a class="hover:bg-[#9685fe] px-[15px] py-[5px] rounded-[15px]" href="/">Home</a>
+          <a class="hover:bg-[#9685fe] px-[15px] py-[5px] rounded-[15px]" href="#about">About</a>
+          <a class="hover:bg-[#9685fe] px-[15px] py-[5px] rounded-[15px]" href="#contact">Contact</a>
         </div>
+
 
         <div class="flex gap-[16px]">
           <a class="bg-[#9685fe] pt-[10px] pb-[10px] pl-[13px] pr-[13px] rounded-[6px]" href="/login">Get Started</a>

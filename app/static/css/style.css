@@ -1,3 +1,33 @@
+@font-face {
+  font-family: "BwGradual-Black";
+  src: url("../font/BwGradualDEMO-Black.otf");
+}
+
+@font-face {
+  font-family: "BwGradual-Bold";
+  src: url("../font/BwGradualDEMO-Bold.otf");
+}
+
+@font-face {
+  font-family: "BwGradual-Light";
+  src: url("../font/BwGradualDEMO-Light.otf");
+}
+
+@font-face {
+  font-family: "BwGradual-Medium";
+  src: url("../font/BwGradualDEMO-Medium.otf");
+}
+
+@font-face {
+  font-family: "BwGradual-Regular";
+  src: url("../font/BwGradualDEMO-Regular.otf");
+}
+
+@font-face {
+  font-family: "BwGradual-Thin";
+  src: url("../font/BwGradualDEMO-Thin.otf");
+}
+
 :root{
   --purple: #9685fe;
   --black: #000;
