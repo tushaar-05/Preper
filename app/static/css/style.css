@@ -46,6 +46,93 @@ body{
   background-color: var(--purple);
 }
 
+/* Testimonials Section */
+.testimonials-section {
+  position: relative;
+  z-index: 10;
+  background-color: #000;
+  overflow: hidden;
+}
+
+.testimonial-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  min-width: 320px;
+  height: 100%;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.testimonial-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px -5px rgba(150, 133, 254, 0.2);
+  border-color: rgba(150, 133, 254, 0.3);
+}
+
+/* Marquee Animation */
+.marquee-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  margin: 3rem 0;
+  padding: 1rem 0;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  gap: 1.5rem;
+}
+
+.marquee-track.reverse {
+  animation-direction: reverse;
+}
+
+.marquee-item {
+  flex: 0 0 auto;
+  margin-right: 1.5rem;
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+/* Infinite scroll effect */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Pause on hover */
+.marquee-container:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Add subtle scale effect on hover */
+.marquee-item:hover {
+  transform: scale(1.02);
+  z-index: 1;
+}
+
 body[theme="black"]{
   background-color: var(--black);
   color: var(--white);

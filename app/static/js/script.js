@@ -18,7 +18,91 @@ function themeChange(){
   const locomotiveScroll = new LocomotiveScroll();
 })();
 
+// Initialize Marquee Animation with smooth infinite scroll
+function initMarquee() {
+  const marquees = document.querySelectorAll('.marquee-track');
+  
+  marquees.forEach((marquee, index) => {
+    const items = marquee.querySelectorAll('.marquee-item');
+    const isFirstRow = index === 0; // Check if it's the first row
+    
+    // Duplicate items for seamless looping
+    const itemsArray = Array.from(items);
+    itemsArray.forEach(item => {
+      const clone = item.cloneNode(true);
+      marquee.appendChild(clone);
+    });
+    
+    // Get the total width of all original items
+    const firstItem = items[0];
+    const itemWidth = firstItem.offsetWidth + 24; // 24px gap
+    const totalWidth = itemWidth * itemsArray.length;
+    
+    // Set initial position based on direction
+    const initialX = isFirstRow ? `-${totalWidth/2}px` : '0';
+    gsap.set(marquee, { x: initialX });
+    
+    // Calculate duration based on number of items
+    const duration = 30 + (itemsArray.length * 2);
+    
+    // Create the animation
+    const tl = gsap.timeline({ 
+      repeat: -1,
+      defaults: { ease: 'none' },
+      onRepeat: function() {
+        gsap.set(marquee, { x: initialX });
+        marquee.offsetHeight;
+      }
+    });
+    
+    if (isFirstRow) {
+      // First row moves right
+      tl.to(marquee, {
+        x: '0',
+        duration: duration / 2,
+        ease: 'none'
+      });
+      
+      tl.to(marquee, {
+        x: `+=${totalWidth / 2}`,
+        duration: duration / 2,
+        ease: 'power1.inOut',
+        onComplete: function() {
+          gsap.set(marquee, { x: `-${totalWidth/2}px` });
+        }
+      }, `-=${duration / 4}`);
+    } else {
+      // Other rows move left (original behavior)
+      tl.to(marquee, {
+        x: `-=${totalWidth / 2}`,
+        duration: duration / 2,
+        ease: 'none'
+      });
+      
+      tl.to(marquee, {
+        x: `-=${totalWidth / 2}`,
+        duration: duration / 2,
+        ease: 'power1.inOut',
+        onComplete: function() {
+          gsap.set(marquee, { x: 0 });
+        }
+      }, `-=${duration / 4}`);
+    }
+    
+    // Pause on hover
+    const container = marquee.closest('.marquee-container');
+    container.addEventListener('mouseenter', () => {
+      tl.pause();
+    });
+    container.addEventListener('mouseleave', () => {
+      tl.resume();
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+  // Initialize marquee animation
+  initMarquee();
   // Elements
   const videoThumbnail = document.querySelector('.video-thumbnail');
   const videoModal = document.querySelector('.video-modal');
@@ -111,3 +195,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 themeChange();
+
