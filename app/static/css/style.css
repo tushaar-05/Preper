@@ -31,7 +31,7 @@
 :root{
   --purple: #9685fe;
   --black: #000;
-  --white: ■#fff;
+  --white: #fff;
 }
 
 body{
@@ -48,9 +48,10 @@ body{
 
 body[theme="black"]{
   background-color: var(--black);
-  color: white;
+  color: var(--white);
 }
 
 body[theme="white"]{
   background-color: var(--white);
+  color: var(--black)
 }

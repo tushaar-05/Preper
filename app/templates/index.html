@@ -9,47 +9,82 @@
 </head>
 <body theme="black">
   <div class="main h-[300vh]">
-    <header class="relative w-full h-screen overflow-hidden">
-      <div class="absolute -translate-y-[50%] inset-0 -z-10 flex items-center justify-center">
-        <div class="relative scale-[2.6] w-[500px] h-[500px] rounded-full overflow-hidden">
-          <video
-            class="w-full h-full object-cover"
-            src="../static/video/DotVid.mp4"
-            autoplay
-            loop
-            muted
-            playsinline
-          ></video>
+    <header class="relative mb-[50px] w-full overflow-hidden">
+      <div class="absolute inset-0 top-[-250px] flex justify-center items-start pt-[120px] z-0">
+        <div class="relative w-[420px] h-[420px] scale-[2.5]">
 
+          <div class="w-full h-full rounded-full overflow-hidden">
+            <video
+              class="w-full h-full object-cover"
+              src="../static/video/DotVid.mp4"
+              autoplay
+              loop
+              muted
+              playsinline
+            ></video>
+          </div>
           <div
             class="pointer-events-none absolute inset-0 rounded-full
-                  bg-[radial-gradient(circle,rgba(0,0,0,0.5)_35%,rgba(0,0,0,1)_100%)]"
-          ></div>
+            bg-[radial-gradient(circle,rgba(0,0,0,0.35)_35%,rgba(0,0,0,0.85)_65%,rgba(0,0,0,1)_100%)]">
+          </div>
         </div>
       </div>
 
-
-      <nav class="flex justify-between font-[BwGradual-Medium] items-center px-[40px] py-[16px] relative z-10 text-white">
-        <div class="flex items-center font-bold">PREPER</div>
+      <nav class="relative z-10 flex justify-between items-center px-[50px] pt-[35px] pb-[35px]">
+        <div class="font-bold">PREPER</div>
 
         <div
           class="flex gap-[5px] text-[15px] rounded-[30px] px-[5px] py-[5px]
-                bg-black shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.01)]">
-          <a class="hover:bg-[#9685fe] px-[15px] py-[5px] rounded-[15px]" href="/">Home</a>
-          <a class="hover:bg-[#9685fe] px-[15px] py-[5px] rounded-[15px]" href="#about">About</a>
-          <a class="hover:bg-[#9685fe] px-[15px] py-[5px] rounded-[15px]" href="#contact">Contact</a>
+          bg-black shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.01)]">
+          <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="/">Home</a>
+          <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="#about">About</a>
+          <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="#contact">Contact</a>
         </div>
 
-
-        <div class="flex gap-[16px]">
-          <a class="bg-[#9685fe] pt-[10px] pb-[10px] pl-[13px] pr-[13px] rounded-[6px]" href="/login">Get Started</a>
-        </div>
+        <a class="bg-[var(--purple)] px-[13px] py-[10px] rounded-[6px]" href="/login">
+          Get Started
+        </a>
       </nav>
+
+      <div class="relative z-10 flex flex-col justify-center items-center h-fit my-[50px] text-center">
+        <div class="text-[15px] font-[BwGradual-Regular] font-light opacity-[0.9] mb-3">
+          Trusted by <span class="text-[var(--purple)]">30+</span> NST aspirants
+        </div>
+
+        <div class="leading-[1.2]">
+          <h2 class="text-[60px] font-[BwGradual-Bold] font-bold">
+            The Next-Gen NST Program
+          </h2>
+          <h1 class="text-[45px] font-[BwGradual-Bold]">
+            NST <span class="text-[var(--purple)]">Preper</span>
+          </h1>
+        </div>
+
+        <p class="max-w-[600px] mt-[15px] font-[BwGradual-Thin] opacity-[0.5]">
+          Over multiple NST cycles, this program has guided 30+ students to
+          understand the exam, prepare confidently, and face interviews with
+          clarity — based on real experiences, not guesswork or shortcuts.
+        </p>
+
+        <div class="mt-[35px]">
+          <a
+            class="inline-block text-[15px] rounded-[30px] px-[35px] py-[15px]
+            bg-black shadow-[inset_0_1px_2px_rgba(255,255,255,0.9),inset_0_-1px_2px_rgba(255,255,255,0.1)] hover:bg-[var(--purple)]"
+            href="/login"
+          >
+            Get Started
+          </a>
+        </div>
+      </div>
     </header>
 
-    <main></main>
-    <footer></footer>
-  </div>
+    <main>
+      <div class="mainvido">
+        <video src="../static/video/DotVid.mp4"></video>
+      </div>
+    </main>
+
+    </div>
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" integrity="sha512-NcZdtrT77bJr4STcmsGAESr06BYGE8woZdSdEgqnpyqac7sugNO+Tr4bGwGF3MsnEkGKhU2KL2xh6Ec+BqsaHA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
