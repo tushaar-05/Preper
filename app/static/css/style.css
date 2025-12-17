@@ -55,3 +55,89 @@ body[theme="white"]{
   background-color: var(--white);
   color: var(--black)
 }
+
+
+/* ------------------------------------------------------------------------ */
+.video-thumbnail {
+  position: relative;
+  cursor: none;
+  transition: transform 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  background-color: #000;
+  aspect-ratio: 16/9;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.video-thumbnail:hover {
+  transform: translateY(-5px) scale(1.01);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.video-thumbnail video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.video-thumbnail:hover video {
+  transform: scale(1.05);
+}
+
+.play-button {
+  transition: all 0.3s ease;
+}
+
+.video-thumbnail:hover .play-button {
+  transform: scale(1.1) rotate(360deg);
+}
+
+.video-modal {
+  transition: opacity 0.3s ease;
+}
+
+.video-modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cursor-dot {
+  position: fixed;
+  padding: 25px;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.1s ease;
+  will-change: transform;
+}
+
+.cursor-dot.active {
+  opacity: 1;
+}
+
+.cursor-dot-fill {
+  color: #000;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+body.modal-open {
+  cursor: none;
+}

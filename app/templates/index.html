@@ -41,9 +41,11 @@
           <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="#contact">Contact</a>
         </div>
 
-        <a class="bg-[var(--purple)] px-[13px] py-[10px] rounded-[6px]" href="/login">
-          Get Started
-        </a>
+        <div class="main-cta-btn">
+          <a class="inline-block text-[15px] rounded-[30px] px-[25px] py-[10px]
+            bg-black shadow-[inset_0_1px_2px_rgba(255,255,255,0.9),inset_0_-1px_2px_rgba(255,255,255,0.1)] hover:bg-[var(--purple)]"
+            href="/login">Get Started</a>
+        </div>
       </nav>
 
       <div class="relative z-10 flex flex-col justify-center items-center h-fit my-[50px] text-center">
@@ -79,12 +81,61 @@
     </header>
 
     <main>
-      <div class="mainvido">
-        <video src="../static/video/DotVid.mp4"></video>
+      <section class="video-section py-20 px-4">
+        <div class="max-w-5xl mx-auto">
+          <div class="relative group">
+            <div class="video-thumbnail relative cursor-pointer overflow-hidden rounded-lg shadow-2xl">
+              <video class="w-full h-auto" poster="../static/images/ChatGPT Image Dec 17, 2025, 02_51_48 PM.png" loop muted>
+                <source src="../static/video/your-video.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+              <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                <div class="play-button w-20 h-20 bg-white bg-opacity-90 rounded-full flex items-center justify-center transform transition-transform duration-300 group-hover:scale-110">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1 text-black">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="vidopara flex justify-center text-[25px]">
+            <h3 class="w-[900px] mt-[15px] text-center font-[BwGradual-Medium]">
+            Step by step, you'll build the <span class="text-[var(--purple)]">skills</span> that actually matter for NST.
+            </h3>
+          </div>
+          <div class="mt-[25px] flex justify-center">
+            <a
+            class="inline-block text-[15px] rounded-[30px] px-[35px] py-[15px]
+            bg-black shadow-[inset_0_1px_2px_rgba(255,255,255,0.9),inset_0_-1px_2px_rgba(255,255,255,0.1)] hover:bg-[var(--purple)]"
+            href="/login"
+          >
+            Get Started
+          </a>
+          </div>
+          
+        </div>
+      </section>
+
+      <div class="video-modal fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="relative w-full max-w-4xl mx-4">
+          <button class="close-button absolute -top-12 right-0 text-white text-3xl z-10 hover:text-gray-300 transition-colors">
+            &times;
+          </button>
+          <div class="relative pt-[56.25%]">
+            <video id="modal-video" class="absolute top-0 left-0 w-full h-full" controls>
+              <source src="../static/video/DotVid.mp4" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+      </div>
+
+      <div class="cursor-dot">
+        <div class="cursor-dot-fill">PLAY</div>
       </div>
     </main>
-
-    </div>
+  </div>
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" integrity="sha512-NcZdtrT77bJr4STcmsGAESr06BYGE8woZdSdEgqnpyqac7sugNO+Tr4bGwGF3MsnEkGKhU2KL2xh6Ec+BqsaHA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
