@@ -9,7 +9,7 @@
 </head>
 <body theme="black">
   <div class="main h-[300vh]">
-    <header class="relative mb-[50px] w-full overflow-hidden">
+    <header data-color="black" class="section relative mb-[50px] w-full overflow-hidden">
       <div class="absolute inset-0 top-[-250px] flex justify-center items-start pt-[120px] z-0">
         <div class="relative w-[420px] h-[420px] scale-[2.5]">
 
@@ -50,7 +50,7 @@
 
       <div class="relative z-10 flex flex-col justify-center items-center h-fit my-[50px] text-center">
         <div class="text-[15px] font-[BwGradual-Regular] font-light opacity-[0.9] mb-3">
-          Trusted by <span class="text-[var(--purple)]">30+</span> NST aspirants
+          Trusted by <span class="text-[var(--purple)]">40+</span> NST aspirants
         </div>
 
         <div class="leading-[1.2]">
@@ -63,7 +63,7 @@
         </div>
 
         <p class="max-w-[600px] mt-[15px] font-[BwGradual-Thin] opacity-[0.5]">
-          Over multiple NST cycles, this program has guided 30+ students to
+          Over multiple NST cycles, this program has guided 40+ students to
           understand the exam, prepare confidently, and face interviews with
           clarity — based on real experiences, not guesswork or shortcuts.
         </p>
@@ -81,7 +81,7 @@
     </header>
 
     <main>
-      <section class="video-section py-20 px-4">
+      <section data-color="black" class="section video-section py-20 px-4">
         <div class="max-w-5xl mx-auto">
           <div class="relative group">
             <div class="video-thumbnail relative cursor-pointer overflow-hidden rounded-lg shadow-2xl">
@@ -117,7 +117,7 @@
         </div>
       </section>
 
-      <div class="video-modal fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+      <div data-color="black" class="section video-modal fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="relative w-full max-w-4xl mx-4">
           <button class="close-button absolute -top-12 right-0 text-white text-3xl z-10 hover:text-gray-300 transition-colors">
             &times;
@@ -131,9 +131,37 @@
         </div>
       </div>
 
-      <div class="cursor-dot">
+      <div data-color="black" class="section cursor-dot">
         <div class="cursor-dot-fill">PLAY</div>
       </div>
+
+      <section data-color="black" class="section results mt-[50px] flex justify-between w-full">
+        <div class="results-left leading-[1.2] flex flex-col justify-center pl-[100px] font-[BwGradual-Regular] w-[50%]">
+          <h3 class="text-[75px] ">Proven</h3>
+          <h2 class="text-[75px] opacity-[0.7]">Results</h2>
+        </div>
+        <div class="results-right w-[50%]">
+          <div class="results-right-top flex justify-end pr-[100px]">
+            <h3 class="text-right leading-[1.3] mb-[25px] w-[550px] text-[27px] opacity-[0.6] font-[BwGradual-Regular]">
+              The NST Needs Better Engineers And <br> we're helping students reach where <br> opportunity lives.
+            </h3>
+          </div>
+          <div class="results-right-bottom flex justify-between">
+            <div class="box w-[calc(100%/3)] h-[100px] pr-[50px]">
+              <div class="box-top font-[BwGradual-Bold] text-[48px]">2+</div>
+              <div class="box-bottom font-[BwGradual-Regular] opacity-[0.7] text-[17px] mt-[-15px]">Years of Experience</div>
+            </div>
+            <div class="box w-[calc(100%/3)] h-[100px] pr-[50px]">
+              <div class="box-top font-[BwGradual-Bold] text-[48px]">40+</div>
+              <div class="box-bottom font-[BwGradual-Regular] opacity-[0.7] text-[17px] mt-[-15px]">NST aspirants</div>
+            </div>
+            <div class="box w-[calc(100%/3)] h-[100px] pr-[50px]">
+              <div class="box-top font-[BwGradual-Bold] text-[48px]">20+</div>
+              <div class="box-bottom font-[BwGradual-Regular] opacity-[0.7] text-[17px] mt-[-15px]">Senior Instructors</div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
