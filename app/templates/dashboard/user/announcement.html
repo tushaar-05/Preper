@@ -429,7 +429,7 @@
 
       <!-- Navigation -->
       <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
-        <a href="dashboard.html" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
+        <a href="/me" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
@@ -474,7 +474,7 @@
           Mock NSAT
         </a>
 
-        <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
+        <a href="/doubts" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
           <svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
@@ -502,7 +502,6 @@
         </a>
       </nav>
 
-      <!-- Bottom Logout -->
       <div class="p-4 mt-auto">
         <button
           class="flex items-center gap-3 text-red-400 hover:text-red-300 hover:bg-red-400/10 w-full px-4 py-3 rounded-xl transition-colors text-sm font-medium">
@@ -515,9 +514,7 @@
       </div>
     </aside>
 
-    <!-- MAIN CONTENT -->
     <main class="flex-1 h-full overflow-y-auto bg-[#f8f9fc] p-6 lg:p-10">
-      <!-- Header -->
       <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h2 class="text-3xl font-bold text-gray-900">Announcements</h2>
@@ -552,7 +549,6 @@
         </div>
       </header>
 
-      <!-- Filter and Actions Bar -->
       <div class="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-8">
         <div class="flex flex-wrap gap-2">
           <button data-filter="all" class="filter-btn bg-[var(--purple)] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
@@ -580,9 +576,7 @@
         </button>
       </div>
 
-      <!-- Announcements Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Announcements List -->
         <div class="lg:col-span-2">
           <div class="mb-4 flex items-center justify-between">
             <h3 class="text-lg font-bold text-gray-900">Recent Announcements</h3>
@@ -596,7 +590,6 @@
           </div>
         </div>
         
-        <!-- Announcement Detail View -->
         <div class="lg:col-span-1">
           <div class="sticky top-6">
             <div class="mb-4 flex items-center justify-between">
