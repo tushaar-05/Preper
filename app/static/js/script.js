@@ -14,9 +14,9 @@ function themeChange(){
   });
 }
 
-(function () {
-  const locomotiveScroll = new LocomotiveScroll();
-})();
+// (function () {
+//   const locomotiveScroll = new LocomotiveScroll();
+// })();
 
 // Initialize Marquee Animation with smooth infinite scroll
 function initMarquee() {
@@ -26,12 +26,14 @@ function initMarquee() {
     const items = marquee.querySelectorAll('.marquee-item');
     const isFirstRow = index === 0; // Check if it's the first row
     
-    // Duplicate items for seamless looping
+    // Duplicate items for seamless looping (3 copies for smoother loop)
     const itemsArray = Array.from(items);
-    itemsArray.forEach(item => {
-      const clone = item.cloneNode(true);
-      marquee.appendChild(clone);
-    });
+    for (let i = 0; i < 2; i++) { // Create 2 additional copies
+      itemsArray.forEach(item => {
+        const clone = item.cloneNode(true);
+        marquee.appendChild(clone);
+      });
+    }
     
     // Get the total width of all original items
     const firstItem = items[0];
@@ -39,63 +41,67 @@ function initMarquee() {
     const totalWidth = itemWidth * itemsArray.length;
     
     // Set initial position based on direction
-    const initialX = isFirstRow ? `-${totalWidth/2}px` : '0';
+    const initialX = isFirstRow ? 0 : -totalWidth;
     gsap.set(marquee, { x: initialX });
     
-    // Calculate duration based on number of items
-    const duration = 30 + (itemsArray.length * 2);
+    // Calculate duration based on number of items (faster for more items)
+    const baseDuration = 20; // Base duration in seconds for one full loop
+    const duration = baseDuration * (itemsArray.length / 3); // Adjust based on number of items
     
     // Create the animation
     const tl = gsap.timeline({ 
       repeat: -1,
-      defaults: { ease: 'none' },
-      onRepeat: function() {
-        gsap.set(marquee, { x: initialX });
-        marquee.offsetHeight;
+      defaults: { ease: 'none' }
+    });
+    
+    // Animate the marquee
+    tl.to(marquee, {
+      x: isFirstRow ? `-=${totalWidth}` : `+=${totalWidth}`,
+      duration: duration,
+      ease: 'linear',
+      modifiers: {
+        x: gsap.utils.unitize(x => {
+          // Reset position when reaching the end for seamless loop
+          const xNum = parseFloat(x);
+          const maxX = isFirstRow ? 0 : -totalWidth;
+          const minX = isFirstRow ? -totalWidth * 2 : totalWidth;
+          
+          if (isFirstRow && xNum <= -totalWidth) {
+            return 0;
+          } else if (!isFirstRow && xNum >= 0) {
+            return -totalWidth;
+          }
+          return xNum;
+        })
       }
     });
     
-    if (isFirstRow) {
-      // First row moves right
-      tl.to(marquee, {
-        x: '0',
-        duration: duration / 2,
-        ease: 'none'
-      });
-      
-      tl.to(marquee, {
-        x: `+=${totalWidth / 2}`,
-        duration: duration / 2,
-        ease: 'power1.inOut',
-        onComplete: function() {
-          gsap.set(marquee, { x: `-${totalWidth/2}px` });
-        }
-      }, `-=${duration / 4}`);
-    } else {
-      // Other rows move left (original behavior)
-      tl.to(marquee, {
-        x: `-=${totalWidth / 2}`,
-        duration: duration / 2,
-        ease: 'none'
-      });
-      
-      tl.to(marquee, {
-        x: `-=${totalWidth / 2}`,
-        duration: duration / 2,
-        ease: 'power1.inOut',
-        onComplete: function() {
-          gsap.set(marquee, { x: 0 });
-        }
-      }, `-=${duration / 4}`);
-    }
-    
-    // Pause on hover
+    // Pause on hover with smooth transition
     const container = marquee.closest('.marquee-container');
     container.addEventListener('mouseenter', () => {
-      tl.pause();
+      gsap.to(tl, { 
+        timeScale: 0.3, 
+        duration: 0.5,
+        ease: 'power2.out'
+      });
     });
+    
     container.addEventListener('mouseleave', () => {
-      tl.resume();
+      gsap.to(tl, { 
+        timeScale: 1, 
+        duration: 0.5,
+        ease: 'power2.inOut'
+      });
+    });
+    
+    // Handle window resize
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        tl.kill();
+        initMarquee(); // Reinitialize on resize
+      }, 250);
     });
   });
 }
