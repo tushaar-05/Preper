@@ -102,3 +102,48 @@ def prepkit():
         ]
     }
     return render_template('dashboard/user/prepkit.html', resources=resources)
+
+@bp.route('/interview')
+def interview():
+    upcoming_interviews = [
+        {
+            'id': 1,
+            'title': 'Crack your NSAT exam',
+            'date': 'Dec 21, 2025',
+            'time': '4:00 PM',
+            'mentor': 'Tushar R Singh',
+            'type': 'NSAT Guide',
+            'image': '/static/images/nsat_poster.png',
+            'link': '#'
+        },
+        {
+            'id': 2,
+            'title': 'Choose your campus',
+            'date': 'Dec 24, 2025',
+            'time': '11:00 AM',
+            'mentor': 'Divyam',
+            'type': 'Campus Guide',
+            'image': '/static/images/campus_poster.png',
+            'link': '#'
+        }
+    ]
+    
+    past_interviews = [
+        {
+            'id': 101,
+            'title': '1:1 Interview #1',
+            'date': 'Dec 14, 2025',
+            'mentor': 'Devansh',
+            'status': 'Completed',
+            'feedback_link': '#'
+        },
+        {
+            'id': 100,
+            'title': '1:1 Interview #2',
+            'date': 'Dec 07, 2025',
+            'mentor': 'Devansh',
+            'status': 'Completed',
+            'feedback_link': '#'
+        }
+    ]
+    return render_template('dashboard/user/interview.html', upcoming=upcoming_interviews, past=past_interviews)
