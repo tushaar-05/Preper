@@ -59,3 +59,26 @@ def doubts():
         }
     ]
     return render_template('dashboard/user/doubts.html', doubts=sample_doubts)
+
+@bp.route('/payment')
+def payment():
+    # Sample payment data
+    subscription = {
+        'status': 'Active',
+        'plan': 'Batch NEUMANN',
+        'amount': '₹499',
+        'next_billing': 'Lifetime Access',
+        'card_last4': '4242'
+    }
+    
+    transactions = [
+        {
+            'id': 'TXN_123456789',
+            'date': 'Dec 15, 2025',
+            'description': 'Batch NEUMANN Subscription',
+            'amount': '₹499',
+            'status': 'Success',
+            'invoice_url': '#'
+        }
+    ]
+    return render_template('dashboard/user/payment.html', subscription=subscription, transactions=transactions)
