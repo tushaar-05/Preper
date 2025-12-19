@@ -16,7 +16,7 @@ def register():
 
 @bp.route('/admin')
 def admin():
-    return render_template('/dashboard/admin/admin.html')
+    return render_template('dashboard/admin/admin.html')
 
 @bp.route('/admin/login')
 def admin_login():
@@ -30,5 +30,6 @@ def me():
 def profile():
     return render_template('dashboard/user/profile.html')
 
-
-
+@bp.route('/announcement')
+def announcement():
+    return render_template('dashboard/user/announcement.html')

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,18 +11,22 @@
       font-family: "BwGradual-Black";
       src: url("data:font/woff2;base64,");
     }
+
     @font-face {
       font-family: "BwGradual-Bold";
       src: url("data:font/woff2;base64,");
     }
+
     @font-face {
       font-family: "BwGradual-Medium";
       src: url("data:font/woff2;base64,");
     }
+
     @font-face {
       font-family: "BwGradual-Regular";
       src: url("data:font/woff2;base64,");
     }
+
     @font-face {
       font-family: "BwGradual-Light";
       src: url("data:font/woff2;base64,");
@@ -56,8 +61,17 @@
     }
 
     @keyframes glow {
-      0%, 100% { opacity: 0.3; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.1); }
+
+      0%,
+      100% {
+        opacity: 0.3;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(1.1);
+      }
     }
 
     .gradient-text {
@@ -85,8 +99,15 @@
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
     }
 
     .slide-in {
@@ -98,6 +119,7 @@
         opacity: 0;
         transform: translateY(30px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -113,30 +135,34 @@
     }
   </style>
 </head>
+
 <body>
   <div class="min-h-screen relative overflow-hidden">
     <!-- Animated Background -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--purple)]/20 rounded-full blur-[150px] glow-effect"></div>
-      <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[var(--purple)]/20 rounded-full blur-[150px] glow-effect" style="animation-delay: 1.5s;"></div>
-      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[var(--purple)]/10 rounded-full blur-[200px] glow-effect" style="animation-delay: 3s;"></div>
+      <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--purple)]/20 rounded-full blur-[150px] glow-effect">
+      </div>
+      <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[var(--purple)]/20 rounded-full blur-[150px] glow-effect"
+        style="animation-delay: 1.5s;"></div>
+      <div
+        class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[var(--purple)]/10 rounded-full blur-[200px] glow-effect"
+        style="animation-delay: 3s;"></div>
     </div>
 
     <!-- Navigation -->
     <nav class="relative z-10 flex justify-between items-center px-12 pt-8 pb-8">
       <a href="/" class="text-2xl font-bold" style="font-family: 'BwGradual-Bold', sans-serif;">PREPER</a>
-      
-      <div
-          class="flex gap-[5px] text-[15px] rounded-[30px] px-[5px] py-[5px]
+
+      <div class="flex gap-[5px] text-[15px] rounded-[30px] px-[5px] py-[5px]
           bg-black shadow-[inset_0_1px_2px_rgba(255,255,255,0.5),inset_0_-1px_2px_rgba(255,255,255,0.01)]">
-          <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="/">Home</a>
-          <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="/#results">Results</a>
-          <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="/#process">Process</a>
-          <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="/#material">Material</a>
-          <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="/#testimonial">Testimonial</a>
-          <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="/#pricing">Pricing</a>
-          <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="/#faq">FAQ</a>
-        </div>
+        <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="/">Home</a>
+        <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="/#results">Results</a>
+        <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="/#process">Process</a>
+        <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="/#material">Material</a>
+        <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="/#testimonial">Testimonial</a>
+        <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="/#pricing">Pricing</a>
+        <a class="hover:bg-[var(--purple)] px-[15px] py-[5px] rounded-[15px]" href="/#faq">FAQ</a>
+      </div>
 
       <div>
         <a class="inline-block text-sm rounded-full px-6 py-3 bg-black shadow-[inset_0_1px_2px_rgba(255,255,255,0.9),inset_0_-1px_2px_rgba(255,255,255,0.1)] hover:bg-[var(--purple)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] hover:scale-105"
@@ -147,57 +173,66 @@
     <!-- Main Content -->
     <div class="relative z-10 flex items-center justify-center px-4 py-12">
       <div class="w-full max-w-6xl grid md:grid-cols-2 gap-12 items-center">
-        
+
         <!-- Left Side - Info -->
         <div class="slide-in mt-[-100px]">
           <div class="mb-6">
-            <span class="inline-block px-4 py-2 rounded-full text-sm font-medium text-[var(--purple)] bg-[var(--purple)]/10 border border-[var(--purple)]/20">
+            <span
+              class="inline-block px-4 py-2 rounded-full text-sm font-medium text-[var(--purple)] bg-[var(--purple)]/10 border border-[var(--purple)]/20">
               <span class="pulse-dot inline-block w-2 h-2 bg-[var(--purple)] rounded-full mr-2"></span>
               Join 40+ NSAT Aspirants
             </span>
           </div>
 
-          <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight" style="font-family: 'BwGradual-Bold', sans-serif;">
+          <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight"
+            style="font-family: 'BwGradual-Bold', sans-serif;">
             Start Your <span class="gradient-text">Journey</span> Today
           </h1>
 
           <p class="text-xl text-gray-400 mb-8 leading-relaxed" style="font-family: 'BwGradual-Light', sans-serif;">
-            Create your account and get instant access to comprehensive NST preparation materials, expert mentorship, and a supportive community.
+            Create your account and get instant access to comprehensive NST preparation materials, expert mentorship,
+            and a supportive community.
           </p>
 
           <div class="space-y-4">
             <div class="flex items-start gap-3">
-              <div class="w-6 h-6 rounded-full bg-[var(--purple)]/20 flex items-center justify-center flex-shrink-0 mt-1">
+              <div
+                class="w-6 h-6 rounded-full bg-[var(--purple)]/20 flex items-center justify-center flex-shrink-0 mt-1">
                 <svg class="w-4 h-4 text-[var(--purple)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
                 </svg>
               </div>
               <div>
-                <h3 class="font-semibold text-lg mb-1" style="font-family: 'BwGradual-Medium', sans-serif;">10-Day Structured Program</h3>
+                <h3 class="font-semibold text-lg mb-1" style="font-family: 'BwGradual-Medium', sans-serif;">10-Day
+                  Structured Program</h3>
                 <p class="text-gray-400 text-sm">Complete preparation plan with daily goals and mock tests</p>
               </div>
             </div>
 
             <div class="flex items-start gap-3">
-              <div class="w-6 h-6 rounded-full bg-[var(--purple)]/20 flex items-center justify-center flex-shrink-0 mt-1">
+              <div
+                class="w-6 h-6 rounded-full bg-[var(--purple)]/20 flex items-center justify-center flex-shrink-0 mt-1">
                 <svg class="w-4 h-4 text-[var(--purple)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
                 </svg>
               </div>
               <div>
-                <h3 class="font-semibold text-lg mb-1" style="font-family: 'BwGradual-Medium', sans-serif;">Expert Mentorship</h3>
+                <h3 class="font-semibold text-lg mb-1" style="font-family: 'BwGradual-Medium', sans-serif;">Expert
+                  Mentorship</h3>
                 <p class="text-gray-400 text-sm">Learn from NST students and senior instructors</p>
               </div>
             </div>
 
             <div class="flex items-start gap-3">
-              <div class="w-6 h-6 rounded-full bg-[var(--purple)]/20 flex items-center justify-center flex-shrink-0 mt-1">
+              <div
+                class="w-6 h-6 rounded-full bg-[var(--purple)]/20 flex items-center justify-center flex-shrink-0 mt-1">
                 <svg class="w-4 h-4 text-[var(--purple)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
                 </svg>
               </div>
               <div>
-                <h3 class="font-semibold text-lg mb-1" style="font-family: 'BwGradual-Medium', sans-serif;">24/7 Community Support</h3>
+                <h3 class="font-semibold text-lg mb-1" style="font-family: 'BwGradual-Medium', sans-serif;">24/7
+                  Community Support</h3>
                 <p class="text-gray-400 text-sm">Connect with peers and get your doubts cleared instantly</p>
               </div>
             </div>
@@ -208,7 +243,9 @@
         <div class="slide-in" style="animation-delay: 0.2s;">
           <div class="signup-card bg-[#0a0a0a] rounded-3xl p-8 border border-white/10 relative overflow-hidden">
             <!-- Grainy texture overlay -->
-            <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 400 400%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
+            <div class="absolute inset-0 opacity-5 pointer-events-none"
+              style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 400 400%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');">
+            </div>
 
             <div class="relative z-10">
               <h2 class="text-3xl font-bold mb-2" style="font-family: 'BwGradual-Bold', sans-serif;">Create Account</h2>
@@ -217,94 +254,75 @@
               <form class="space-y-5" onsubmit="handleSubmit(event)">
                 <div>
                   <label class="block text-sm font-medium mb-2 text-gray-300" for="fullname">Full Name</label>
-                  <input 
-                    type="text" 
-                    id="fullname"
-                    name="fullname"
-                    required
+                  <input type="text" id="fullname" name="fullname" required
                     class="input-glow w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300"
-                    placeholder="John Doe"
-                  />
+                    placeholder="John Doe" />
                 </div>
 
                 <div>
                   <label class="block text-sm font-medium mb-2 text-gray-300" for="email">Email Address</label>
-                  <input 
-                    type="email" 
-                    id="email"
-                    name="email"
-                    required
+                  <input type="email" id="email" name="email" required
                     class="input-glow w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300"
-                    placeholder="john@example.com"
-                  />
+                    placeholder="john@example.com" />
                 </div>
 
                 <div>
                   <label class="block text-sm font-medium mb-2 text-gray-300" for="phone">Phone Number</label>
-                  <input 
-                    type="tel" 
-                    id="phone"
-                    name="phone"
-                    required
-                    pattern="[0-9]{10}"
+                  <input type="tel" id="phone" name="phone" required pattern="[0-9]{10}"
                     class="input-glow w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300"
-                    placeholder="9876543210"
-                  />
+                    placeholder="9876543210" />
                 </div>
 
                 <div>
                   <label class="block text-sm font-medium mb-2 text-gray-300" for="password">Password</label>
-                  <input 
-                    type="password" 
-                    id="password"
-                    name="password"
-                    required
-                    minlength="8"
+                  <input type="password" id="password" name="password" required minlength="8"
                     class="input-glow w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300"
-                    placeholder="••••••••"
-                  />
+                    placeholder="••••••••" />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium mb-2 text-gray-300" for="campus_pref">NST Campus Preference
+                    <span class="text-gray-500 text-xs">(Optional)</span></label>
+                  <select id="campus_pref" name="campus_pref"
+                    class="input-glow w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300">
+                    <option value="" disabled selected>Select Campus</option>
+                    <option value="pune">Pune</option>
+                    <option value="bangalore">Bangalore</option>
+                    <option value="delhi">Delhi</option>
+                  </select>
                 </div>
 
                 <div>
                   <label class="block text-sm font-medium mb-2 text-gray-300" for="batch">Select Batch</label>
-                  <select 
-                    id="batch"
-                    name="batch"
-                    required
-                    class="input-glow w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300"
-                  >
+                  <select id="batch" name="batch" required
+                    class="input-glow w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300">
                     <option value="" disabled selected>Choose your batch</option>
                     <option value="neumann">Batch NEUMANN - ₹499</option>
                   </select>
                 </div>
 
                 <div class="flex items-start gap-3">
-                  <input 
-                    type="checkbox" 
-                    id="terms"
-                    name="terms"
-                    required
-                    class="mt-1 w-5 h-5 rounded bg-black/50 border-white/10 text-[var(--purple)] focus:ring-[var(--purple)] focus:ring-offset-0"
-                  />
+                  <input type="checkbox" id="terms" name="terms" required
+                    class="mt-1 w-5 h-5 rounded bg-black/50 border-white/10 text-[var(--purple)] focus:ring-[var(--purple)] focus:ring-offset-0" />
                   <label for="terms" class="text-sm text-gray-400">
-                    I agree to the <a href="#" class="text-[var(--purple)] hover:underline">Terms of Service</a> and <a href="#" class="text-[var(--purple)] hover:underline">Privacy Policy</a>
+                    I agree to the <a href="#" class="text-[var(--purple)] hover:underline">Terms of Service</a> and <a
+                      href="#" class="text-[var(--purple)] hover:underline">Privacy Policy</a>
                   </label>
                 </div>
 
-                <button 
-                  type="submit"
+                <button type="submit"
                   class="w-full bg-white text-black py-4 rounded-full font-semibold hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] flex items-center justify-center gap-2"
-                  style="font-family: 'BwGradual-Medium', sans-serif;"
-                >
+                  style="font-family: 'BwGradual-Medium', sans-serif;">
                   Create Account
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3">
+                    </path>
                   </svg>
                 </button>
 
                 <div class="text-center mt-6">
                   <p class="text-gray-400 text-sm">
-                    Already have an account? 
+                    Already have an account?
                     <a href="/login" class="text-[var(--purple)] hover:underline font-medium">Login here</a>
                   </p>
                 </div>
@@ -318,12 +336,14 @@
     <!-- Footer Note -->
     <div class="relative z-10 text-center py-8 px-4">
       <p class="text-gray-500 text-sm">
-        Questions? Contact us at <a href="mailto:contact@preper.com" class="text-[var(--purple)] hover:underline">contact@preper.com</a>
+        Questions? Contact us at <a href="mailto:contact@preper.com"
+          class="text-[var(--purple)] hover:underline">contact@preper.com</a>
       </p>
     </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
-  
+
 </body>
+
 </html>
