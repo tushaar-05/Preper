@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NST Prep - Payments</title>
+  <title>NST Prep - Prep Kit</title>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -66,6 +66,21 @@
     .sidebar-link:hover:not(.active) svg {
       color: var(--purple);
     }
+
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 20px -8px rgba(150, 133, 254, 0.15);
+      border-color: rgba(150, 133, 254, 0.3);
+    }
+
+    .input-glow:focus {
+      box-shadow: 0 0 0 2px rgba(150, 133, 254, 0.2);
+      border-color: var(--purple);
+    }
   </style>
 
   <script>
@@ -117,7 +132,7 @@
           Announcements
         </a>
 
-        <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
+        <a href="/prepkit" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
@@ -126,16 +141,16 @@
           Prep Kit
         </a>
 
-        <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
+        <a href="/interview" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 6.072l.745 6.353 6.353.745-6.353.745-.745 6.353-.745-6.353-6.353-.745 6.353-.745zM22 12a10 10 0 11-20 0 10 10 0 0120 0z">
             </path>
           </svg>
-          Interview's
+          Interview
         </a>
 
-        <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
+        <a href="/mock" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z">
@@ -156,7 +171,8 @@
 
         <div class="my-4 border-t border-gray-800 mx-4"></div>
 
-        <a href="/payment" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+        <a href="/payment"
+          class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -192,11 +208,22 @@
       <!-- Header -->
       <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h2 class="text-3xl font-bold text-gray-900">Payment & Subscription</h2>
-          <p class="text-gray-500 mt-1">Manage your plan and view transaction history</p>
+          <h2 class="text-3xl font-bold text-gray-900">Preparation Kit</h2>
+          <p class="text-gray-500 mt-1">Access all your study resources and question banks</p>
         </div>
 
         <div class="flex items-center gap-4">
+          <!-- Search -->
+          <div class="relative hidden md:block">
+            <input type="text" placeholder="Search resources..."
+              class="pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[var(--purple)] input-glow w-64">
+            <svg class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none"
+              stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+
           <div
             class="flex items-center gap-3 bg-white pl-2 pr-4 py-1.5 rounded-full shadow-sm hover:shadow-md cursor-pointer transition-all border border-transparent hover:border-gray-100">
             <div
@@ -210,136 +237,81 @@
         </div>
       </header>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+      {% for category, items in resources.items() %}
+      <div class="mb-10 last:mb-0">
+        <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          {% if category == 'Interview Questions' %}
+          <svg class="w-5 h-5 text-[var(--purple)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z">
+            </path>
+          </svg>
+          {% elif category == 'Study Notes' %}
+          <svg class="w-5 h-5 text-[var(--purple)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+            </path>
+          </svg>
+          {% else %}
+          <svg class="w-5 h-5 text-[var(--purple)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          {% endif %}
+          {{ category }}
+        </h3>
 
-        <!-- Current Plan Card -->
-        <div class="lg:col-span-2 bg-[var(--black)] text-white rounded-2xl shadow-xl p-8 relative overflow-hidden">
-          <!-- Decorative Circles -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {% for item in items %}
           <div
-            class="absolute top-0 right-0 w-64 h-64 bg-[var(--purple)] rounded-full opacity-10 blur-3xl transform translate-x-12 -translate-y-12">
-          </div>
-          <div
-            class="absolute bottom-0 left-0 w-48 h-48 bg-blue-500 rounded-full opacity-10 blur-3xl transform -translate-x-12 translate-y-12">
-          </div>
-
-          <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div>
-              <span
-                class="inline-block px-3 py-1 bg-[var(--purple)] text-white text-xs font-semibold rounded-full mb-3">CURRENT
-                PLAN</span>
-              <h3 class="text-3xl font-bold mb-1">{{ subscription.plan }}</h3>
-              <p class="text-gray-400 text-sm">Valid until: <span class="text-white">{{ subscription.next_billing
-                  }}</span></p>
-            </div>
-            <div class="text-right">
-              <p class="text-4xl font-bold">{{ subscription.amount }}</p>
-              <p class="text-gray-400 text-xs mt-1">One-time payment</p>
-            </div>
-          </div>
-
-          <div class="mt-8 pt-6 border-t border-gray-800 flex flex-wrap gap-4">
-            <div class="flex items-center gap-2 text-sm text-gray-300">
-              <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Full Course Access
-            </div>
-            <div class="flex items-center gap-2 text-sm text-gray-300">
-              <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Mock Interviews
-            </div>
-            <div class="flex items-center gap-2 text-sm text-gray-300">
-              <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Doubt Support
-            </div>
-          </div>
-        </div>
-
-        <!-- Payment Method Summary -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-center">
-          <h4 class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-4">Payment Method</h4>
-          <div class="flex items-center gap-4 mb-6">
+            class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm card-hover group cursor-pointer relative overflow-hidden">
+            <!-- Decorative accent -->
             <div
-              class="w-12 h-8 bg-gray-100 rounded flex items-center justify-center text-gray-500 font-bold text-xs border border-gray-200">
-              UPI
+              class="absolute top-0 right-0 w-20 h-20 bg-[var(--purple)] opacity-0 group-hover:opacity-5 rounded-full blur-xl transition-opacity">
             </div>
-            <div>
-              <p class="text-gray-900 font-medium text-sm">xxxxxx@okhdfcbank</p>
+
+            <div class="flex items-start justify-between mb-4 relative z-10">
+              <div
+                class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-[var(--purple)] group-hover:bg-[var(--purple)] group-hover:text-white transition-colors">
+                {% if item.type == 'PDF' %}
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                  </path>
+                </svg>
+                {% elif item.type == 'Zip' %}
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                </svg>
+                {% else %}
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                  </path>
+                </svg>
+                {% endif %}
+              </div>
+              <span class="text-xs font-semibold text-gray-400 bg-gray-50 px-2 py-1 rounded-md">{{ item.type }}</span>
             </div>
+
+            <h4 class="font-bold text-gray-900 mb-1 group-hover:text-[var(--purple)] transition-colors">{{ item.title }}
+            </h4>
+            <p class="text-xs text-gray-400 mb-4">{{ item.size }} • Updated recently</p>
+
+            <a href="{{ item.link }}"
+              class="w-full mt-2 inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gray-50 text-gray-900 text-sm font-medium hover:bg-black hover:text-white transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+              </svg>
+              Download
+            </a>
           </div>
-          <button
-            class="w-full py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
-            Manage Payment Method
-          </button>
+          {% endfor %}
         </div>
       </div>
-
-      <!-- Transaction History -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center">
-          <h3 class="font-bold text-gray-900">Transaction History</h3>
-          <button class="text-[var(--purple)] text-sm font-medium hover:underline flex items-center gap-1">
-            Download All
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-            </svg>
-          </button>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left">
-            <thead>
-              <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
-                <th class="px-6 py-4 font-semibold">Description</th>
-                <th class="px-6 py-4 font-semibold">Date</th>
-                <th class="px-6 py-4 font-semibold">Amount</th>
-                <th class="px-6 py-4 font-semibold">Status</th>
-                <th class="px-6 py-4 font-semibold text-right">Invoice</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              {% for txn in transactions %}
-              <tr class="hover:bg-gray-50/50 transition-colors">
-                <td class="px-6 py-4">
-                  <p class="text-sm font-medium text-gray-900">{{ txn.description }}</p>
-                  <p class="text-xs text-gray-400">ID: {{ txn.id }}</p>
-                </td>
-                <td class="px-6 py-4 text-sm text-gray-500">{{ txn.date }}</td>
-                <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ txn.amount }}</td>
-                <td class="px-6 py-4">
-                  {% if txn.status == 'Success' %}
-                  <span
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Success
-                  </span>
-                  {% else %}
-                  <span
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                    Failed
-                  </span>
-                  {% endif %}
-                </td>
-                <td class="px-6 py-4 text-right">
-                  <a href="{{ txn.invoice_url }}"
-                    class="text-gray-400 hover:text-[var(--purple)] transition-colors inline-block p-1">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                      </path>
-                    </svg>
-                  </a>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {% endfor %}
 
     </main>
 

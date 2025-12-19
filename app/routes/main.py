@@ -82,3 +82,23 @@ def payment():
         }
     ]
     return render_template('dashboard/user/payment.html', subscription=subscription, transactions=transactions)
+
+@bp.route('/prepkit')
+def prepkit():
+    resources = {
+        'Interview Questions': [
+            {'title': 'Top 50 NST Interview Questions', 'type': 'PDF', 'size': '2.4 MB', 'link': '#'},
+            {'title': 'HR Behavioural Q&A Guide', 'type': 'PDF', 'size': '1.8 MB', 'link': '#'},
+            {'title': 'Technical Round Cheat Sheet', 'type': 'PDF', 'size': '3.1 MB', 'link': '#'},
+        ],
+        'Study Notes': [
+            {'title': 'Physics Formula Sheet', 'type': 'PDF', 'size': '4.2 MB', 'link': '#'},
+            {'title': 'Mathematics Quick Revision', 'type': 'PDF', 'size': '5.5 MB', 'link': '#'},
+            {'title': 'Logical Reasoning Tricks', 'type': 'DOC', 'size': '1.2 MB', 'link': '#'},
+        ],
+        'Practice Sets': [
+            {'title': 'Mock Test Series 1 - Solutions', 'type': 'PDF', 'size': '8.4 MB', 'link': '#'},
+            {'title': 'Previous Year Papers (2020-2024)', 'type': 'Zip', 'size': '42 MB', 'link': '#'},
+        ]
+    }
+    return render_template('dashboard/user/prepkit.html', resources=resources)
