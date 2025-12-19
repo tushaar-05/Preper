@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NST Prep - Interviews</title>
+  <title>NST Prep - Mock NSAT</title>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -136,7 +136,8 @@
           Prep Kit
         </a>
 
-        <a href="/interview" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
+        <a href="/interview"
+          class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 6.072l.745 6.353 6.353.745-6.353.745-.745 6.353-.745-6.353-6.353-.745 6.353-.745zM22 12a10 10 0 11-20 0 10 10 0 0120 0z">
@@ -145,8 +146,7 @@
           Interview
         </a>
 
-        <a href="/interview"
-          class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+        <a href="/mock" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z">
@@ -204,8 +204,8 @@
       <!-- Header -->
       <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h2 class="text-3xl font-bold text-gray-900">Interviews</h2>
-          <p class="text-gray-500 mt-1">Manage your upcoming schedule and view past feedback</p>
+          <h2 class="text-3xl font-bold text-gray-900">Mock NSATs</h2>
+          <p class="text-gray-500 mt-1">Upcoming practice tests and exam schedule</p>
         </div>
 
         <div class="flex items-center gap-4">
@@ -222,113 +222,85 @@
         </div>
       </header>
 
-      <!-- Upcoming Interviews -->
-      <section class="mb-10">
-        <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <svg class="w-5 h-5 text-[var(--purple)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-          </svg>
-          Upcoming Interviews
-        </h3>
+      <!-- Mock Tests Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% if tests %}
+        {% for test in tests %}
+        <div
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden card-hover group h-full flex flex-col">
+          <!-- Header Bar -->
+          <div class="h-2 w-full bg-gradient-to-r from-[var(--purple)] to-indigo-500"></div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {% if upcoming %}
-          {% for interview in upcoming %} <div
-            class="bg-white rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group h-full flex flex-col">
-            <!-- Poster Image -->
-            <div class="h-40 w-full overflow-hidden relative">
-              <img src="{{ interview.image }}" alt="{{ interview.title }}"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-              <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+          <div class="p-6 flex-1 flex flex-col">
+            <div class="flex justify-between items-start mb-4">
+              {% if test.status == 'Live' %}
               <span
-                class="absolute bottom-3 left-4 inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-white/20 backdrop-blur-md text-white border border-white/30">
-                {{ interview.type }}
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-600 animate-pulse">
+                LIVE NOW
               </span>
+              {% else %}
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-600">
+                Upcoming
+              </span>
+              {% endif %}
+              <span class="text-xs font-medium text-gray-400">ID: #MOCK{{ test.id }}</span>
             </div>
 
-            <div class="p-6 flex-1 flex flex-col">
-              <div class="flex justify-between items-start mb-4">
-                <div>
-                  <h4 class="text-lg font-bold text-gray-900 leading-tight mb-1">{{ interview.title }}</h4>
-                  <p class="text-xs text-gray-500">with {{ interview.mentor }}</p>
-                </div>
-              </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2 leading-tight">{{ test.title }}</h3>
 
-              <div class="mt-auto pt-4 border-t border-gray-50">
-                <div class="flex justify-between items-center mb-4 text-sm">
-                  <span class="font-bold text-gray-900">{{ interview.time }}</span>
-                  <span class="text-gray-500">{{ interview.date }}</span>
-                </div>
-                <a href="{{ interview.link }}"
-                  class="block w-full text-center py-2.5 bg-[var(--black)] text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200">
-                  Join Meeting
-                </a>
+            <div class="space-y-3 mb-6">
+              <div class="flex items-center gap-3 text-sm text-gray-600">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <span>{{ test.date }}</span>
+              </div>
+              <div class="flex items-center gap-3 text-sm text-gray-600">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>{{ test.time }} • {{ test.duration }}</span>
+              </div>
+              <div class="flex items-center gap-3 text-sm text-gray-600">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                  </path>
+                </svg>
+                <span>{{ test.questions }} Questions</span>
               </div>
             </div>
-          </div>
-          {% endfor %}
-          {% else %}
-          <div class="col-span-full bg-white p-6 rounded-2xl border border-gray-100 text-center text-gray-500">
-            <p>No upcoming interviews scheduled.</p>
-          </div>
-          {% endif %}
-        </div>
-      </section>
 
-      <!-- Past Interviews -->
-      <section>
-        <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          Past Interviews
-        </h3>
-
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div class="overflow-x-auto">
-            <table class="w-full text-left">
-              <thead>
-                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
-                  <th class="px-6 py-4 font-semibold">Interview</th>
-                  <th class="px-6 py-4 font-semibold">Date</th>
-                  <th class="px-6 py-4 font-semibold">Mentor</th>
-                  <th class="px-6 py-4 font-semibold">Status</th>
-                  <th class="px-6 py-4 font-semibold text-right">Feedback</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-100">
-                {% if past %}
-                {% for interview in past %}
-                <tr class="hover:bg-gray-50/50 transition-colors">
-                  <td class="px-6 py-4 font-medium text-gray-900">{{ interview.title }}</td>
-                  <td class="px-6 py-4 text-sm text-gray-500">{{ interview.date }}</td>
-                  <td class="px-6 py-4 text-sm text-gray-900">{{ interview.mentor }}</td>
-                  <td class="px-6 py-4">
-                    <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      {{ interview.status }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 text-right">
-                    <a href="{{ interview.feedback_link }}"
-                      class="text-[var(--purple)] hover:text-purple-700 text-sm font-medium hover:underline">
-                      View Feedback
-                    </a>
-                  </td>
-                </tr>
-                {% endfor %}
-                {% else %}
-                <tr>
-                  <td colspan="5" class="px-6 py-8 text-center text-gray-500 text-sm">No past interviews found.</td>
-                </tr>
-                {% endif %}
-              </tbody>
-            </table>
+            <div class="mt-auto pt-4 border-t border-gray-50 flex gap-3">
+              <a href="{{ test.syllabus_link }}"
+                class="flex-1 py-2.5 text-center rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors">
+                Syllabus
+              </a>
+              <button disabled
+                class="flex-1 py-2.5 text-center rounded-xl bg-gray-100 text-gray-400 text-sm font-medium cursor-not-allowed">
+                Start Test
+              </button>
+            </div>
           </div>
         </div>
-      </section>
+        {% endfor %}
+        {% else %}
+        <div class="col-span-full py-12 text-center">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+              </path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900">No mock tests scheduled</h3>
+          <p class="text-gray-500 mt-1">Check back later for upcoming exams.</p>
+        </div>
+        {% endif %}
+      </div>
 
     </main>
 

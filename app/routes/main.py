@@ -147,3 +147,39 @@ def interview():
         }
     ]
     return render_template('dashboard/user/interview.html', upcoming=upcoming_interviews, past=past_interviews)
+
+@bp.route('/mock')
+def mock():
+    mock_tests = [
+        {
+            'id': 1,
+            'title': 'NSAT Full Length Mock 1',
+            'date': 'Dec 25, 2025',
+            'time': '10:00 AM - 1:00 PM',
+            'duration': '3 Hours',
+            'questions': 90,
+            'status': 'Upcoming',
+            'syllabus_link': '#'
+        },
+        {
+            'id': 2,
+            'title': 'Logical Reasoning Sectional',
+            'date': 'Dec 28, 2025',
+            'time': '2:00 PM - 3:30 PM',
+            'duration': '1.5 Hours',
+            'questions': 45,
+            'status': 'Upcoming',
+            'syllabus_link': '#'
+        },
+        {
+            'id': 3,
+            'title': 'Quantitative Aptitude Drill',
+            'date': 'Dec 30, 2025',
+            'time': 'Available All Day',
+            'duration': '1 Hour',
+            'questions': 30,
+            'status': 'Live',
+            'syllabus_link': '#'
+        }
+    ]
+    return render_template('dashboard/user/mock.html', tests=mock_tests)
