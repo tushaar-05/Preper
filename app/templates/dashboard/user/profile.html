@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NST Prep - My Profile</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --purple: #9685fe;
+      --black: #000000;
+      --white: #ffffff;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: #f8f9fc;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #e5e7eb;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #d1d5db;
+    }
+
+    .n-text-purple {
+      color: var(--purple);
+    }
+
+    .n-bg-purple {
+      background-color: var(--purple);
+    }
+
+    .n-bg-black {
+      background-color: var(--black);
+    }
+
+    .sidebar-link {
+      transition: all 0.2s ease-in-out;
+    }
+
+    .sidebar-link:hover {
+      background-color: rgba(150, 133, 254, 0.1);
+      color: var(--purple);
+      transform: translateX(4px);
+    }
+
+    .sidebar-link.active {
+      background-color: var(--purple);
+      color: var(--white);
+      box-shadow: 0 4px 12px rgba(150, 133, 254, 0.4);
+    }
+
+    .sidebar-link.active svg {
+      color: var(--white);
+    }
+
+    .sidebar-link:hover:not(.active) svg {
+      color: var(--purple);
+    }
+
+    .input-field {
+      transition: all 0.2s ease;
+    }
+
+    .input-field:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px rgba(150, 133, 254, 0.1);
+    }
+  </style>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              purple: '#9685fe',
+              black: '#000000',
+              white: '#ffffff',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="text-gray-800 antialiased overflow-hidden">
+
+  <div class="flex h-screen w-full">
+
+    <!-- SIDEBAR -->
+    <aside class="w-[260px] flex-shrink-0 bg-black text-white flex flex-col h-full sticky top-0 z-50">
+      <!-- Branding -->
+      <div class="px-6 py-8">
+        <h1 class="text-2xl font-bold tracking-tight">PREPER<span class="text-[var(--purple)]">.</span></h1>
+        <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider">Student Dashboard</p>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
+        <a href="/me" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+            </path>
+          </svg>
+          Dashboard
+        </a>
+
+        <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
+          <svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z">
+            </path>
+          </svg>
+          Announcements
+        </a>
+
+        <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
+          <svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+            </path>
+          </svg>
+          Prep Kit
+        </a>
+
+        <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
+          <svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 6.072l.745 6.353 6.353.745-6.353.745-.745 6.353-.745-6.353-6.353-.745 6.353-.745zM22 12a10 10 0 11-20 0 10 10 0 0120 0z">
+            </path>
+          </svg>
+          Interview Guide
+        </a>
+
+        <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
+          <svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z">
+            </path>
+          </svg>
+          Mock NSAT
+        </a>
+
+        <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
+          <svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+            </path>
+          </svg>
+          Doubts
+        </a>
+
+        <div class="my-4 border-t border-gray-800 mx-4"></div>
+
+        <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
+          <svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          Payment Status
+        </a>
+
+        <a href="/profile" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+          <svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+          </svg>
+          Profile
+        </a>
+      </nav>
+
+      <!-- Bottom Logout -->
+      <div class="p-4 mt-auto">
+        <button
+          class="flex items-center gap-3 text-red-400 hover:text-red-300 hover:bg-red-400/10 w-full px-4 py-3 rounded-xl transition-colors text-sm font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+          </svg>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 h-full overflow-y-auto bg-[#f8f9fc] p-6 lg:p-10">
+
+      <!-- Header -->
+      <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+        <div>
+          <h2 class="text-3xl font-bold text-gray-900">My Profile</h2>
+          <p class="text-gray-500 mt-1">Manage your account settings and preferences</p>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <button
+            class="p-2.5 rounded-full bg-white text-gray-600 shadow-sm hover:shadow-md hover:text-[var(--purple)] transition-all relative group">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+              </path>
+            </svg>
+            <span class="absolute top-2 right-2.5 w-2 h-2 bg-[var(--purple)] rounded-full"></span>
+          </button>
+
+          <div
+            class="flex items-center gap-3 bg-white pl-2 pr-4 py-1.5 rounded-full shadow-sm hover:shadow-md cursor-pointer transition-all border border-transparent hover:border-gray-100">
+            <div
+              class="w-9 h-9 rounded-full bg-gradient-to-tr from-[var(--purple)] to-indigo-500 flex items-center justify-center text-white text-sm font-bold">
+              T</div>
+            <div class="text-sm">
+              <p class="font-semibold text-gray-900 leading-tight">Tushar</p>
+              <p class="text-xs text-gray-500">Student</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Profile Content Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Left Column - Profile Card -->
+        <div class="lg:col-span-1">
+          <div class="bg-white rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] p-6 border border-gray-100">
+            <div class="flex flex-col items-center">
+              <!-- Profile Picture -->
+              <div class="relative mb-4">
+                <div
+                  class="w-32 h-32 rounded-full bg-gradient-to-tr from-[var(--purple)] to-indigo-500 flex items-center justify-center text-white text-5xl font-bold">
+                  T
+                </div>
+                <button
+                  class="absolute bottom-0 right-0 w-10 h-10 bg-black text-white rounded-full flex items-center justify-center hover:bg-gray-900 transition-colors shadow-lg">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
+                    </path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                </button>
+              </div>
+
+              <h3 class="text-xl font-bold text-gray-900 mb-1">Tushar Singh</h3>
+              <p class="text-sm text-gray-500 mb-6">tushar@example.com</p>
+
+              <!-- Stats -->
+              <div class="w-full space-y-4">
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                  <span class="text-sm text-gray-600">Member Since</span>
+                  <span class="text-sm font-semibold text-gray-900">Jan 2025</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                  <span class="text-sm text-gray-600">Campus Preference</span>
+                  <span class="text-sm font-semibold text-[var(--purple)]">Pune</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Personal Information -->
+        <div class="lg:col-span-2 space-y-6">
+
+          <!-- Personal Information Card -->
+          <div class="bg-white rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] p-6 border border-gray-100">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <svg class="w-5 h-5 text-[var(--purple)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                Personal Information
+              </h3>
+              <button
+                class="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-900 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                  </path>
+                </svg>
+                Edit Profile
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Full Name -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Full
+                  Name</label>
+                <input type="text" value="Tushar Singh" readonly
+                  class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 font-medium">
+              </div>
+
+              <!-- Email Address -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Email
+                  Address</label>
+                <input type="email" value="tushar@example.com" readonly
+                  class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 font-medium">
+              </div>
+
+              <!-- Phone Number -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Phone
+                  Number</label>
+                <input type="tel" value="+91 98765 43210" readonly
+                  class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 font-medium">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">NST Campus
+                  Preference</label>
+                <input type="text" value="Pune" readonly
+                  class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 font-medium">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Date of
+                  Birth</label>
+                <input type="text" value="15 March 2000" readonly
+                  class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 font-medium">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">City</label>
+                <input type="text" value="Pimpri, Maharashtra" readonly
+                  class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 font-medium">
+              </div>
+            </div>
+          </div>
+          
+</body>
+
+</html>
