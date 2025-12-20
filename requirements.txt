@@ -1,5 +1,9 @@
 Flask
 Flask-SQLAlchemy
 Flask-Migrate
+Flask-Login
+Flask-Bcrypt
 pymysql
 python-dotenv
+cryptography
+Babel>=2.9.0

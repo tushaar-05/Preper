@@ -2,7 +2,7 @@ import os
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
-    # Defaulting to a local mysql database, user should update this URI.
+    # XAMPP MySQL default configuration (root user with no password)
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'mysql+pymysql://root:password@localhost/flask_db'
+        'mysql+pymysql://root@localhost/nst_prep_db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False

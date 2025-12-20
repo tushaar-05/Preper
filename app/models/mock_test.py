@@ -1,0 +1,136 @@
+from app.extensions import db
+from datetime import datetime
+import json
+
+
+class MockTest(db.Model):
+    __tablename__ = 'mock_tests'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    
+    # Test Configuration
+    duration_minutes = db.Column(db.Integer, nullable=False, default=60)
+    total_marks = db.Column(db.Integer, nullable=False, default=100)
+    passing_marks = db.Column(db.Integer, nullable=False, default=40)
+    
+    # Difficulty & Category
+    difficulty_level = db.Column(db.String(20), default='medium')  # easy, medium, hard
+    category = db.Column(db.String(50))  # Mathematics, English, Reasoning, etc.
+    
+    # Availability
+    is_active = db.Column(db.Boolean, default=True)
+    is_free = db.Column(db.Boolean, default=False)
+    
+    # Schedule
+    available_from = db.Column(db.DateTime)
+    available_until = db.Column(db.DateTime)
+    
+    # Metadata
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    questions = db.relationship('Question', backref='mock_test', lazy='dynamic', cascade='all, delete-orphan')
+    attempts = db.relationship('TestAttempt', backref='mock_test', lazy='dynamic', cascade='all, delete-orphan')
+    
+    @property
+    def total_questions(self):
+        """Get total number of questions"""
+        return self.questions.count()
+    
+    def __repr__(self):
+        return f'<MockTest {self.title}>'
+
+
+class Question(db.Model):
+    __tablename__ = 'questions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    mock_test_id = db.Column(db.Integer, db.ForeignKey('mock_tests.id'), nullable=False)
+    
+    # Question Details
+    question_text = db.Column(db.Text, nullable=False)
+    question_type = db.Column(db.String(20), default='mcq')  # mcq, true_false, numerical
+    
+    # Options (stored as JSON for MCQ)
+    options_json = db.Column(db.Text)  # JSON array: ["Option A", "Option B", ...]
+    correct_answer = db.Column(db.String(500), nullable=False)
+    
+    # Marks
+    marks = db.Column(db.Integer, default=1)
+    negative_marks = db.Column(db.Float, default=0.0)
+    
+    # Explanation
+    explanation = db.Column(db.Text)
+    
+    # Order
+    question_number = db.Column(db.Integer)
+    
+    @property
+    def options(self):
+        """Get options as a Python list"""
+        if self.options_json:
+            return json.loads(self.options_json)
+        return []
+    
+    @options.setter
+    def options(self, options_list):
+        """Set options from a Python list"""
+        self.options_json = json.dumps(options_list)
+    
+    def __repr__(self):
+        return f'<Question {self.id} - Test:{self.mock_test_id}>'
+
+
+class TestAttempt(db.Model):
+    __tablename__ = 'test_attempts'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+    mock_test_id = db.Column(db.Integer, db.ForeignKey('mock_tests.id'), nullable=False)
+    
+    # Attempt Details
+    started_at = db.Column(db.DateTime, default=datetime.utcnow)
+    submitted_at = db.Column(db.DateTime)
+    
+    # Results
+    score = db.Column(db.Float, default=0.0)
+    total_marks = db.Column(db.Integer)
+    percentage = db.Column(db.Float)
+    
+    # Status
+    status = db.Column(db.String(20), default='in_progress')  # in_progress, completed, abandoned
+    
+    # Answers (stored as JSON)
+    answers_json = db.Column(db.Text)  # JSON: {question_id: answer, ...}
+    
+    # Analytics
+    time_taken_minutes = db.Column(db.Integer)
+    correct_answers = db.Column(db.Integer, default=0)
+    wrong_answers = db.Column(db.Integer, default=0)
+    unanswered = db.Column(db.Integer, default=0)
+    
+    @property
+    def answers(self):
+        """Get answers as a Python dict"""
+        if self.answers_json:
+            return json.loads(self.answers_json)
+        return {}
+    
+    @answers.setter
+    def answers(self, answers_dict):
+        """Set answers from a Python dict"""
+        self.answers_json = json.dumps(answers_dict)
+    
+    @property
+    def is_passed(self):
+        """Check if student passed the test"""
+        if self.mock_test and self.percentage:
+            passing_percentage = (self.mock_test.passing_marks / self.mock_test.total_marks) * 100
+            return self.percentage >= passing_percentage
+        return False
+    
+    def __repr__(self):
+        return f'<TestAttempt Student:{self.student_id} Test:{self.mock_test_id}>'
