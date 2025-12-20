@@ -12,7 +12,7 @@ from app.models import (
 )
 from app.utils import admin_required, get_batch_status_color, get_interview_status_color
 from datetime import datetime, timedelta
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -141,23 +141,54 @@ def add_mentor():
 @admin_required
 def students():
     """List all students"""
-    # Query students with their user info and enrollments
-    students_data = db.session.query(Student, User)\
-        .join(User, Student.user_id == User.id)\
-        .order_by(Student.created_at.desc())\
-        .all()
+    # Get filter parameters
+    search_query = request.args.get('q', '')
+    batch_filter = request.args.get('batch', '')
+    status_filter = request.args.get('status', '')
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
     
-    # Get enrollment info for each student
+    # Base query joining Student, User, Enrollment and Batch
+    query = db.session.query(Student, User, Enrollment, Batch)\
+        .join(User, Student.user_id == User.id)\
+        .outerjoin(Enrollment, Student.id == Enrollment.student_id)\
+        .outerjoin(Batch, Enrollment.batch_id == Batch.id)
+    
+    # Apply search filter
+    if search_query:
+        query = query.filter(or_(
+            Student.full_name.ilike(f'%{search_query}%'),
+            User.email.ilike(f'%{search_query}%'),
+            Student.phone.ilike(f'%{search_query}%')
+        ))
+    
+    # Apply batch filter
+    if batch_filter:
+        query = query.filter(Batch.name.ilike(f'%{batch_filter}%'))
+    
+    # Apply status filter
+    if status_filter == 'active':
+        # Enrolled: has a payment status that indicates completion
+        query = query.filter(Enrollment.payment_status.in_(['completed', 'partial']))
+    elif status_filter == 'pending':
+        # Not Enrolled: either no enrollment or payment is pending
+        query = query.filter(or_(
+            Enrollment.id == None,
+            Enrollment.payment_status == 'pending'
+        ))
+    
+    # Order by joined date
+    query = query.order_by(Student.created_at.desc())
+    
+    # Paginate
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    
+    # Convert items to list for template
     students_list = []
-    for student, user in students_data:
-        # Get student's batch
-        enrollment = Enrollment.query.filter_by(student_id=student.id)\
-            .join(Batch)\
-            .first()
-        
-        # Determine batch name and status based on payment
+    for student, user, enrollment, batch in pagination.items:
+        # Determine if they are enrolled in any batch (paid)
         has_paid = enrollment and enrollment.payment_status in ['completed', 'partial']
-        batch_name = enrollment.batch.name if has_paid else '-'
+        batch_name = batch.name if (batch and has_paid) else '-'
         status = 'Enrolled' if has_paid else 'Not Enrolled'
         
         students_list.append({
@@ -171,7 +202,12 @@ def students():
             'avatar_color': 'bg-violet-100 text-violet-600'
         })
     
-    return render_template('dashboard/admin/students.html', students=students_list)
+    return render_template('dashboard/admin/students.html', 
+                          students=students_list, 
+                          pagination=pagination,
+                          q=search_query,
+                          selected_batch=batch_filter,
+                          selected_status=status_filter)
 
 
 @bp.route('/mentors')
@@ -211,13 +247,99 @@ def batches():
             'status_color': get_batch_status_color(batch.status),
             'students_count': batch.current_enrollment,
             'max_students': batch.max_students,
-            'price': batch.discounted_price,
-            'original_price': batch.original_price,
+            'price': int(batch.discounted_price),
+            'original_price': int(batch.original_price),
             'features': batch.features,
-            'color': batch.color
+            'color': batch.color,
+            'description': batch.description
         })
     
     return render_template('dashboard/admin/batches.html', batches=batches_list)
+
+@bp.route('/batches/create', methods=['POST'])
+@admin_required
+def batches_create():
+    """Create a new batch"""
+    try:
+        name = request.form.get('name')
+        description = request.form.get('description')
+        original_price = float(request.form.get('original_price', 0))
+        discounted_price = float(request.form.get('discounted_price', 0))
+        max_students = int(request.form.get('max_students', 50))
+        status = request.form.get('status', 'upcoming')
+        color = request.form.get('color', 'violet')
+        features = request.form.getlist('features[]')
+        
+        if not name:
+            flash('Batch name is required', 'error')
+            return redirect(url_for('admin.batches'))
+            
+        batch = Batch(
+            name=name,
+            description=description,
+            original_price=original_price,
+            discounted_price=discounted_price,
+            max_students=max_students,
+            status=status,
+            color=color
+        )
+        batch.features = features if features else []
+        
+        db.session.add(batch)
+        db.session.commit()
+        flash(f'Batch "{name}" created successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error creating batch: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.batches'))
+
+@bp.route('/batches/edit/<int:batch_id>', methods=['POST'])
+@admin_required
+def batches_edit(batch_id):
+    """Edit an existing batch"""
+    try:
+        batch = Batch.query.get_or_404(batch_id)
+        
+        batch.name = request.form.get('name')
+        batch.description = request.form.get('description')
+        batch.original_price = float(request.form.get('original_price', 0))
+        batch.discounted_price = float(request.form.get('discounted_price', 0))
+        batch.max_students = int(request.form.get('max_students', 50))
+        batch.status = request.form.get('status')
+        batch.color = request.form.get('color')
+        
+        features = request.form.getlist('features[]')
+        batch.features = features if features else []
+        
+        db.session.commit()
+        flash(f'Batch "{batch.name}" updated successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error updating batch: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.batches'))
+
+@bp.route('/batches/delete/<int:batch_id>', methods=['POST'])
+@admin_required
+def batches_delete(batch_id):
+    """Delete a batch"""
+    try:
+        batch = Batch.query.get_or_404(batch_id)
+        
+        # Check if there are enrollments
+        if batch.current_enrollment > 0:
+            flash(f'Cannot delete batch "{batch.name}" because it has active enrollments.', 'error')
+            return redirect(url_for('admin.batches'))
+            
+        db.session.delete(batch)
+        db.session.commit()
+        flash(f'Batch deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting batch: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.batches'))
 
 
 @bp.route('/interviews')
@@ -232,18 +354,141 @@ def interviews():
     
     interviews_list = []
     for interview, student, user in interviews_data:
+        # Improve type display
+        type_display = interview.interview_type.replace('_', ' ').title()
+        if interview.interview_type == 'personal':
+            type_display = '1:1 Interview'
+        elif interview.interview_type == 'meeting':
+            type_display = 'Meeting'
+            
         interviews_list.append({
             'id': interview.id,
             'student_name': student.full_name,
-            'type': interview.interview_type.replace('_', ' ').title(),
+            'student_id': student.id,
+            'type': type_display,
+            'raw_type': interview.interview_type,
             'mentor': interview.interviewer_name or 'TBD',
             'date': interview.scheduled_date.strftime('%b %d, %Y'),
             'time': interview.scheduled_date.strftime('%I:%M %p'),
+            'raw_date': interview.scheduled_date.strftime('%Y-%m-%d'),
+            'raw_time': interview.scheduled_date.strftime('%H:%M'),
             'status': interview.status.title(),
-            'status_color': get_interview_status_color(interview.status)
+            'raw_status': interview.status,
+            'status_color': get_interview_status_color(interview.status),
+            'title': interview.title,
+            'description': interview.description,
+            'feedback': interview.feedback,
+            'rating': interview.rating
         })
     
-    return render_template('dashboard/admin/interviews.html', interviews=interviews_list)
+    # Fetch students and mentors for scheduling modal
+    all_students = Student.query.order_by(Student.full_name).all()
+    all_mentors = Mentor.query.order_by(Mentor.full_name).all()
+    
+    return render_template('dashboard/admin/interviews.html', 
+                          interviews=interviews_list,
+                          students=all_students,
+                          mentors=all_mentors)
+
+@bp.route('/interviews/schedule', methods=['POST'])
+@admin_required
+def interviews_schedule():
+    """Schedule a new interview or meeting"""
+    try:
+        student_id = request.form.get('student_id')
+        mentor_id = request.form.get('mentor_id')
+        interview_type = request.form.get('type')
+        title = request.form.get('title')
+        description = request.form.get('description')
+        scheduled_date_str = request.form.get('date')
+        scheduled_time_str = request.form.get('time')
+        
+        if not student_id or not scheduled_date_str or not scheduled_time_str:
+            flash('Missing required fields for scheduling', 'error')
+            return redirect(url_for('admin.interviews'))
+            
+        scheduled_datetime = datetime.strptime(f"{scheduled_date_str} {scheduled_time_str}", "%Y-%m-%d %H:%M")
+        
+        interviewer_name = None
+        interviewer_email = None
+        if mentor_id:
+            mentor = Mentor.query.get(mentor_id)
+            if mentor:
+                interviewer_name = mentor.full_name
+                interviewer_email = mentor.email
+        
+        interview = Interview(
+            student_id=student_id,
+            interview_type=interview_type,
+            title=title or f"{interview_type.title()} with {interviewer_name or 'Mentor'}",
+            description=description,
+            scheduled_date=scheduled_datetime,
+            interviewer_name=interviewer_name,
+            interviewer_email=interviewer_email,
+            status='scheduled'
+        )
+        
+        db.session.add(interview)
+        db.session.commit()
+        flash('Interview scheduled successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error scheduling interview: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.interviews'))
+
+@bp.route('/interviews/update/<int:interview_id>', methods=['POST'])
+@admin_required
+def interviews_update(interview_id):
+    """Update an existing interview"""
+    try:
+        interview = Interview.query.get_or_404(interview_id)
+        
+        interview.student_id = request.form.get('student_id')
+        mentor_id = request.form.get('mentor_id')
+        interview.interview_type = request.form.get('type')
+        interview.title = request.form.get('title')
+        interview.description = request.form.get('description')
+        interview.status = request.form.get('status')
+        interview.feedback = request.form.get('feedback')
+        rating = request.form.get('rating')
+        if rating:
+            interview.rating = int(rating)
+            
+        scheduled_date_str = request.form.get('date')
+        scheduled_time_str = request.form.get('time')
+        
+        if scheduled_date_str and scheduled_time_str:
+            interview.scheduled_date = datetime.strptime(f"{scheduled_date_str} {scheduled_time_str}", "%Y-%m-%d %H:%M")
+        
+        if mentor_id:
+            mentor = Mentor.query.get(mentor_id)
+            if mentor:
+                interview.interviewer_name = mentor.full_name
+                interview.interviewer_email = mentor.email
+        
+        db.session.commit()
+        flash('Interview updated successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error updating interview: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.interviews'))
+
+@bp.route('/interviews/delete/<int:interview_id>', methods=['POST'])
+@admin_required
+def interviews_delete(interview_id):
+    """Delete an interview"""
+    try:
+        interview = Interview.query.get_or_404(interview_id)
+        db.session.delete(interview)
+        db.session.commit()
+        flash('Interview deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting interview: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.interviews'))
 
 
 @bp.route('/mocks')
