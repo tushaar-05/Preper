@@ -12,6 +12,7 @@ from .interview import Interview  # noqa
 from .announcement import Announcement  # noqa
 from .resource import Resource  # noqa
 from .payment import Payment  # noqa
+from .mentor import Mentor  # noqa
 
 # Import mock test related models conditionally to avoid circular imports
 try:
@@ -31,7 +32,8 @@ __all__ = [
     'TestAttempt',
     'Announcement',
     'Resource',
-    'Payment'
+    'Payment',
+    'Mentor'
 ]
 
 # This ensures SQLAlchemy can discover all models

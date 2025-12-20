@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NST Prep - Manage Students</title>
+  <title>NST Prep - Manage Mentors</title>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -93,14 +93,23 @@
 
         <p class="px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2 mt-6">Management</p>
 
-        <a href="/admin/students"
-          class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+        <a href="/admin/students" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
             </path>
           </svg>
           Students
+        </a>
+
+        <a href="/admin/mentors"
+          class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+            </path>
+          </svg>
+          Mentors
         </a>
 
         <a href="/admin/batches" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
@@ -160,7 +169,7 @@
           Analytics
         </a>
 
-        <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+        <a href="/admin/settings" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
@@ -197,120 +206,102 @@
 
       <header class="flex justify-between items-center mb-8">
         <div>
-          <h2 class="text-3xl font-bold text-gray-900">Manage Students</h2>
-          <p class="text-gray-500 mt-1">View, manage, and track all enrolled students.</p>
+          <h2 class="text-3xl font-bold text-gray-900">Manage Mentors</h2>
+          <p class="text-gray-500 mt-1">View and manage all platform mentors.</p>
         </div>
-        <button
-          class="bg-[var(--admin-accent)] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 flex items-center gap-2 shadow-lg shadow-violet-200">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-          </svg>
-          Add New Student
-        </button>
+        <div class="flex gap-4">
+          <button id="add-mentor-btn"
+            class="bg-[var(--admin-accent)] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 flex items-center gap-2 shadow-lg shadow-violet-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+              </path>
+            </svg>
+            Add New Mentor
+          </button>
+        </div>
       </header>
 
-      <!-- Filters -->
-      <div
-        class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-6 flex lg:flex-row flex-col gap-4 justify-between items-center">
-        <div class="relative w-full lg:w-96">
-          <span class="absolute left-3 top-2.5 text-gray-400">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-          </span>
-          <input type="text" placeholder="Search students by name, email..."
-            class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all text-sm">
-        </div>
-
-        <div class="flex items-center gap-3 w-full lg:w-auto">
-          <select
-            class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-violet-500 bg-white">
-            <option value="">All Batches</option>
-            <option value="neumann">Batch NEUMANN</option>
-            <option value="newton">Batch NEWTON</option>
-            <option value="einstein">Batch EINSTEIN</option>
-          </select>
-          <select
-            class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-violet-500 bg-white">
-            <option value="">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="pending">Pending</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Students Table -->
+      <!-- Mentors Table -->
       <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-gray-50/50 text-gray-500 text-xs uppercase tracking-wider">
-                <th class="px-6 py-4 font-semibold">Student</th>
-                <th class="px-6 py-4 font-semibold">Batch Info</th>
+                <th class="px-6 py-4 font-semibold">Mentor</th>
+                <th class="px-6 py-4 font-semibold">Role</th>
                 <th class="px-6 py-4 font-semibold">Status</th>
+                <th class="px-6 py-4 font-semibold">Rating</th>
                 <th class="px-6 py-4 font-semibold">Joined Date</th>
                 <th class="px-6 py-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 text-sm">
-              {% for student in students %}
+              {% for mentor in mentors %}
               <tr class="hover:bg-gray-50/50 transition-colors group">
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-3">
                     <div
-                      class="w-10 h-10 rounded-full {{ student.avatar_color }} flex items-center justify-center font-bold text-sm">
-                      {{ student.name[0] }}
+                      class="w-10 h-10 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center font-bold text-sm">
+                      {{ mentor.initial }}
                     </div>
                     <div>
-                      <p class="font-bold text-gray-900">{{ student.name }}</p>
-                      <p class="text-xs text-gray-500">{{ student.email }}</p>
+                      <p class="font-bold text-gray-900">{{ mentor.name }}</p>
+                      <p class="text-xs text-gray-500">{{ mentor.email }}</p>
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
-                    {{ student.batch }}
-                  </span>
+                <td class="px-6 py-4 text-gray-600">
+                  {{ mentor.role }}
                 </td>
                 <td class="px-6 py-4">
-                  {% if student.status == 'Enrolled' %}
+                  {% if mentor.status == 'Active' %}
                   <span
                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    <span class="w-1.5 h-1.5 bg-green-600 rounded-full mr-1.5"></span>Enrolled
+                    <span class="w-1.5 h-1.5 bg-green-600 rounded-full mr-1.5"></span>Active
                   </span>
                   {% else %}
                   <span
                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                    <span class="w-1.5 h-1.5 bg-gray-500 rounded-full mr-1.5"></span>Not Enrolled
+                    <span class="w-1.5 h-1.5 bg-gray-500 rounded-full mr-1.5"></span>Inactive
                   </span>
                   {% endif %}
                 </td>
+                <td class="px-6 py-4 font-semibold text-amber-500">
+                  {{ mentor.rating }} ★
+                </td>
                 <td class="px-6 py-4 text-gray-500">
-                  {{ student.joined_date }}
+                  {{ mentor.joined_date }}
                 </td>
                 <td class="px-6 py-4 text-right">
                   <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <a href="mailto:{{ student.email }}"
-                      class="p-2 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-all"
-                      title="Send Mail">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button
+                      class="p-2 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
                         </path>
                       </svg>
-                    </a>
-                    <a href="tel:{{ student.phone }}"
-                      class="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
-                      title="Call Student">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    </button>
+                    <button class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
                         </path>
                       </svg>
-                    </a>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                  <div class="flex flex-col items-center gap-2">
+                    <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                      </path>
+                    </svg>
+                    <p class="text-sm">No mentors added yet.</p>
                   </div>
                 </td>
               </tr>
@@ -318,25 +309,76 @@
             </tbody>
           </table>
         </div>
-
-        <!-- Pagination -->
-        <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-          <p class="text-xs text-gray-500">Showing <span class="font-medium text-gray-900">1</span> to <span
-              class="font-medium text-gray-900">5</span> of <span class="font-medium text-gray-900">43</span> results
-          </p>
-          <div class="flex gap-2">
-            <button
-              class="px-3 py-1 border border-gray-200 rounded-lg text-xs font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-              disabled>Previous</button>
-            <button
-              class="px-3 py-1 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50">Next</button>
-          </div>
-        </div>
       </div>
 
     </main>
   </div>
 
+  <!-- Add Mentor Modal -->
+  <div id="mentor-modal" class="fixed inset-0 z-[100] hidden">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div
+      class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+      <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center">
+        <h3 class="text-xl font-bold text-gray-900">Add New Mentor</h3>
+        <button id="close-modal" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+          <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <form action="{{ url_for('admin.add_mentor') }}" method="POST" class="p-8 space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
+          <input type="text" name="full_name" required
+            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all outline-none"
+            placeholder="e.g. Tushar R Singh">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
+          <input type="email" name="email" required
+            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all outline-none"
+            placeholder="mentor@example.com">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Role / Designation</label>
+          <input type="text" name="role" required
+            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all outline-none"
+            placeholder="e.g. Guide, Senior Mentor">
+        </div>
+        <div class="pt-4">
+          <button type="submit"
+            class="w-full bg-violet-600 text-white py-3 rounded-xl font-bold hover:bg-violet-700 transition-all shadow-lg shadow-violet-200">
+            Save Mentor
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById('mentor-modal');
+    const openBtn = document.getElementById('add-mentor-btn');
+    const closeBtn = document.getElementById('close-modal');
+
+    openBtn.addEventListener('click', () => {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    });
+
+    closeBtn.addEventListener('click', () => {
+      modal.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    });
+
+    // Close on outside click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal.children[0]) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+      }
+    });
+  </script>
 </body>
 
 </html>
