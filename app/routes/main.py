@@ -36,8 +36,6 @@ def announcement():
 
 @bp.route('/doubts')
 def doubts():
-    # In a real application, you would fetch actual doubts from the database here
-    # For now, we'll use sample data
     sample_doubts = [
         {
             'id': 1,
@@ -183,3 +181,15 @@ def mock():
         }
     ]
     return render_template('dashboard/user/mock.html', tests=mock_tests)
+
+@bp.route('/payment-pending')
+def payment_pending():
+    batches = [
+        {
+            'id': 'neumann',
+            'name': 'Batch NEUMANN',
+            'price': 499,
+            'features': ['1:1 Mentorship', 'Live Doubt Support', 'Mock Tests Series', 'Prep Kit (PYQs)']
+        }
+    ]
+    return render_template('dashboard/user/payment-pending.html', batches=batches)
