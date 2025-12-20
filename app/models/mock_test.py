@@ -27,6 +27,9 @@ class MockTest(db.Model):
     available_from = db.Column(db.DateTime)
     available_until = db.Column(db.DateTime)
     
+    # Sections (stored as JSON array of strings)
+    sections_json = db.Column(db.Text)  # e.g., ["Physics", "Chemistry", "Maths"]
+    
     # Metadata
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -39,6 +42,21 @@ class MockTest(db.Model):
     def total_questions(self):
         """Get total number of questions"""
         return self.questions.count()
+
+    @property
+    def sections(self):
+        """Get sections as a Python list"""
+        if self.sections_json:
+            try:
+                return json.loads(self.sections_json)
+            except:
+                return []
+        return []
+    
+    @sections.setter
+    def sections(self, sections_list):
+        """Set sections from a Python list"""
+        self.sections_json = json.dumps(sections_list)
     
     def __repr__(self):
         return f'<MockTest {self.title}>'
@@ -51,11 +69,14 @@ class Question(db.Model):
     mock_test_id = db.Column(db.Integer, db.ForeignKey('mock_tests.id'), nullable=False)
     
     # Question Details
+    section = db.Column(db.String(50))  # Physics, Chemistry, etc.
     question_text = db.Column(db.Text, nullable=False)
+    question_image_url = db.Column(db.Text)
     question_type = db.Column(db.String(20), default='mcq')  # mcq, true_false, numerical
     
     # Options (stored as JSON for MCQ)
-    options_json = db.Column(db.Text)  # JSON array: ["Option A", "Option B", ...]
+    # [{"text": "Option 1", "image": "url"}, ...]
+    options_json = db.Column(db.Text)
     correct_answer = db.Column(db.String(500), nullable=False)
     
     # Marks
@@ -64,6 +85,7 @@ class Question(db.Model):
     
     # Explanation
     explanation = db.Column(db.Text)
+    explanation_image_url = db.Column(db.Text)
     
     # Order
     question_number = db.Column(db.Integer)
@@ -72,13 +94,31 @@ class Question(db.Model):
     def options(self):
         """Get options as a Python list"""
         if self.options_json:
-            return json.loads(self.options_json)
+            try:
+                return json.loads(self.options_json)
+            except:
+                return []
         return []
     
     @options.setter
     def options(self, options_list):
         """Set options from a Python list"""
         self.options_json = json.dumps(options_list)
+    
+    def to_dict(self):
+        """Convert question to dictionary for JSON serialization"""
+        return {
+            'id': self.id,
+            'mock_test_id': self.mock_test_id,
+            'section': self.section,
+            'question_text': self.question_text,
+            'question_image_url': self.question_image_url,
+            'options': self.options,
+            'correct_answer': self.correct_answer,
+            'explanation': self.explanation,
+            'explanation_image_url': self.explanation_image_url,
+            'question_number': self.question_number
+        }
     
     def __repr__(self):
         return f'<Question {self.id} - Test:{self.mock_test_id}>'

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Questions - {{ mock.title }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background-color: #f8fafc;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+    }
+
+    .input-focus {
+      transition: all 0.3s;
+    }
+
+    .input-focus:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px -10px rgba(124, 58, 237, 0.3);
+    }
+  </style>
+</head>
+
+<body class="text-slate-900">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8">
+      <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+          <div class="flex items-center gap-4">
+            <a href="{{ url_for('admin.mocks') }}" class="p-2 hover:bg-white rounded-xl transition-colors">
+              <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+                </path>
+              </svg>
+            </a>
+            <div>
+              <h1
+                class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600">
+                {{ mock.title }}</h1>
+              <p class="text-slate-500 font-medium">Manage and build your test curriculum.</p>
+            </div>
+          </div>
+          <button onclick="document.getElementById('addQuestionModal').classList.remove('hidden')"
+            class="bg-violet-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl shadow-violet-200 hover:bg-violet-700 transition-all active:scale-95 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Add Question
+          </button>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div
+          class="mb-6 p-4 rounded-2xl {% if category == 'error' %}bg-rose-50 text-rose-600 border border-rose-100{% else %}bg-emerald-50 text-emerald-600 border border-emerald-100{% endif %} font-medium">
+          {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <!-- Sections Preview -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {% for sec in mock.sections %}
+          <div
+            class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">{{ sec }}</span>
+            <span class="text-2xl font-bold text-slate-800">{{ questions|selectattr('section', 'equalto',
+              sec)|list|length }}</span>
+            <span class="text-[10px] text-slate-500 uppercase font-bold">Questions</span>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Questions List -->
+        <div class="space-y-6 mb-20">
+          {% for q in questions %}
+          <div
+            class="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden group hover:shadow-xl transition-all duration-500">
+            <div class="p-8">
+              <div class="flex justify-between items-start mb-6">
+                <div class="flex items-center gap-3">
+                  <span
+                    class="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-lg font-bold text-slate-600">Q{{
+                    q.question_number or loop.index }}</span>
+                  <span
+                    class="px-3 py-1 rounded-full bg-violet-50 text-violet-600 text-xs font-bold border border-violet-100 uppercase tracking-wide">{{
+                    q.section }}</span>
+                </div>
+                <div class="flex gap-2">
+                  <button data-question='{{ q.to_dict()|tojson|safe }}'
+                    onclick='openEditModal(JSON.parse(this.dataset.question))'
+                    class="p-2 text-violet-400 hover:text-violet-600 hover:bg-violet-50 rounded-xl transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                      </path>
+                    </svg>
+                  </button>
+                  <form action="{{ url_for('admin.mock_questions_delete', mock_id=mock.id, question_id=q.id) }}"
+                    method="POST" onsubmit="return confirm('Delete this question?')">
+                    <button type="submit"
+                      class="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                        </path>
+                      </svg>
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              <div class="flex flex-col md:flex-row gap-8">
+                <div class="flex-1">
+                  <p class="text-xl font-medium text-slate-800 leading-relaxed mb-6">{{ q.question_text }}</p>
+
+                  {% if q.question_image_url %}
+                  <div class="mb-6 rounded-3xl overflow-hidden border border-slate-100 bg-slate-50">
+                    <img src="{{ q.question_image_url }}" alt="Question" class="max-h-64 mx-auto object-contain">
+                  </div>
+                  {% endif %}
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for opt in q.options %}
+                    <div
+                      class="p-4 rounded-2xl border-2 {% if loop.index|string == q.correct_answer %}border-emerald-500 bg-emerald-50/50{% else %}border-slate-50 bg-slate-50/30{% endif %} flex flex-col gap-3">
+                      <div class="flex items-center gap-3">
+                        <span
+                          class="w-8 h-8 rounded-lg {% if loop.index|string == q.correct_answer %}bg-emerald-500 text-white{% else %}bg-white text-slate-400 border border-slate-200{% endif %} flex items-center justify-center text-sm font-bold shadow-sm">
+                          {{ loop.index }}
+                        </span>
+                        <span
+                          class="font-medium {% if loop.index|string == q.correct_answer %}text-emerald-700{% else %}text-slate-600{% endif %}">{{
+                          opt.text }}</span>
+                      </div>
+                      {% if opt.image %}
+                      <div class="rounded-xl overflow-hidden border border-slate-100">
+                        <img src="{{ opt.image }}" alt="Option {{ loop.index }}"
+                          class="max-h-32 w-full object-contain bg-white">
+                      </div>
+                      {% endif %}
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+
+                {% if q.explanation or q.explanation_image_url %}
+                <div class="md:w-72">
+                  <div class="bg-indigo-50/50 rounded-3xl p-6 border border-indigo-100">
+                    <h4 class="text-indigo-600 font-bold text-xs uppercase tracking-widest mb-3">Explanation</h4>
+                    <p class="text-sm text-indigo-700 leading-relaxed">{{ q.explanation }}</p>
+                    {% if q.explanation_image_url %}
+                    <img src="{{ q.explanation_image_url }}" alt="Explanation"
+                      class="mt-4 rounded-xl shadow-sm border border-indigo-100">
+                    {% endif %}
+                  </div>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <div class="text-center py-20 bg-white rounded-[40px] border border-dashed border-slate-200">
+            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-10 h-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                </path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800">No questions added yet</h3>
+            <p class="text-slate-400">Start building your test by adding your first question.</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </main>
+
+    <!-- Modal Base (Hidden by default) -->
+    <div id="addQuestionModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+        onclick="this.parentElement.classList.add('hidden')"></div>
+
+      <div
+        class="relative bg-white w-full max-w-4xl h-full max-h-[90vh] rounded-[40px] shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300">
+        <div class="p-8 border-b border-slate-100 flex items-center justify-between glass">
+          <div>
+            <h3 class="text-2xl font-bold text-slate-900 leading-tight">Add New Question</h3>
+            <p class="text-slate-500 font-medium text-sm">Design question content, options, and explanations.</p>
+          </div>
+          <button onclick="document.getElementById('addQuestionModal').classList.add('hidden')"
+            class="p-3 hover:bg-slate-100 rounded-2xl transition-all">
+            <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <form action="{{ url_for('admin.mock_questions_add', mock_id=mock.id) }}" method="POST"
+          enctype="multipart/form-data" class="flex-1 overflow-y-auto p-8 space-y-8 bg-slate-50/50">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Left Side: Basic Info -->
+            <div class="space-y-6">
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Section</label>
+                <select name="section" required
+                  class="w-full px-5 py-4 border border-slate-200 rounded-2xl bg-white focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 transition-all font-medium appearance-none">
+                  {% for sec in mock.sections %}
+                  <option value="{{ sec }}">{{ sec }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Question
+                  Text</label>
+                <textarea name="question_text" required rows="4" placeholder="Enter the main question here..."
+                  class="w-full px-5 py-4 border border-slate-200 rounded-3xl bg-white focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 transition-all font-medium resize-none"></textarea>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Question Image
+                  (Optional)</label>
+                <div
+                  class="group relative flex items-center justify-center w-full h-32 border-2 border-dashed border-slate-200 rounded-3xl bg-white hover:border-violet-400 hover:bg-violet-50/30 transition-all cursor-pointer overflow-hidden">
+                  <input type="file" name="question_image" class="absolute inset-0 opacity-0 cursor-pointer z-10"
+                    onchange="previewImg(this, 'q_preview')">
+                  <div id="q_preview_content" class="flex flex-col items-center gap-2">
+                    <svg class="w-8 h-8 text-slate-300 group-hover:text-violet-500" fill="none" stroke="currentColor"
+                      viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                      </path>
+                    </svg>
+                    <span class="text-xs font-bold text-slate-400 group-hover:text-violet-600">Click to upload
+                      image</span>
+                  </div>
+                  <img id="q_preview" class="hidden absolute inset-0 w-full h-full object-contain">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Detailed
+                  Explanation</label>
+                <textarea name="explanation" rows="3" placeholder="Explain the solution..."
+                  class="w-full px-5 py-4 border border-slate-200 rounded-3xl bg-white focus:ring-4 focus:ring-violet-500/10 font-medium resize-none"></textarea>
+              </div>
+            </div>
+
+            <!-- Right Side: Options -->
+            <div class="space-y-6">
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest">Answer Options</label>
+
+              <div class="space-y-4">
+                {% for i in range(1, 5) %}
+                <div
+                  class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-4 group transition-all hover:border-violet-100 hover:shadow-lg">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <span
+                        class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center text-xs font-bold">#{{
+                        i }}</span>
+                      <input type="radio" name="correct_answer" value="{{ i }}" {% if i==1 %}checked{% endif %}
+                        class="w-5 h-5 text-emerald-500 rounded-full border-slate-200 focus:ring-emerald-500">
+                      <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Correct?</span>
+                    </div>
+                  </div>
+
+                  <input type="text" name="option_{{ i }}_text" required placeholder="Option text..."
+                    class="w-full px-4 py-3 border border-slate-100 rounded-xl bg-slate-50 focus:bg-white focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 transition-all font-medium">
+
+                  <div
+                    class="relative flex items-center gap-3 p-3 border border-slate-100 rounded-2xl bg-slate-50/50 hover:bg-white hover:border-violet-200 transition-colors cursor-pointer overflow-hidden">
+                    <input type="file" name="option_{{ i }}_image"
+                      class="absolute inset-0 opacity-0 cursor-pointer z-10"
+                      onchange="previewImg(this, 'opt_{{ i }}_preview')">
+                    <div id="opt_{{ i }}_preview_placeholder" class="flex items-center gap-2">
+                      <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                        </path>
+                      </svg>
+                      <span class="text-[10px] font-bold text-slate-400 uppercase">Attach Image</span>
+                    </div>
+                    <img id="opt_{{ i }}_preview"
+                      class="hidden h-10 w-10 object-cover rounded-lg border border-slate-200">
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-8 border-t border-slate-100 flex gap-4">
+            <button type="button" onclick="document.getElementById('addQuestionModal').classList.add('hidden')"
+              class="flex-1 py-4 px-6 border border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all">Discard</button>
+            <button type="submit"
+              class="flex-[2] py-4 px-6 bg-slate-900 text-white rounded-2xl font-bold shadow-xl shadow-slate-200 hover:shadow-2xl hover:-translate-y-1 transition-all">Finalize
+              & Add Question</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Question Modal -->
+  <div id="editQuestionModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onclick="this.parentElement.classList.add('hidden')">
+    </div>
+
+    <div
+      class="relative bg-white w-full max-w-4xl h-full max-h-[90vh] rounded-[40px] shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300">
+      <div class="p-8 border-b border-slate-100 flex items-center justify-between glass">
+        <div>
+          <h3 class="text-2xl font-bold text-slate-900 leading-tight">Edit Question</h3>
+          <p class="text-slate-500 font-medium text-sm">Update question content, options, and explanations.</p>
+        </div>
+        <button onclick="document.getElementById('editQuestionModal').classList.add('hidden')"
+          class="p-3 hover:bg-slate-100 rounded-2xl transition-all">
+          <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <form id="editQuestionForm" method="POST" enctype="multipart/form-data"
+        class="flex-1 overflow-y-auto p-8 space-y-8 bg-slate-50/50">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Left Side: Basic Info -->
+          <div class="space-y-6">
+            <div>
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Section</label>
+              <select name="section" id="edit_section" required
+                class="w-full px-5 py-4 border border-slate-200 rounded-2xl bg-white focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 transition-all font-medium appearance-none">
+                {% for sec in mock.sections %}
+                <option value="{{ sec }}">{{ sec }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Question Text</label>
+              <textarea name="question_text" id="edit_question_text" required rows="4"
+                placeholder="Enter the main question here..."
+                class="w-full px-5 py-4 border border-slate-200 rounded-3xl bg-white focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 transition-all font-medium resize-none"></textarea>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Question Image
+                (Optional)</label>
+              <div
+                class="group relative flex items-center justify-center w-full h-32 border-2 border-dashed border-slate-200 rounded-3xl bg-white hover:border-violet-400 hover:bg-violet-50/30 transition-all cursor-pointer overflow-hidden">
+                <input type="file" name="question_image" class="absolute inset-0 opacity-0 cursor-pointer z-10"
+                  onchange="previewImg(this, 'edit_q_preview')">
+                <div id="edit_q_preview_content" class="flex flex-col items-center gap-2">
+                  <svg class="w-8 h-8 text-slate-300 group-hover:text-violet-500" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                    </path>
+                  </svg>
+                  <span class="text-xs font-bold text-slate-400 group-hover:text-violet-600">Click to change
+                    image</span>
+                </div>
+                <img id="edit_q_preview" class="hidden absolute inset-0 w-full h-full object-contain">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Detailed
+                Explanation</label>
+              <textarea name="explanation" id="edit_explanation" rows="3" placeholder="Explain the solution..."
+                class="w-full px-5 py-4 border border-slate-200 rounded-3xl bg-white focus:ring-4 focus:ring-violet-500/10 font-medium resize-none"></textarea>
+            </div>
+          </div>
+
+          <!-- Right Side: Options -->
+          <div class="space-y-6">
+            <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest">Answer Options</label>
+            <div class="space-y-4">
+              {% for i in range(1, 5) %}
+              <div
+                class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-4 group transition-all hover:border-violet-100 hover:shadow-lg">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <span
+                      class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center text-xs font-bold">#{{
+                      i }}</span>
+                    <input type="radio" name="correct_answer" id="edit_opt_radio_{{ i }}" value="{{ i }}"
+                      class="w-5 h-5 text-emerald-500 rounded-full border-slate-200 focus:ring-emerald-500">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Correct?</span>
+                  </div>
+                </div>
+                <input type="text" name="option_{{ i }}_text" id="edit_opt_text_{{ i }}" required
+                  placeholder="Option text..."
+                  class="w-full px-4 py-3 border border-slate-100 rounded-xl bg-slate-50 focus:bg-white focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 transition-all font-medium">
+
+                <div
+                  class="relative flex items-center gap-3 p-3 border border-slate-100 rounded-2xl bg-slate-50/50 hover:bg-white hover:border-violet-200 transition-colors cursor-pointer overflow-hidden">
+                  <input type="file" name="option_{{ i }}_image" class="absolute inset-0 opacity-0 cursor-pointer z-10"
+                    onchange="previewImg(this, 'edit_opt_{{ i }}_preview')">
+                  <div id="edit_opt_{{ i }}_preview_placeholder" class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                      </path>
+                    </svg>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">Attach New Image</span>
+                  </div>
+                  <img id="edit_opt_{{ i }}_preview"
+                    class="hidden h-10 w-10 object-cover rounded-lg border border-slate-200">
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-8 border-t border-slate-100 flex gap-4">
+          <button type="button" onclick="document.getElementById('editQuestionModal').classList.add('hidden')"
+            class="flex-1 py-4 px-6 border border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancel</button>
+          <button type="submit"
+            class="flex-[2] py-4 px-6 bg-violet-600 text-white rounded-2xl font-bold shadow-xl shadow-violet-200 hover:shadow-2xl hover:-translate-y-1 transition-all">Save
+            Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openEditModal(q) {
+      const modal = document.getElementById('editQuestionModal');
+      document.getElementById('edit_section').value = q.section;
+      document.getElementById('edit_question_text').value = q.question_text;
+      document.getElementById('edit_explanation').value = q.explanation || '';
+
+      // Correct answer radio
+      document.getElementById('edit_opt_radio_' + q.correct_answer).checked = true;
+
+      // Options
+      const options = q.options; // q.options is already parsed list from tojson|safe
+      options.forEach((opt, index) => {
+        const i = index + 1;
+        document.getElementById('edit_opt_text_' + i).value = opt.text;
+        const preview = document.getElementById('edit_opt_' + i + '_preview');
+        const placeholder = document.getElementById('edit_opt_' + i + '_preview_placeholder');
+        if (opt.image) {
+          preview.src = opt.image;
+          preview.classList.remove('hidden');
+          placeholder.classList.add('hidden');
+        } else {
+          preview.classList.add('hidden');
+          placeholder.classList.remove('hidden');
+        }
+      });
+
+      // Question Image
+      const qPreview = document.getElementById('edit_q_preview');
+      const qPlaceholder = document.getElementById('edit_q_preview_content');
+      if (q.question_image_url) {
+        qPreview.src = q.question_image_url;
+        qPreview.classList.remove('hidden');
+        qPlaceholder.classList.add('hidden');
+      } else {
+        qPreview.classList.add('hidden');
+        qPlaceholder.classList.remove('hidden');
+      }
+
+      document.getElementById('editQuestionForm').action = `/admin/mocks/{{ mock.id }}/questions/${q.id}/edit`;
+      modal.classList.remove('hidden');
+    }
+
+    function previewImg(input, previewId) {
+      const preview = document.getElementById(previewId);
+      const content = document.getElementById(previewId + '_content') || document.getElementById(previewId + '_placeholder');
+
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          preview.src = e.target.result;
+          preview.classList.remove('hidden');
+          if (content) content.classList.add('hidden');
+        }
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+  </script>
+</body>
+
+</html>

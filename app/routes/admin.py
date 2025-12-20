@@ -12,6 +12,8 @@ from app.models import (
 from app.utils import admin_required, get_batch_status_color, get_interview_status_color
 from datetime import datetime, timedelta
 from sqlalchemy import func, or_
+import os
+from werkzeug.utils import secure_filename
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -529,6 +531,208 @@ def mocks():
         })
     
     return render_template('dashboard/admin/mocks.html', mocks=mocks_list)
+
+
+@bp.route('/mocks/create', methods=['POST'])
+@admin_required
+def mocks_create():
+    """Create a new mock test"""
+    try:
+        title = request.form.get('title')
+        category = request.form.get('category', 'General')
+        duration = int(request.form.get('duration', 60))
+        total_marks = int(request.form.get('total_marks', 100))
+        sections = request.form.getlist('sections')
+        
+        available_from_str = request.form.get('available_from')
+        available_until_str = request.form.get('available_until')
+        
+        available_from = datetime.fromisoformat(available_from_str) if available_from_str else None
+        available_until = datetime.fromisoformat(available_until_str) if available_until_str else None
+        
+        mock = MockTest(
+            title=title,
+            category=category,
+            duration_minutes=duration,
+            total_marks=total_marks,
+            sections=sections,
+            available_from=available_from,
+            available_until=available_until,
+            is_active=True
+        )
+        
+        db.session.add(mock)
+        db.session.commit()
+        flash('Mock test scheduled successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error scheduling test: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.mocks'))
+
+
+@bp.route('/mocks/<int:mock_id>/questions')
+@admin_required
+def mock_questions(mock_id):
+    """View and manage questions for a specific mock test"""
+    mock = MockTest.query.get_or_404(mock_id)
+    questions = Question.query.filter_by(mock_test_id=mock_id).order_by(Question.question_number).all()
+    return render_template('dashboard/admin/mock_questions.html', mock=mock, questions=questions)
+
+
+@bp.route('/mocks/<int:mock_id>/questions/add', methods=['POST'])
+@admin_required
+def mock_questions_add(mock_id):
+    """Add a new question to a mock test"""
+    try:
+        section = request.form.get('section')
+        question_text = request.form.get('question_text')
+        correct_answer = request.form.get('correct_answer')
+        explanation = request.form.get('explanation')
+        
+        # Handle Question Image
+        question_image_url = None
+        if 'question_image' in request.files:
+            file = request.files['question_image']
+            if file and file.filename:
+                filename = secure_filename(f"q_{mock_id}_{datetime.now().timestamp()}_{file.filename}")
+                upload_path = os.path.join('app', 'static', 'uploads', 'mocks', filename)
+                file.save(upload_path)
+                question_image_url = url_for('static', filename=f'uploads/mocks/{filename}')
+
+        # Handle Options
+        options = []
+        for i in range(1, 5):
+            opt_text = request.form.get(f'option_{i}_text')
+            opt_image_url = None
+            if f'option_{i}_image' in request.files:
+                file = request.files[f'option_{i}_image']
+                if file and file.filename:
+                    filename = secure_filename(f"opt_{mock_id}_{i}_{datetime.now().timestamp()}_{file.filename}")
+                    upload_path = os.path.join('app', 'static', 'uploads', 'mocks', filename)
+                    file.save(upload_path)
+                    opt_image_url = url_for('static', filename=f'uploads/mocks/{filename}')
+            
+            options.append({
+                'text': opt_text,
+                'image': opt_image_url
+            })
+
+        # Get next question number
+        last_q = Question.query.filter_by(mock_test_id=mock_id).order_by(Question.question_number.desc()).first()
+        qn = (last_q.question_number + 1) if last_q and last_q.question_number else 1
+
+        question = Question(
+            mock_test_id=mock_id,
+            section=section,
+            question_text=question_text,
+            question_image_url=question_image_url,
+            options=options,
+            correct_answer=correct_answer,
+            explanation=explanation,
+            question_number=qn
+        )
+        
+        db.session.add(question)
+        db.session.commit()
+        flash('Question added successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error adding question: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.mock_questions', mock_id=mock_id))
+
+
+@bp.route('/mocks/<int:mock_id>/questions/<int:question_id>/edit', methods=['POST'])
+@admin_required
+def mock_questions_edit(mock_id, question_id):
+    """Update an existing question in a mock test"""
+    try:
+        question = Question.query.get_or_404(question_id)
+        section = request.form.get('section')
+        question_text = request.form.get('question_text')
+        correct_answer = request.form.get('correct_answer')
+        explanation = request.form.get('explanation')
+        
+        # Update basic fields
+        question.section = section
+        question.question_text = question_text
+        question.correct_answer = correct_answer
+        question.explanation = explanation
+
+        # Handle Question Image Update
+        if 'question_image' in request.files:
+            file = request.files['question_image']
+            if file and file.filename:
+                filename = secure_filename(f"q_{mock_id}_{datetime.now().timestamp()}_{file.filename}")
+                upload_path = os.path.join('app', 'static', 'uploads', 'mocks', filename)
+                file.save(upload_path)
+                question.question_image_url = url_for('static', filename=f'uploads/mocks/{filename}')
+
+        # Handle Options Update
+        current_options = question.options or []
+        updated_options = []
+        
+        for i in range(1, 5):
+            opt_text = request.form.get(f'option_{i}_text')
+            
+            # Keep existing image by default if it exists in current_options
+            opt_image_url = current_options[i-1].get('image') if len(current_options) >= i else None
+            
+            # Check for new image upload
+            if f'option_{i}_image' in request.files:
+                file = request.files[f'option_{i}_image']
+                if file and file.filename:
+                    filename = secure_filename(f"opt_{mock_id}_{i}_{datetime.now().timestamp()}_{file.filename}")
+                    upload_path = os.path.join('app', 'static', 'uploads', 'mocks', filename)
+                    file.save(upload_path)
+                    opt_image_url = url_for('static', filename=f'uploads/mocks/{filename}')
+            
+            updated_options.append({
+                'text': opt_text,
+                'image': opt_image_url
+            })
+
+        question.options = updated_options
+        db.session.commit()
+        flash('Question updated successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error updating question: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.mock_questions', mock_id=mock_id))
+
+
+@bp.route('/mocks/<int:mock_id>/questions/<int:question_id>/delete', methods=['POST'])
+@admin_required
+def mock_questions_delete(mock_id, question_id):
+    """Delete a question from a mock test"""
+    try:
+        question = Question.query.get_or_404(question_id)
+        db.session.delete(question)
+        db.session.commit()
+        flash('Question deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting question: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.mock_questions', mock_id=mock_id))
+
+
+@bp.route('/mocks/<int:mock_id>/delete', methods=['POST'])
+@admin_required
+def mocks_delete(mock_id):
+    """Delete a mock test"""
+    try:
+        mock = MockTest.query.get_or_404(mock_id)
+        db.session.delete(mock)
+        db.session.commit()
+        flash('Mock test deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting test: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.mocks'))
 
 
 @bp.route('/announcements')
