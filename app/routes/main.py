@@ -193,3 +193,236 @@ def payment_pending():
         }
     ]
     return render_template('dashboard/user/payment-pending.html', batches=batches)
+
+@bp.route('/admin/students')
+def admin_students():
+    students = [
+        {
+            'id': 1,
+            'name': 'Arjun Verma',
+            'email': 'arjun.v@example.com',
+            'batch': 'Batch NEUMANN',
+            'status': 'Active',
+            'joined_date': 'Dec 20, 2025',
+            'avatar_color': 'bg-violet-100 text-violet-600'
+        },
+        {
+            'id': 2,
+            'name': 'Sneha Gupta',
+            'email': 'sneha.g@example.com',
+            'batch': 'Batch NEUMANN',
+            'status': 'Active',
+            'joined_date': 'Dec 19, 2025',
+            'avatar_color': 'bg-pink-100 text-pink-600'
+        },
+        {
+            'id': 3,
+            'name': 'Rahul Kumar',
+            'email': 'rahul.k@example.com',
+            'batch': 'Batch NEUMANN',
+            'status': 'Pending Payment',
+            'joined_date': 'Dec 19, 2025',
+            'avatar_color': 'bg-blue-100 text-blue-600'
+        },
+        {
+            'id': 4,
+            'name': 'Priya Singh',
+            'email': 'priya.s@example.com',
+            'batch': 'Batch NEUMANN',
+            'status': 'Active',
+            'joined_date': 'Dec 18, 2025',
+            'avatar_color': 'bg-green-100 text-green-600'
+        },
+        {
+            'id': 5,
+            'name': 'Aditya Roy',
+            'email': 'aditya.r@example.com',
+            'batch': 'Batch NEUMANN',
+            'status': 'Inactive',
+            'joined_date': 'Dec 15, 2025',
+            'avatar_color': 'bg-yellow-100 text-yellow-600'
+        }
+    ]
+    return render_template('dashboard/admin/students.html', students=students)
+
+@bp.route('/admin/batches')
+def admin_batches():
+    batches = [
+        {
+            'id': 1,
+            'name': 'Batch NEUMANN',
+            'status': 'Active',
+            'status_color': 'bg-green-100 text-green-700',
+            'students_count': 24,
+            'max_students': 50,
+            'price': 499,
+            'original_price': 999,
+            'features': ['Daily Live Classes', 'Doubt Support', 'Mock Tests', 'Personal Mentorship'],
+            'color': 'violet'
+        }
+    ]
+    return render_template('dashboard/admin/batches.html', batches=batches)
+
+@bp.route('/admin/interviews')
+def admin_interviews():
+    interviews = [
+        {
+            'id': 1,
+            'student_name': 'Arjun Verma',
+            'type': 'Mock HR',
+            'mentor': 'Tushar R Singh',
+            'date': 'Dec 22, 2025',
+            'time': '10:00 AM',
+            'status': 'Scheduled',
+            'status_color': 'bg-blue-100 text-blue-700'
+        },
+        {
+            'id': 2,
+            'student_name': 'Sneha Gupta',
+            'type': 'Technical Round',
+            'mentor': 'Divyam',
+            'date': 'Dec 22, 2025',
+            'time': '2:00 PM',
+            'status': 'Confirmed',
+            'status_color': 'bg-green-100 text-green-700'
+        },
+        {
+            'id': 3,
+            'student_name': 'Rahul Kumar',
+            'type': '1:1 Mentorship',
+            'mentor': 'Devansh',
+            'date': 'Dec 21, 2025',
+            'time': '11:00 AM',
+            'status': 'Completed',
+            'status_color': 'bg-gray-100 text-gray-600'
+        }
+    ]
+    return render_template('dashboard/admin/interviews.html', interviews=interviews)
+
+@bp.route('/admin/mocks')
+def admin_mocks():
+    mocks = [
+        {
+            'id': 1,
+            'title': 'NST Full Mock Test 01',
+            'batch': 'All Batches',
+            'date': 'Dec 25, 2025',
+            'attempts': 0,
+            'avg_score': '-',
+            'status': 'Scheduled',
+            'status_color': 'bg-blue-100 text-blue-700'
+        },
+        {
+            'id': 2,
+            'title': 'Physics Chapter Test: Mechanics',
+            'batch': 'Batch NEUMANN',
+            'date': 'Dec 18, 2025',
+            'attempts': 22,
+            'avg_score': '76%',
+            'status': 'Live',
+            'status_color': 'bg-green-100 text-green-700'
+        },
+        {
+            'id': 3,
+            'title': 'Mathematics Speed Test',
+            'batch': 'Batch NEWTON',
+            'date': 'Dec 15, 2025',
+            'attempts': 15,
+            'avg_score': '82%',
+            'status': 'Ended',
+            'status_color': 'bg-gray-100 text-gray-600'
+        }
+    ]
+    return render_template('dashboard/admin/mocks.html', mocks=mocks)
+
+@bp.route('/admin/announcements')
+def admin_announcements():
+    announcements = [
+        {
+            'id': 1,
+            'title': 'System Maintenance Update',
+            'date': 'Dec 20, 2025',
+            'target': 'All Users',
+            'content': 'The portal will be down for maintenance from 2 AM to 4 AM tomorrow.',
+            'type': 'System',
+            'type_color': 'bg-gray-100 text-gray-700'
+        },
+        {
+            'id': 2,
+            'title': 'New Physics Module Released',
+            'date': 'Dec 19, 2025',
+            'target': 'Batch NEUMANN',
+            'content': 'The new Mechanics module is now live in your Resource Center.',
+            'type': 'Academic',
+            'type_color': 'bg-violet-100 text-violet-700'
+        },
+        {
+            'id': 3,
+            'title': 'Mock Test Schedule Change',
+            'date': 'Dec 18, 2025',
+            'target': 'All Batches',
+            'content': 'The upcoming Full Mock Test has been rescheduled to Dec 25th.',
+            'type': 'Important',
+            'type_color': 'bg-red-100 text-red-700'
+        }
+    ]
+    return render_template('dashboard/admin/announcements.html', announcements=announcements)
+
+@bp.route('/admin/resources')
+def admin_resources():
+    resources = [
+        {
+            'id': 1,
+            'title': 'Physics Chapter 1: Mechanics - Complete Notes',
+            'category': 'Notes',
+            'batch': 'All Batches',
+            'uploaded_date': 'Dec 20, 2025',
+            'file_size': '2.4 MB',
+            'downloads': 45,
+            'type': 'PDF'
+        },
+        {
+            'id': 2,
+            'title': 'NST Previous Year Questions 2024',
+            'category': 'PYQs',
+            'batch': 'Batch NEUMANN',
+            'uploaded_date': 'Dec 18, 2025',
+            'file_size': '5.1 MB',
+            'downloads': 38,
+            'type': 'PDF'
+        },
+        {
+            'id': 3,
+            'title': 'Mathematics Formula Sheet',
+            'category': 'Reference',
+            'batch': 'All Batches',
+            'uploaded_date': 'Dec 15, 2025',
+            'file_size': '1.2 MB',
+            'downloads': 52,
+            'type': 'PDF'
+        }
+    ]
+    return render_template('dashboard/admin/resources.html', resources=resources)
+
+@bp.route('/admin/settings')
+def admin_settings():
+    settings = {
+        'platform': {
+            'name': 'NST Prep',
+            'email': 'admin@nstprep.com',
+            'phone': '+91 98765 43210',
+            'timezone': 'Asia/Kolkata'
+        },
+        'features': {
+            'registrations_open': True,
+            'mock_tests_enabled': True,
+            'interview_booking': True,
+            'doubt_forum': True
+        },
+        'notifications': {
+            'email_notifications': True,
+            'sms_notifications': False,
+            'push_notifications': True
+        }
+    }
+    return render_template('dashboard/admin/settings.html', settings=settings)

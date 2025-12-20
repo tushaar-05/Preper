@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NST Prep - Mock Tests</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --admin-dark: #121212;
+      --admin-accent: #7c3aed;
+    }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background-color: #f3f4f6;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+
+    .sidebar-link {
+      transition: all 0.2s ease-in-out;
+    }
+
+    .sidebar-link:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: white;
+      transform: translateX(4px);
+    }
+
+    .sidebar-link.active {
+      background-color: var(--admin-accent);
+      color: white;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    }
+  </style>
+</head>
+
+<body class="text-gray-800 antialiased overflow-hidden">
+
+  <div class="flex h-screen w-full">
+
+    <!-- SIDEBAR -->
+    <aside
+      class="w-[280px] flex-shrink-0 bg-[#0a0a0a] text-gray-400 flex flex-col h-full sticky top-0 z-50 border-r border-gray-800">
+      <div class="px-6 py-8 flex items-center gap-3">
+        <div
+          class="w-8 h-8 rounded-lg bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
+          A</div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-white">NST Admin</h1>
+          <p class="text-[10px] uppercase tracking-wider font-semibold text-gray-500">System Control</p>
+        </div>
+      </div>
+
+      <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
+        <p class="px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2 mt-4">Overview</p>
+
+        <a href="/admin" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+            </path>
+          </svg>
+          Dashboard
+        </a>
+
+        <p class="px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Management</p>
+
+        <a href="/admin/students" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+            </path>
+          </svg>
+          Students
+        </a>
+
+        <a href="/admin/batches" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+            </path>
+          </svg>
+          Batches
+        </a>
+
+        <a href="/admin/interviews"
+          class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          Interviews
+        </a>
+
+        <a href="/admin/mocks"
+          class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+            </path>
+          </svg>
+          Mock Tests
+        </a>
+
+        <a href="/admin/announcements"
+          class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+            </path>
+          </svg>
+          Announcements
+        </a>
+
+        <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z">
+            </path>
+          </svg>
+          Resource Center
+        </a>
+
+        <p class="px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2 mt-6">Insights</p>
+
+        <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+            </path>
+          </svg>
+          Analytics
+        </a>
+
+        <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+            </path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
+            </path>
+          </svg>
+          Settings
+        </a>
+      </nav>
+
+      <div class="p-4 mt-auto border-t border-gray-800">
+        <div class="flex items-center gap-3 px-2 py-2 mb-2">
+          <img src="https://ui-avatars.com/api/?name=Admin+User&background=7c3aed&color=fff" alt="Admin"
+            class="w-8 h-8 rounded-full">
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-white truncate">Admin User</p>
+            <p class="text-xs text-gray-500 truncate">Super Admin</p>
+          </div>
+        </div>
+        <button
+          class="flex items-center justify-center gap-2 text-red-400 hover:text-red-300 hover:bg-red-400/10 w-full px-4 py-2 rounded-lg transition-colors text-xs font-medium uppercase tracking-wide">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+          </svg>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="flex-1 h-full overflow-y-auto bg-gray-50 p-8">
+
+      <header class="flex justify-between items-center mb-8">
+        <div>
+          <h2 class="text-3xl font-bold text-gray-900">Mock Test Management</h2>
+          <p class="text-gray-500 mt-1">Manage tests, monitor attempts, and analyze results.</p>
+        </div>
+        <button
+          class="bg-[var(--admin-accent)] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 flex items-center gap-2 shadow-lg shadow-violet-200">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Upload New Test
+        </button>
+      </header>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        {% for mock in mocks %}
+        <div
+          class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:border-violet-200 transition-colors">
+          <div class="flex justify-between items-start mb-4">
+            <div class="bg-violet-50 p-2.5 rounded-lg text-violet-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                </path>
+              </svg>
+            </div>
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ mock.status_color }}">
+              {{ mock.status }}
+            </span>
+          </div>
+
+          <h3 class="text-lg font-bold text-gray-900 mb-1 leading-tight">{{ mock.title }}</h3>
+          <p class="text-sm text-gray-400 mb-4">{{ mock.batch }} • {{ mock.date }}</p>
+
+          <div class="grid grid-cols-2 gap-4 bg-gray-50 rounded-xl p-3 mb-4">
+            <div>
+              <p class="text-xs text-gray-500 font-medium">Attempts</p>
+              <p class="text-lg font-bold text-gray-900">{{ mock.attempts }}</p>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 font-medium">Avg Score</p>
+              <p class="text-lg font-bold text-gray-900">{{ mock.avg_score }}</p>
+            </div>
+          </div>
+
+          <div class="flex gap-2">
+            <button
+              class="flex-1 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 font-medium">Edit</button>
+            <button
+              class="flex-1 py-2 text-sm text-white bg-gray-900 rounded-lg hover:bg-black font-medium">Results</button>
+          </div>
+        </div>
+        {% endfor %}
+
+      </div>
+
+    </main>
+  </div>
+
+</body>
+
+</html>
