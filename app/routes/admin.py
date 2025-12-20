@@ -3,7 +3,6 @@ Admin dashboard routes with database integration
 """
 
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, session
-from flask_login import current_user
 from app.extensions import db
 from app.utils.decorators import admin_required
 from app.models import (
@@ -572,7 +571,61 @@ def announcements():
             'type_color': type_color
         })
     
-    return render_template('dashboard/admin/announcements.html', announcements=announcements_list)
+    # Fetch batches for targeting
+    all_batches = Batch.query.filter(Batch.status.in_(['active', 'upcoming'])).all()
+    
+    return render_template('dashboard/admin/announcements.html', 
+                          announcements=announcements_list,
+                          batches=all_batches)
+@bp.route('/announcements/create', methods=['POST'])
+@admin_required
+def announcements_create():
+    """Create a new announcement"""
+    try:
+        title = request.form.get('title')
+        content = request.form.get('content')
+        priority = request.form.get('priority', 'medium')
+        target_audience = request.form.get('target_audience', 'all')
+        target_batch_id = request.form.get('target_batch_id')
+        
+        if not title or not content:
+            flash('Title and content are required', 'error')
+            return redirect(url_for('admin.announcements'))
+            
+        announcement = Announcement(
+            title=title,
+            content=content,
+            priority=priority,
+            target_audience=target_audience,
+            target_batch_id=target_batch_id if target_audience == 'specific_batch' and target_batch_id else None,
+            created_by=session.get('admin_id'),
+            published_at=datetime.utcnow(),
+            is_published=True
+        )
+        
+        db.session.add(announcement)
+        db.session.commit()
+        flash('Announcement published successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error publishing announcement: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.announcements'))
+
+@bp.route('/announcements/delete/<int:announcement_id>', methods=['POST'])
+@admin_required
+def announcements_delete(announcement_id):
+    """Delete an announcement"""
+    try:
+        announcement = Announcement.query.get_or_404(announcement_id)
+        db.session.delete(announcement)
+        db.session.commit()
+        flash('Announcement deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting announcement: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.announcements'))
 
 
 @bp.route('/resources')
