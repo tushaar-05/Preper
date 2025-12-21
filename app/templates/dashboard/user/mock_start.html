@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NST Prep - Start {{ test.title }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --purple: #9685fe;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: #f8f9fc;
+    }
+  </style>
+</head>
+
+<body class="text-gray-800 antialiased min-h-screen flex items-center justify-center p-4">
+
+  <div class="max-w-2xl w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+    <div class="h-2 w-full bg-gradient-to-r from-[var(--purple)] to-indigo-500"></div>
+
+    <div class="p-8 md:p-12">
+      <div class="flex items-center gap-4 mb-8">
+        <div class="w-16 h-16 rounded-2xl bg-[var(--purple)]/10 flex items-center justify-center">
+          <svg class="w-8 h-8 text-[var(--purple)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+            </path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">{{ test.title }}</h1>
+          <p class="text-gray-500">{{ test.category }} • {{ test.total_questions }} Questions</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 mb-10">
+        <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100">
+          <p class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Duration</p>
+          <p class="text-xl font-bold text-gray-900">{{ test.duration_minutes }} Minutes</p>
+        </div>
+        <div class="p-4 rounded-2xl bg-gray-50 border border-gray-100">
+          <p class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Passing Marks</p>
+          <p class="text-xl font-bold text-gray-900">{{ test.passing_marks }} / {{ test.total_marks }}</p>
+        </div>
+      </div>
+
+      <div class="space-y-6 mb-10">
+        <h3 class="text-lg font-bold text-gray-900">Exam Instructions</h3>
+        <ul class="space-y-4 text-gray-600">
+          <li class="flex gap-3">
+            <span
+              class="w-6 h-6 rounded-full bg-green-100 text-green-600 flex-shrink-0 flex items-center justify-center text-xs font-bold">1</span>
+            <span>Once you start, the timer cannot be paused. Ensure a stable internet connection.</span>
+          </li>
+          <li class="flex gap-3">
+            <span
+              class="w-6 h-6 rounded-full bg-green-100 text-green-600 flex-shrink-0 flex items-center justify-center text-xs font-bold">2</span>
+            <span>Each question has fixed marks. Some questions may have negative marking.</span>
+          </li>
+          <li class="flex gap-3">
+            <span
+              class="w-6 h-6 rounded-full bg-green-100 text-green-600 flex-shrink-0 flex items-center justify-center text-xs font-bold">3</span>
+            <span>The test will automatically submit when the timer runs out.</span>
+          </li>
+          <li class="flex gap-3">
+            <span
+              class="w-6 h-6 rounded-full bg-green-100 text-green-600 flex-shrink-0 flex items-center justify-center text-xs font-bold">4</span>
+            <span>Do not refresh the page or navigate away, as it may lead to attempt termination.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="flex flex-col md:flex-row gap-4">
+        <a href="{{ url_for('user.mock') }}"
+          class="flex-1 py-4 text-center rounded-2xl border-2 border-gray-100 text-gray-600 font-bold hover:bg-gray-50 transition-all">
+          Go Back
+        </a>
+        <a href="{{ url_for('user.mock_take', test_id=test.id) }}"
+          class="flex-1 py-4 text-center rounded-2xl bg-black text-white font-bold hover:bg-gray-900 transition-all shadow-lg shadow-black/10">
+          I'm Ready, Start Test
+        </a>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>

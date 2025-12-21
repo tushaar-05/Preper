@@ -291,6 +291,9 @@
               <a href="{{ url_for('admin.mock_questions', mock_id=mock.id) }}"
                 class="flex-1 py-2 text-center text-sm text-violet-600 bg-violet-50 rounded-lg hover:bg-violet-100 font-bold transition-colors">Manage
                 Questions</a>
+              <button onclick="openEditModal({{ mock.id }})"
+                class="flex-1 py-2 text-center text-sm text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 font-bold transition-colors">Edit
+                Settings</button>
             </div>
             <div class="flex gap-2 text-xs">
               <form action="{{ url_for('admin.mocks_delete', mock_id=mock.id) }}" method="POST" class="flex-1"
@@ -330,6 +333,16 @@
                   <label class="block text-sm font-semibold text-gray-700 mb-2">Test Title</label>
                   <input type="text" name="title" required placeholder="e.g., Full Length Mock Test 01"
                     class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Target Batch</label>
+                  <select name="batch_id" class="w-full px-4 py-2 border border-gray-200 rounded-xl bg-white">
+                    <option value="">All Batches</option>
+                    {% for batch in batches_list %}
+                    <option value="{{ batch.id }}">{{ batch.name }}</option>
+                    {% endfor %}
+                  </select>
                 </div>
 
                 <div>
@@ -412,9 +425,121 @@
         </div>
       </div>
 
+      <!-- Edit Mock Modal -->
+      <div id="editModal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeEditModal()"></div>
+        <div
+          class="absolute right-0 top-0 h-full w-full max-w-lg bg-white shadow-2xl flex flex-col transform transition-transform duration-300 translate-x-full"
+          id="editModalContainer">
+          <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+            <div>
+              <h3 class="text-xl font-bold text-gray-900">Edit Mock Test</h3>
+              <p class="text-sm text-gray-500">Update test settings and availability.</p>
+            </div>
+            <button onclick="closeEditModal()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="flex-1 overflow-y-auto p-6">
+            <form id="editForm" method="POST" class="space-y-6">
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Test Title</label>
+                  <input type="text" name="title" id="edit_title" required
+                    class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Target Batch</label>
+                  <select name="batch_id" id="edit_batch_id"
+                    class="w-full px-4 py-2 border border-gray-200 rounded-xl bg-white">
+                    <option value="">All Batches</option>
+                    {% for batch in batches_list %}
+                    <option value="{{ batch.id }}">{{ batch.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                  <select name="category" id="edit_category"
+                    class="w-full px-4 py-2 border border-gray-200 rounded-xl bg-white">
+                    <option value="General">General</option>
+                    <option value="NEET">NEET</option>
+                    <option value="JEE">JEE</option>
+                    <option value="Academic">Academic</option>
+                  </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Duration (Mins)</label>
+                    <input type="number" name="duration" id="edit_duration" required
+                      class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Total Marks</label>
+                    <input type="number" name="total_marks" id="edit_total_marks" required
+                      class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Passing Marks</label>
+                  <input type="number" name="passing_marks" id="edit_passing_marks" required
+                    class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Available From</label>
+                    <input type="datetime-local" name="available_from" id="edit_available_from" required
+                      class="w-full px-4 py-2 border border-gray-200 rounded-xl text-sm">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Available Until</label>
+                    <input type="datetime-local" name="available_until" id="edit_available_until" required
+                      class="w-full px-4 py-2 border border-gray-200 rounded-xl text-sm">
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-6 flex gap-3">
+                <button type="button" onclick="closeEditModal()"
+                  class="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all">Cancel</button>
+                <button type="submit"
+                  class="flex-1 px-4 py-2 bg-violet-600 text-white rounded-xl text-sm font-bold hover:bg-violet-700 shadow-lg shadow-violet-200 transition-all">Update
+                  Test</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Store mocks data safely for JS access -->
+      <script id="mocks-data" type="application/json">
+        {
+           {% for m in mocks %}
+           "{{ m.id }}": {{ m|tojson }}{% if not loop.last %},{% endif %}
+           {% endfor %}
+        }
+      </script>
+
       <script>
         const modal = document.getElementById('createModal');
         const container = document.getElementById('modalContainer');
+        const editModal = document.getElementById('editModal');
+        const editContainer = document.getElementById('editModalContainer');
+
+        let mocksData = {};
+        try {
+          mocksData = JSON.parse(document.getElementById('mocks-data').textContent);
+        } catch (e) {
+          console.error("Failed to parse mocks data", e);
+        }
 
         function openCreateModal() {
           modal.classList.remove('hidden');
@@ -427,6 +552,33 @@
           container.classList.add('translate-x-full');
           setTimeout(() => {
             modal.classList.add('hidden');
+          }, 300);
+        }
+
+        function openEditModal(mockId) {
+          const mock = mocksData[mockId];
+          if (!mock) return;
+
+          document.getElementById('editForm').action = `/admin/mocks/${mock.id}/update`;
+          document.getElementById('edit_title').value = mock.title;
+          document.getElementById('edit_category').value = mock.category;
+          document.getElementById('edit_batch_id').value = mock.batch_id;
+          document.getElementById('edit_duration').value = mock.duration_minutes;
+          document.getElementById('edit_total_marks').value = mock.total_marks;
+          document.getElementById('edit_passing_marks').value = mock.passing_marks;
+          document.getElementById('edit_available_from').value = mock.available_from;
+          document.getElementById('edit_available_until').value = mock.available_until;
+
+          editModal.classList.remove('hidden');
+          setTimeout(() => {
+            editContainer.classList.remove('translate-x-full');
+          }, 10);
+        }
+
+        function closeEditModal() {
+          editContainer.classList.add('translate-x-full');
+          setTimeout(() => {
+            editModal.classList.add('hidden');
           }, 300);
         }
       </script>

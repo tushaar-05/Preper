@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ test.title }} - NST Prep</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --purple: #9685fe;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: #f8f9fc;
+    }
+
+    .question-btn.active {
+      background-color: var(--purple);
+      color: white;
+      border-color: var(--purple);
+    }
+
+    .question-btn.answered {
+      background-color: #10b981;
+      color: white;
+      border-color: #10b981;
+    }
+
+    .question-card {
+      display: none;
+    }
+
+    .question-card.active {
+      display: block;
+    }
+  </style>
+</head>
+
+<body class="text-gray-800 antialiased overflow-hidden h-screen flex flex-col">
+
+  <!-- Header / Timer Bar -->
+  <header class="bg-black text-white px-6 py-4 flex items-center justify-between z-10">
+    <div class="flex items-center gap-4">
+      <h1 class="text-xl font-bold tracking-tight">PREPER<span class="text-[var(--purple)]">.</span></h1>
+      <div class="h-6 w-px bg-gray-700"></div>
+      <h2 class="text-sm font-medium text-gray-400 capitalize">{{ test.title }}</h2>
+    </div>
+
+    <div class="flex items-center gap-8">
+      <div class="hidden md:flex flex-col items-end">
+        <p class="text-[10px] text-gray-500 uppercase font-bold tracking-[0.2em]">Time Remaining</p>
+        <p id="timer" class="text-2xl font-mono font-bold text-[var(--purple)]">00:00:00</p>
+      </div>
+      <button onclick="confirmSubmit()"
+        class="px-6 py-2 bg-[var(--purple)] text-white font-bold rounded-xl hover:bg-opacity-90 transition-all text-sm group">
+        Submit Test
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-1 flex overflow-hidden">
+    <!-- Left Sidebar: Question Navigation -->
+    <aside class="w-80 bg-white border-r border-gray-100 flex flex-col hidden lg:flex">
+      <div class="p-6 border-b border-gray-50">
+        <h3 class="font-bold text-gray-900 mb-4">Question Palette</h3>
+        <div class="grid grid-cols-5 gap-2" id="palette">
+          {% for q in questions %}
+          <button onclick="goToQuestion({{ loop.index0 }})" id="palette-btn-{{ loop.index0 }}"
+            class="question-btn w-10 h-10 rounded-lg border border-gray-100 text-sm font-bold flex items-center justify-center transition-all hover:border-[var(--purple)]">
+            {{ loop.index }}
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="flex-1 p-6 overflow-y-auto">
+        <h3 class="font-bold text-gray-900 mb-4">Legend</h3>
+        <div class="space-y-3">
+          <div class="flex items-center gap-3 text-sm">
+            <div class="w-4 h-4 rounded bg-gray-100"></div>
+            <span class="text-gray-600">Not Visited</span>
+          </div>
+          <div class="flex items-center gap-3 text-sm">
+            <div class="w-4 h-4 rounded bg-[var(--purple)]"></div>
+            <span class="text-gray-600">Current Question</span>
+          </div>
+          <div class="flex items-center gap-3 text-sm">
+            <div class="w-4 h-4 rounded bg-[#10b981]"></div>
+            <span class="text-gray-600">Answered</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area: Question Cards -->
+    <section class="flex-1 overflow-y-auto bg-[#f8f9fc] p-4 md:p-8">
+      <form id="test-form" action="{{ url_for('user.mock_submit', test_id=test.id) }}" method="POST"
+        class="max-w-3xl mx-auto">
+
+        {% for q in questions %}
+        {% set q_index = loop.index0 %}
+        <div class="question-card bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-6"
+          id="q-card-{{ q_index }}">
+          <div class="p-6 md:p-8">
+            <div class="flex justify-between items-center mb-6">
+              <span class="text-xs font-bold text-gray-400 tracking-widest uppercase">Question {{ loop.index }} of {{
+                questions|length }}</span>
+              <span class="px-3 py-1 bg-gray-50 rounded-full text-xs font-bold text-gray-500">+{{ q.marks or 1 }}
+                Marks</span>
+            </div>
+
+            <h3 class="text-xl md:text-2xl font-semibold text-gray-900 mb-8 leading-relaxed">
+              {{ q.question_text }}
+            </h3>
+
+            {% if q.question_image_url %}
+            <div class="mb-8 rounded-2xl overflow-hidden border border-gray-100">
+              <img src="{{ q.question_image_url }}" alt="Question Context" class="w-full">
+            </div>
+            {% endif %}
+
+            <div class="space-y-3">
+              {% for opt in q.options %}
+              <label class="group block relative cursor-pointer outline-none">
+                <input type="radio" name="q_{{ q.id }}" value="{{ opt.text }}" onchange="markAnswered({{ q_index }})"
+                  class="peer sr-only">
+                <div
+                  class="px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl transition-all peer-checked:border-[var(--purple)] peer-checked:bg-[var(--purple)]/5 group-hover:bg-gray-100">
+                  <div class="flex items-center gap-4">
+                    <span
+                      class="w-8 h-8 rounded-full border-2 border-gray-200 bg-white flex items-center justify-center text-sm font-bold text-gray-400 transition-all peer-checked:border-[var(--purple)] peer-checked:text-[var(--purple)]">
+                      {{ ['A', 'B', 'C', 'D'][loop.index0] }}
+                    </span>
+                    <span class="text-gray-700 font-medium">{{ opt.text }}</span>
+                  </div>
+                </div>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+
+        <!-- Navigation Buttons -->
+        <div class="flex items-center justify-between gap-4 mt-8">
+          <button type="button" onclick="prevQuestion()" id="prev-btn"
+            class="px-8 py-3 rounded-2xl bg-white border border-gray-100 font-bold text-gray-600 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            Previous
+          </button>
+
+          <div class="flex gap-3">
+            <button type="button" onclick="clearOption()"
+              class="px-6 py-3 rounded-2xl text-red-500 font-bold hover:bg-red-50 transition-all text-sm">
+              Clear Choice
+            </button>
+            <button type="button" onclick="nextQuestion()" id="next-btn"
+              class="px-10 py-3 rounded-2xl bg-black text-white font-bold hover:bg-gray-900 transition-all shadow-lg shadow-black/10">
+              Next Question
+            </button>
+          </div>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    let currentQuestion = 0;
+    const totalQuestions = {{ questions| length }};
+    let remainingSeconds = {{ remaining_seconds }};
+
+    function updateTimer() {
+      const h = Math.floor(remainingSeconds / 3600);
+      const m = Math.floor((remainingSeconds % 3600) / 60);
+      const s = remainingSeconds % 60;
+      document.getElementById('timer').innerText =
+        `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+
+      if (remainingSeconds <= 0) {
+        alert("Time is up! Submitting your test.");
+        document.getElementById('test-form').submit();
+      } else {
+        remainingSeconds--;
+        setTimeout(updateTimer, 1000);
+      }
+    }
+
+    function goToQuestion(index) {
+      if (index < 0 || index >= totalQuestions) return;
+
+      // Update UI
+      document.querySelectorAll('.question-card').forEach(c => c.classList.remove('active'));
+      document.getElementById(`q-card-${index}`).classList.add('active');
+
+      document.querySelectorAll('.question-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`palette-btn-${index}`).classList.add('active');
+
+      currentQuestion = index;
+
+      // Update nav buttons
+      document.getElementById('prev-btn').disabled = (index === 0);
+      document.getElementById('next-btn').innerText = (index === totalQuestions - 1) ? 'Review Summary' : 'Next Question';
+    }
+
+    function nextQuestion() {
+      if (currentQuestion < totalQuestions - 1) {
+        goToQuestion(currentQuestion + 1);
+      } else {
+        // Option to open summary palette on mobile or confirm
+        confirmSubmit();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQuestion > 0) {
+        goToQuestion(currentQuestion - 1);
+      }
+    }
+
+    function markAnswered(index) {
+      document.getElementById(`palette-btn-${index}`).classList.add('answered');
+    }
+
+    function clearOption() {
+      const inputs = document.querySelectorAll(`#q-card-${currentQuestion} input[type="radio"]`);
+      inputs.forEach(i => i.checked = false);
+      document.getElementById(`palette-btn-${currentQuestion}`).classList.remove('answered');
+    }
+
+    function confirmSubmit() {
+      if (confirm("Are you sure you want to submit the test? You won't be able to change your answers.")) {
+        document.getElementById('test-form').submit();
+      }
+    }
+
+    // Initialize
+    goToQuestion(0);
+    updateTimer();
+
+    // Prevent navigation away
+    window.onbeforeunload = function () {
+      return "Are you sure you want to leave? Your progress will not be saved correctly.";
+    };
+
+    document.getElementById('test-form').onsubmit = function () {
+      window.onbeforeunload = null;
+    };
+  </script>
+
+</body>
+
+</html>

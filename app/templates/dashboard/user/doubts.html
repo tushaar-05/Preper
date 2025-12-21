@@ -308,50 +308,52 @@
       <div class="space-y-4">
         {% if doubts %}
         {% for doubt in doubts %}
-        <div
-          class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer group">
-          <div class="flex justify-between items-start mb-2">
-            <div class="flex items-center gap-3">
-              <div
-                class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-[var(--purple)] text-xs font-bold">
-                {{ doubt.author[0] }}
+        <a href="/doubts/{{ doubt.id }}" class="block">
+          <div
+            class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer group">
+            <div class="flex justify-between items-start mb-2">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-[var(--purple)] text-xs font-bold">
+                  {{ doubt.author[0] }}
+                </div>
+                <div>
+                  <p class="text-sm font-semibold text-gray-900">{{ doubt.author }}</p>
+                  <p class="text-xs text-gray-400">{{ doubt.timestamp }}</p>
+                </div>
               </div>
-              <div>
-                <p class="text-sm font-semibold text-gray-900">{{ doubt.author }}</p>
-                <p class="text-xs text-gray-400">{{ doubt.timestamp }}</p>
-              </div>
+              <span
+                class="px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600 group-hover:bg-purple-50 group-hover:text-[var(--purple)] transition-colors">
+                {{ doubt.category }}
+              </span>
             </div>
-            <span
-              class="px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600 group-hover:bg-purple-50 group-hover:text-[var(--purple)] transition-colors">
-              General
-            </span>
-          </div>
 
-          <h3 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-[var(--purple)] transition-colors">{{
-            doubt.title }}</h3>
-          <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ doubt.content }}</p>
+            <h3 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-[var(--purple)] transition-colors">{{
+              doubt.title }}</h3>
+            <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ doubt.content }}</p>
 
-          <div class="flex items-center gap-4 text-xs text-gray-500 border-t border-gray-100 pt-4">
-            <span class="flex items-center gap-1.5">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
-                </path>
-              </svg>
-              {{ doubt.replies }} Replies
-            </span>
-            <span class="flex items-center gap-1.5">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                </path>
-              </svg>
-              {{ doubt.views }} Views
-            </span>
+            <div class="flex items-center gap-4 text-xs text-gray-500 border-t border-gray-100 pt-4">
+              <span class="flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+                  </path>
+                </svg>
+                {{ doubt.replies }} Replies
+              </span>
+              <span class="flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                  </path>
+                </svg>
+                {{ doubt.views }} Views
+              </span>
+            </div>
           </div>
-        </div>
+        </a>
         {% endfor %}
         {% else %}
         <div class="text-center py-10">

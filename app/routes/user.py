@@ -3,7 +3,7 @@ from datetime import datetime
 from app.extensions import db
 from app.models import (
     User, Student, Batch, Enrollment, Interview,
-    MockTest, TestAttempt, Announcement, Resource
+    MockTest, Question, TestAttempt, Announcement, Resource
 )
 from app.utils.decorators import student_required
 from app.utils.helpers import get_current_student, get_user_batch_ids
@@ -132,7 +132,39 @@ def profile():
             flash('Update failed', 'danger')
             print(e)
 
-    return render_template('dashboard/user/profile.html', student=student, user=user)
+    # Format date of birth
+    dob_formatted = student.date_of_birth.strftime('%d %B %Y') if student.date_of_birth else 'Not set'
+    
+    # Format member since
+    member_since = student.created_at.strftime('%b %Y') if student.created_at else 'N/A'
+    
+    # Get enrollment info - check if student is actually enrolled
+    enrollment = Enrollment.query.filter_by(student_id=student.id).first()
+    if enrollment and enrollment.batch:
+        batch_name = enrollment.batch.name
+    else:
+        batch_name = 'Not enrolled'
+    
+    # Display campus preference with proper capitalization
+    if student.preferred_batch:
+        preferred_campus = student.preferred_batch.capitalize()
+    else:
+        preferred_campus = 'Not set'
+    
+    profile_data = {
+        'full_name': student.full_name,
+        'email': user.email if user else 'N/A',
+        'phone': student.phone or 'Not set',
+        'date_of_birth': dob_formatted,
+        'city': f"{student.city}, {student.state}" if student.city and student.state else student.city or student.state or 'Not set',
+        'preferred_batch': preferred_campus,
+        'member_since': member_since,
+        'batch_name': batch_name,
+        'education_level': student.education_level or 'Not set',
+        'institution_name': student.institution_name or 'Not set'
+    }
+
+    return render_template('dashboard/user/profile.html', student=student, user=user, profile=profile_data)
 
 
 @bp.route('/announcement')
@@ -350,3 +382,338 @@ def post_doubt():
         print(f"Error posting doubt: {e}")
     
     return redirect(url_for('user.doubts'))
+
+
+@bp.route('/doubts/<int:doubt_id>')
+@student_required
+def doubt_detail(doubt_id):
+    """View individual doubt with replies"""
+    from app.models.doubt import Doubt, DoubtReply
+    student = get_current_student()
+    
+    # Get the doubt
+    doubt = Doubt.query.get_or_404(doubt_id)
+    
+    # Increment view count only once per session
+    viewed_doubts = session.get('viewed_doubts', [])
+    if doubt_id not in viewed_doubts:
+        doubt.views += 1
+        viewed_doubts.append(doubt_id)
+        session['viewed_doubts'] = viewed_doubts
+        db.session.commit()
+    
+    # Calculate time ago for doubt
+    time_diff = datetime.utcnow() - doubt.created_at
+    if time_diff.days > 0:
+        doubt_timestamp = f"{time_diff.days} day{'s' if time_diff.days > 1 else ''} ago"
+    elif time_diff.seconds >= 3600:
+        hours = time_diff.seconds // 3600
+        doubt_timestamp = f"{hours} hour{'s' if hours > 1 else ''} ago"
+    else:
+        minutes = max(1, time_diff.seconds // 60)
+        doubt_timestamp = f"{minutes} minute{'s' if minutes > 1 else ''} ago"
+    
+    # Format doubt data
+    doubt_data = {
+        'id': doubt.id,
+        'title': doubt.title,
+        'content': doubt.content,
+        'category': doubt.category,
+        'status': doubt.status,
+        'author': doubt.student.full_name,
+        'timestamp': doubt_timestamp,
+        'created_at': doubt.created_at.strftime('%B %d, %Y at %I:%M %p'),
+        'views': doubt.views,
+        'replies_count': doubt.replies.count()
+    }
+    
+    # Get all replies
+    replies_query = doubt.replies.order_by(DoubtReply.created_at.asc()).all()
+    replies_list = []
+    for reply in replies_query:
+        # Calculate time ago for reply
+        reply_time_diff = datetime.utcnow() - reply.created_at
+        if reply_time_diff.days > 0:
+            reply_timestamp = f"{reply_time_diff.days} day{'s' if reply_time_diff.days > 1 else ''} ago"
+        elif reply_time_diff.seconds >= 3600:
+            reply_hours = reply_time_diff.seconds // 3600
+            reply_timestamp = f"{reply_hours} hour{'s' if reply_hours > 1 else ''} ago"
+        else:
+            reply_minutes = max(1, reply_time_diff.seconds // 60)
+            reply_timestamp = f"{reply_minutes} minute{'s' if reply_minutes > 1 else ''} ago"
+        
+        # Get user info
+        user = User.query.get(reply.user_id)
+        author_name = user.email.split('@')[0] if user else 'Unknown'
+        
+        replies_list.append({
+            'id': reply.id,
+            'content': reply.content,
+            'author': author_name,
+            'is_staff': reply.is_staff_reply,
+            'timestamp': reply_timestamp,
+            'created_at': reply.created_at.strftime('%B %d, %Y at %I:%M %p')
+        })
+    
+    return render_template('dashboard/user/doubt_detail.html', 
+                         doubt=doubt_data, 
+                         replies=replies_list,
+                         student=student)
+
+
+@bp.route('/doubts/<int:doubt_id>/reply', methods=['POST'])
+@student_required
+def post_reply(doubt_id):
+    """Post a reply to a doubt"""
+    from app.models.doubt import Doubt, DoubtReply
+    student = get_current_student()
+    
+    # Get form data
+    content = request.form.get('content')
+    
+    # Validate input
+    if not content:
+        flash('Please provide a reply.', 'danger')
+        return redirect(url_for('user.doubt_detail', doubt_id=doubt_id))
+    
+    try:
+        # Get the doubt
+        doubt = Doubt.query.get_or_404(doubt_id)
+        
+        # Create new reply
+        new_reply = DoubtReply(
+            doubt_id=doubt_id,
+            user_id=student.user_id,
+            content=content,
+            is_staff_reply=False
+        )
+        
+        db.session.add(new_reply)
+        db.session.commit()
+        
+        flash('Your reply has been posted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('Failed to post reply. Please try again.', 'danger')
+        print(f"Error posting reply: {e}")
+    
+    return redirect(url_for('user.doubt_detail', doubt_id=doubt_id))
+@bp.route('/mock')
+@student_required
+def mock():
+    """View available mock tests"""
+    student = get_current_student()
+    batch_ids = get_user_batch_ids(student.id)
+    
+    # Filter tests: either free or assigned to student's batches
+    # Filter for active tests only
+    from sqlalchemy import or_
+    tests_query = MockTest.query.filter(
+        MockTest.is_active == True
+    ).filter(
+        or_(
+            MockTest.is_free == True,
+            MockTest.batch_id.in_(batch_ids) if batch_ids else False,
+            MockTest.batch_id == None
+        )
+    ).order_by(MockTest.available_from.desc()).all()
+    
+    formatted_tests = []
+    now = datetime.now()
+    
+    for test in tests_query:
+        # Check if attempt already exists
+        attempt = TestAttempt.query.filter_by(
+            student_id=student.id, 
+            mock_test_id=test.id,
+            status='completed'
+        ).first()
+        
+        # Determine status
+        status = 'Upcoming'
+        if test.available_from and test.available_until:
+            if now < test.available_from:
+                status = 'Upcoming'
+            elif now > test.available_until:
+                status = 'Ended'
+            else:
+                status = 'Live'
+        elif test.available_from:
+            status = 'Live' if now >= test.available_from else 'Upcoming'
+            
+        formatted_tests.append({
+            'id': test.id,
+            'title': test.title,
+            'date': test.available_from.strftime('%b %d, %Y') if test.available_from else 'Anytime',
+            'time': test.available_from.strftime('%I:%M %p') if test.available_from else 'Flexible',
+            'duration': f"{test.duration_minutes} mins",
+            'questions': test.total_questions,
+            'status': status,
+            'attempted': attempt is not None,
+            'attempt_id': attempt.id if attempt else None,
+            'syllabus_link': '#' # Can be added to model if needed
+        })
+        
+    return render_template('dashboard/user/mock.html', tests=formatted_tests, student=student)
+
+
+@bp.route('/mock/<int:test_id>/start')
+@student_required
+def mock_start(test_id):
+    """View test instructions before starting"""
+    student = get_current_student()
+    test = MockTest.query.get_or_404(test_id)
+    
+    # Check if already attempted
+    attempt = TestAttempt.query.filter_by(
+        student_id=student.id, 
+        mock_test_id=test.id,
+        status='completed'
+    ).first()
+    
+    if attempt:
+        flash('You have already completed this test.', 'info')
+        return redirect(url_for('user.mock_result', attempt_id=attempt.id))
+        
+    return render_template('dashboard/user/mock_start.html', test=test, student=student)
+
+
+@bp.route('/mock/<int:test_id>/take')
+@student_required
+def mock_take(test_id):
+    """The actual test taking interface"""
+    student = get_current_student()
+    test = MockTest.query.get_or_404(test_id)
+    
+    # Check if already attempted completed
+    existing_attempt = TestAttempt.query.filter_by(
+        student_id=student.id, 
+        mock_test_id=test.id,
+        status='completed'
+    ).first()
+    
+    if existing_attempt:
+        flash('You have already completed this test.', 'info')
+        return redirect(url_for('user.mock_result', attempt_id=existing_attempt.id))
+    
+    # Check or create an in-progress attempt
+    attempt = TestAttempt.query.filter_by(
+        student_id=student.id, 
+        mock_test_id=test.id,
+        status='in_progress'
+    ).first()
+    
+    if not attempt:
+        attempt = TestAttempt(
+            student_id=student.id,
+            mock_test_id=test.id,
+            status='in_progress',
+            started_at=datetime.now()
+        )
+        db.session.add(attempt)
+        db.session.commit()
+    
+    # Calculate remaining time
+    now = datetime.now()
+    elapsed = (now - attempt.started_at).total_seconds() / 60
+    remaining_minutes = max(0, test.duration_minutes - elapsed)
+    
+    if remaining_minutes <= 0:
+        flash('Time limit exceeded for this test.', 'warning')
+        return redirect(url_for('user.mock'))
+        
+    # Get questions
+    questions = test.questions.order_by(Question.question_number).all()
+    questions_data = [q.to_dict() for q in questions]
+    
+    return render_template('dashboard/user/mock_take.html', 
+                         test=test, 
+                         attempt=attempt, 
+                         questions=questions_data,
+                         remaining_seconds=int(remaining_minutes * 60),
+                         student=student)
+
+
+@bp.route('/mock/<int:test_id>/submit', methods=['POST'])
+@student_required
+def mock_submit(test_id):
+    """Process test submission"""
+    student = get_current_student()
+    test = MockTest.query.get_or_404(test_id)
+    
+    attempt = TestAttempt.query.filter_by(
+        student_id=student.id, 
+        mock_test_id=test.id,
+        status='in_progress'
+    ).first()
+    
+    if not attempt:
+        flash('No active attempt found for this test.', 'danger')
+        return redirect(url_for('user.mock'))
+        
+    # Process answers from form
+    user_answers = {}
+    for key, value in request.form.items():
+        if key.startswith('q_'):
+            q_id = key.split('_')[1]
+            user_answers[q_id] = value
+            
+    attempt.answers = user_answers
+    attempt.submitted_at = datetime.now()
+    attempt.status = 'completed'
+    
+    # Grading logic
+    correct_count = 0
+    wrong_count = 0
+    total_score = 0.0
+    questions = test.questions.all()
+    
+    for q in questions:
+        ans = user_answers.get(str(q.id))
+        if ans == q.correct_answer:
+            correct_count += 1
+            total_score += q.marks if q.marks else 1
+        elif ans:
+            wrong_count += 1
+            total_score -= q.negative_marks if q.negative_marks else 0
+            
+    attempt.correct_answers = correct_count
+    attempt.wrong_answers = wrong_count
+    attempt.unanswered = len(questions) - (correct_count + wrong_count)
+    attempt.score = total_score
+    attempt.total_marks = test.total_marks
+    attempt.percentage = (total_score / test.total_marks * 100) if test.total_marks > 0 else 0
+    
+    # Calculate time taken
+    time_taken = (attempt.submitted_at - attempt.started_at).seconds // 60
+    attempt.time_taken_minutes = time_taken
+    
+    db.session.commit()
+    
+    flash('Test submitted successfully! Here are your results.', 'success')
+    return redirect(url_for('user.mock_result', attempt_id=attempt.id))
+
+
+@bp.route('/mock/result/<int:attempt_id>')
+@student_required
+def mock_result(attempt_id):
+    """View test attempt results"""
+    student = get_current_student()
+    attempt = TestAttempt.query.get_or_404(attempt_id)
+    
+    if attempt.student_id != student.id:
+        flash('Unauthorized access to test results.', 'danger')
+        return redirect(url_for('user.mock'))
+        
+    test = attempt.mock_test
+    questions = test.questions.order_by(Question.question_number).all()
+    
+    # Map answers for easy lookup in template
+    answers = attempt.answers
+    
+    return render_template('dashboard/user/mock_result.html', 
+                         attempt=attempt, 
+                         test=test, 
+                         questions=questions, 
+                         answers=answers,
+                         student=student)

@@ -7,9 +7,12 @@ class MockTest(db.Model):
     __tablename__ = 'mock_tests'
     
     id = db.Column(db.Integer, primary_key=True)
+    batch_id = db.Column(db.Integer, db.ForeignKey('batches.id')) # NULL means all batches
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     
+    # Relationships
+    batch = db.relationship('Batch', backref=db.backref('mock_tests', lazy='dynamic'))
     # Test Configuration
     duration_minutes = db.Column(db.Integer, nullable=False, default=60)
     total_marks = db.Column(db.Integer, nullable=False, default=100)

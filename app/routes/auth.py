@@ -41,7 +41,13 @@ def register():
             db.session.flush()
 
             # 2. Create Student profile
-            student = Student(user_id=user.id, full_name=full_name, phone=phone)
+            campus_pref = request.form.get('campus_pref')  # Get campus preference from form
+            student = Student(
+                user_id=user.id, 
+                full_name=full_name, 
+                phone=phone,
+                preferred_batch=campus_pref if campus_pref else None  # Save campus preference
+            )
             db.session.add(student)
             db.session.flush()
 

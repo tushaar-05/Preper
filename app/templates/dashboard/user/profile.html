@@ -120,7 +120,8 @@
 
       <!-- Navigation -->
       <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
-        <a href="/me" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
+        <a href="/me"
+          class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
@@ -129,7 +130,8 @@
           Dashboard
         </a>
 
-        <a href="/announcement" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
+        <a href="/announcement"
+          class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
           <svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z">
@@ -165,7 +167,8 @@
           Mock NSAT
         </a>
 
-        <a href="/doubts" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
+        <a href="/doubts"
+          class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
           <svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
@@ -176,7 +179,8 @@
 
         <div class="my-4 border-t border-gray-800 mx-4"></div>
 
-        <a href="/payment" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
+        <a href="/payment"
+          class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400">
           <svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -231,10 +235,10 @@
             class="flex items-center gap-3 bg-white pl-2 pr-4 py-1.5 rounded-full shadow-sm hover:shadow-md cursor-pointer transition-all border border-transparent hover:border-gray-100">
             <div
               class="w-9 h-9 rounded-full bg-gradient-to-tr from-[var(--purple)] to-indigo-500 flex items-center justify-center text-white text-sm font-bold">
-              T</div>
+              {{ student.full_name[0]|upper }}</div>
             <div class="text-sm">
               <a href="/profile">
-                <p class="font-semibold text-gray-900 leading-tight">Tushar</p>
+                <p class="font-semibold text-gray-900 leading-tight">{{ student.full_name.split()[0] }}</p>
                 <p class="text-xs text-gray-500">Student</p>
               </a>
             </div>
@@ -267,18 +271,18 @@
                 </button>
               </div>
 
-              <h3 class="text-xl font-bold text-gray-900 mb-1">Tushar Singh</h3>
-              <p class="text-sm text-gray-500 mb-6">tushar@example.com</p>
+              <h3 class="text-xl font-bold text-gray-900 mb-1">{{ profile.full_name }}</h3>
+              <p class="text-sm text-gray-500 mb-6">{{ profile.email }}</p>
 
               <!-- Stats -->
               <div class="w-full space-y-4">
                 <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
                   <span class="text-sm text-gray-600">Member Since</span>
-                  <span class="text-sm font-semibold text-gray-900">Jan 2025</span>
+                  <span class="text-sm font-semibold text-gray-900">{{ profile.member_since }}</span>
                 </div>
                 <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
-                  <span class="text-sm text-gray-600">Campus Preference</span>
-                  <span class="text-sm font-semibold text-[var(--purple)]">Pune</span>
+                  <span class="text-sm text-gray-600">Batch</span>
+                  <span class="text-sm font-semibold text-[var(--purple)]">{{ profile.batch_name }}</span>
                 </div>
               </div>
             </div>
@@ -314,7 +318,7 @@
               <div>
                 <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Full
                   Name</label>
-                <input type="text" value="Tushar Singh" readonly
+                <input type="text" value="{{ profile.full_name }}" readonly
                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 font-medium">
               </div>
 
@@ -322,7 +326,7 @@
               <div>
                 <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Email
                   Address</label>
-                <input type="email" value="tushar@example.com" readonly
+                <input type="email" value="{{ profile.email }}" readonly
                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 font-medium">
               </div>
 
@@ -330,32 +334,32 @@
               <div>
                 <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Phone
                   Number</label>
-                <input type="tel" value="+91 98765 43210" readonly
+                <input type="tel" value="{{ profile.phone }}" readonly
                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 font-medium">
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">NST Campus
-                  Preference</label>
-                <input type="text" value="Pune" readonly
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Preferred
+                  Campus</label>
+                <input type="text" value="{{ profile.preferred_batch }}" readonly
                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 font-medium">
               </div>
 
               <div>
                 <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Date of
                   Birth</label>
-                <input type="text" value="15 March 2000" readonly
+                <input type="text" value="{{ profile.date_of_birth }}" readonly
                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 font-medium">
               </div>
 
               <div>
                 <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">City</label>
-                <input type="text" value="Pimpri, Maharashtra" readonly
+                <input type="text" value="{{ profile.city }}" readonly
                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 font-medium">
               </div>
             </div>
           </div>
-          
+
 </body>
 
 </html>

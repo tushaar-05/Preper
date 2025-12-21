@@ -190,7 +190,7 @@ def students():
     for student, user, enrollment, batch in pagination.items:
         # Determine if they are enrolled in any batch (paid)
         has_paid = enrollment and enrollment.payment_status in ['completed', 'partial']
-        batch_name = batch.name if (batch and has_paid) else '-'
+        batch_name = batch.name if (batch and has_paid) else 'Not Enrolled'
         status = 'Enrolled' if has_paid else 'Not Enrolled'
         
         students_list.append({
@@ -643,6 +643,7 @@ def interviews_delete_all():
 def mocks():
     """List all mock tests"""
     mocks_data = MockTest.query.order_by(MockTest.created_at.desc()).all()
+    batches = Batch.query.all()
     
     mocks_list = []
     for mock in mocks_data:
@@ -654,7 +655,7 @@ def mocks():
             .scalar()
         
         # Determine status based on availability
-        now = datetime.utcnow()
+        now = datetime.now()
         if mock.available_from and now < mock.available_from:
             status = 'Scheduled'
             status_color = 'bg-blue-100 text-blue-700'
@@ -668,7 +669,15 @@ def mocks():
         mocks_list.append({
             'id': mock.id,
             'title': mock.title,
-            'batch': 'All Batches',  # Can be enhanced with batch filtering
+            'category': mock.category,
+            'description': mock.description,
+            'duration_minutes': mock.duration_minutes,
+            'total_marks': mock.total_marks,
+            'passing_marks': mock.passing_marks,
+            'batch_id': mock.batch_id or '',
+            'batch': mock.batch.name if (mock.batch_id and mock.batch) else 'All Batches',
+            'available_from': mock.available_from.strftime('%Y-%m-%dT%H:%M') if mock.available_from else '',
+            'available_until': mock.available_until.strftime('%Y-%m-%dT%H:%M') if mock.available_until else '',
             'date': mock.available_from.strftime('%b %d, %Y') if mock.available_from else 'N/A',
             'attempts': attempts_count,
             'avg_score': f'{avg_score:.0f}%' if avg_score else '-',
@@ -676,7 +685,7 @@ def mocks():
             'status_color': status_color
         })
     
-    return render_template('dashboard/admin/mocks.html', mocks=mocks_list)
+    return render_template('dashboard/admin/mocks.html', mocks=mocks_list, batches_list=batches)
 
 
 @bp.route('/mocks/create', methods=['POST'])
@@ -696,9 +705,13 @@ def mocks_create():
         available_from = datetime.fromisoformat(available_from_str) if available_from_str else None
         available_until = datetime.fromisoformat(available_until_str) if available_until_str else None
         
+        batch_id = request.form.get('batch_id')
+        batch_id = int(batch_id) if batch_id else None
+        
         mock = MockTest(
             title=title,
             category=category,
+            batch_id=batch_id,
             duration_minutes=duration,
             total_marks=total_marks,
             sections=sections,
@@ -713,6 +726,37 @@ def mocks_create():
     except Exception as e:
         db.session.rollback()
         flash(f'Error scheduling test: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.mocks'))
+
+
+@bp.route('/mocks/<int:mock_id>/update', methods=['POST'])
+@admin_required
+def mocks_update(mock_id):
+    """Update an existing mock test"""
+    try:
+        mock = MockTest.query.get_or_404(mock_id)
+        
+        mock.title = request.form.get('title')
+        mock.category = request.form.get('category', 'General')
+        mock.duration_minutes = int(request.form.get('duration', 60))
+        mock.total_marks = int(request.form.get('total_marks', 100))
+        mock.passing_marks = int(request.form.get('passing_marks', 40))
+        
+        batch_id = request.form.get('batch_id')
+        mock.batch_id = int(batch_id) if batch_id else None
+        
+        available_from_str = request.form.get('available_from')
+        available_until_str = request.form.get('available_until')
+        
+        mock.available_from = datetime.fromisoformat(available_from_str) if available_from_str else None
+        mock.available_until = datetime.fromisoformat(available_until_str) if available_until_str else None
+        
+        db.session.commit()
+        flash('Mock test updated successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error updating test: {str(e)}', 'error')
         
     return redirect(url_for('admin.mocks'))
 
@@ -1282,3 +1326,118 @@ def doubts():
                          stats=stats,
                          current_status=status_filter,
                          current_category=category_filter)
+
+
+@bp.route('/doubts/<int:doubt_id>')
+@admin_required
+def doubt_detail(doubt_id):
+    """View individual doubt with replies (admin)"""
+    from app.models.doubt import Doubt, DoubtReply
+    
+    # Get the doubt
+    doubt = Doubt.query.get_or_404(doubt_id)
+    
+    # Calculate time ago for doubt
+    time_diff = datetime.utcnow() - doubt.created_at
+    if time_diff.days > 0:
+        doubt_timestamp = f"{time_diff.days} day{'s' if time_diff.days > 1 else ''} ago"
+    elif time_diff.seconds >= 3600:
+        hours = time_diff.seconds // 3600
+        doubt_timestamp = f"{hours} hour{'s' if hours > 1 else ''} ago"
+    else:
+        minutes = max(1, time_diff.seconds // 60)
+        doubt_timestamp = f"{minutes} minute{'s' if minutes > 1 else ''} ago"
+    
+    # Format doubt data
+    doubt_data = {
+        'id': doubt.id,
+        'title': doubt.title,
+        'content': doubt.content,
+        'category': doubt.category,
+        'status': doubt.status,
+        'student_name': doubt.student.full_name,
+        'student_email': User.query.get(doubt.student.user_id).email if doubt.student.user_id else 'N/A',
+        'timestamp': doubt_timestamp,
+        'created_at': doubt.created_at.strftime('%B %d, %Y at %I:%M %p'),
+        'views': doubt.views,
+        'replies_count': doubt.replies.count()
+    }
+    
+    # Get all replies
+    replies_query = doubt.replies.order_by(DoubtReply.created_at.asc()).all()
+    replies_list = []
+    for reply in replies_query:
+        # Calculate time ago for reply
+        reply_time_diff = datetime.utcnow() - reply.created_at
+        if reply_time_diff.days > 0:
+            reply_timestamp = f"{reply_time_diff.days} day{'s' if reply_time_diff.days > 1 else ''} ago"
+        elif reply_time_diff.seconds >= 3600:
+            reply_hours = reply_time_diff.seconds // 3600
+            reply_timestamp = f"{reply_hours} hour{'s' if reply_hours > 1 else ''} ago"
+        else:
+            reply_minutes = max(1, reply_time_diff.seconds // 60)
+            reply_timestamp = f"{reply_minutes} minute{'s' if reply_minutes > 1 else ''} ago"
+        
+        # Get user info
+        user = User.query.get(reply.user_id)
+        author_name = user.email.split('@')[0] if user else 'Unknown'
+        
+        replies_list.append({
+            'id': reply.id,
+            'content': reply.content,
+            'author': author_name,
+            'is_staff': reply.is_staff_reply,
+            'timestamp': reply_timestamp,
+            'created_at': reply.created_at.strftime('%B %d, %Y at %I:%M %p')
+        })
+    
+    return render_template('dashboard/admin/doubt_detail.html', 
+                         doubt=doubt_data, 
+                         replies=replies_list)
+
+
+@bp.route('/doubts/<int:doubt_id>/reply', methods=['POST'])
+@admin_required
+def doubt_reply(doubt_id):
+    """Post a reply to a doubt (admin)"""
+    from app.models.doubt import Doubt, DoubtReply
+    
+    # Get form data
+    content = request.form.get('content')
+    mark_as_answered = request.form.get('mark_as_answered') == 'on'
+    
+    # Validate input
+    if not content:
+        flash('Please provide a reply.', 'danger')
+        return redirect(url_for('admin.doubt_detail', doubt_id=doubt_id))
+    
+    try:
+        # Get the doubt
+        doubt = Doubt.query.get_or_404(doubt_id)
+        
+        # Get admin user ID
+        admin_id = session.get('admin_id')
+        
+        # Create new reply
+        new_reply = DoubtReply(
+            doubt_id=doubt_id,
+            user_id=admin_id,
+            content=content,
+            is_staff_reply=True
+        )
+        
+        db.session.add(new_reply)
+        
+        # Update doubt status if marked as answered
+        if mark_as_answered:
+            doubt.status = 'answered'
+        
+        db.session.commit()
+        
+        flash('Your reply has been posted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('Failed to post reply. Please try again.', 'danger')
+        print(f"Error posting reply: {e}")
+    
+    return redirect(url_for('admin.doubt_detail', doubt_id=doubt_id))
