@@ -82,7 +82,8 @@
       <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
         <p class="px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2 mt-4">Overview</p>
 
-        <a href="/admin" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+        <a href="/admin/dashboard"
+          class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
@@ -102,6 +103,15 @@
           Students
         </a>
 
+        <a href="/admin/mentors" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+            </path>
+          </svg>
+          Mentors
+        </a>
+
         <a href="/admin/batches" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -112,7 +122,7 @@
         </a>
 
         <a href="/admin/interviews"
-          class="sidebar-link flex active items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+          class="sidebar-link flex items-center active gap-3 px-4 py-3 rounded-xl text-sm font-medium">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -139,7 +149,8 @@
           Announcements
         </a>
 
-        <a href="/admin/resources" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+        <a href="/admin/resources"
+          class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z">
@@ -150,7 +161,8 @@
 
         <p class="px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2 mt-6">Insights</p>
 
-        <a href="/admin/analytics" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+        <a href="/admin/analytics"
+          class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
@@ -222,61 +234,124 @@
           <h2 class="text-3xl font-bold text-gray-900">Manage Interviews</h2>
           <p class="text-gray-500 mt-1">Schedule and track student interviews.</p>
         </div>
-        <button onclick="openScheduleModal()"
-          class="bg-[var(--admin-accent)] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 flex items-center gap-2 shadow-lg shadow-violet-200">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-          </svg>
-          Schedule Interview
-        </button>
+        <div class="flex gap-3">
+          <form id="deleteAllForm" action="{{ url_for('admin.interviews_delete_all') }}" method="POST"
+            onsubmit="return confirm('Are you sure you want to delete all interviews? This action cannot be undone.');">
+            <button type="submit"
+              class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 flex items-center gap-2 shadow-lg shadow-red-200">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                </path>
+              </svg>
+              Delete All
+            </button>
+          </form>
+          <button onclick="openScheduleModal()"
+            class="bg-[var(--admin-accent)] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 flex items-center gap-2 shadow-lg shadow-violet-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Schedule Interview
+          </button>
+        </div>
       </header>
 
-      <!-- Table -->
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-gray-50/50 text-gray-500 text-xs uppercase tracking-wider">
-                <th class="px-6 py-4 font-semibold">Student</th>
-                <th class="px-6 py-4 font-semibold">Interview Type</th>
-                <th class="px-6 py-4 font-semibold">Assigned Mentor</th>
-                <th class="px-6 py-4 font-semibold">Date & Time</th>
-                <th class="px-6 py-4 font-semibold">Status</th>
-                <th class="px-6 py-4 font-semibold text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100 text-sm">
-              {% for interview in interviews %}
-              <tr class="hover:bg-gray-50/50 transition-colors group">
-                <td class="px-6 py-4 font-medium text-gray-900">{{ interview.student_name }}</td>
-                <td class="px-6 py-4 text-gray-500">{{ interview.type }}</td>
-                <td class="px-6 py-4 text-gray-500">{{ interview.mentor }}</td>
-                <td class="px-6 py-4 text-gray-500">
-                  <div class="flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    {{ interview.date }} • {{ interview.time }}
-                  </div>
-                </td>
-                <td class="px-6 py-4">
+      <!-- Interview Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for interview in interviews %}
+        <div
+          class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200">
+          <div class="p-6">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ interview.title }}</h3>
+                <p class="text-sm text-gray-500 mb-4">{{ interview.type }}</p>
+
+                <!-- Student/Group Info -->
+                <div class="mb-4">
+                  <p class="text-xs font-medium text-gray-500 mb-1">
+                    {% if interview.student_name %}
+                    <span class="block">Student: <span class="text-gray-900">{{ interview.student_name }}</span></span>
+                    {% elif interview.target_audience == 'all_registered' %}
+                    <span class="text-violet-600 font-semibold">All Registered Students</span>
+                    {% elif interview.target_audience == 'all_enrolled' %}
+                    <span class="text-green-600 font-semibold">All Enrolled Students</span>
+                    {% else %}
+                    <span class="text-gray-900">No Student Assigned</span>
+                    {% endif %}
+                  </p>
+                  <p class="text-xs text-gray-500">
+                    Mentor: <span class="text-gray-900">{{ interview.mentor or 'Not assigned' }}</span>
+                  </p>
+                </div>
+
+                <!-- Date & Time -->
+                <div class="flex items-center text-sm text-gray-600 mb-4">
+                  <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  <span>{{ interview.date }} • {{ interview.time }}</span>
+                </div>
+
+                <!-- Status & Action Buttons -->
+                <div class="flex flex-wrap items-center justify-between mt-4 pt-4 border-t border-gray-100">
                   <span
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ interview.status_color }}">
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ interview.status_color }} mb-2 sm:mb-0">
                     {{ interview.status }}
                   </span>
-                </td>
-                <td class="px-6 py-4 text-right">
-                  <button data-interview='{{ interview | tojson | safe }}'
-                    onclick='openManageModal(JSON.parse(this.dataset.interview))'
-                    class="text-violet-600 hover:text-violet-700 font-medium text-xs">Manage</button>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+
+                  <div class="flex items-center space-x-2">
+                    {% if interview.meeting_link %}
+                    <a href="{{ interview.meeting_link }}" target="_blank"
+                      class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                      <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Join
+                    </a>
+                    {% else %}
+                    <span class="text-xs text-gray-500">No meeting link</span>
+                    {% endif %}
+
+                    <button data-interview="{{ interview|tojson|forceescape }}"
+                      onclick="openManageModal(JSON.parse(this.dataset.interview))"
+                      class="inline-flex items-center px-3 py-1.5 border border-gray-200 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 shadow-sm transition-all ml-2">
+                      <svg class="w-3.5 h-3.5 mr-1.5 text-gray-500" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Edit
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+        {% else %}
+        <div class="col-span-full py-12 text-center">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No interviews</h3>
+          <p class="mt-1 text-sm text-gray-500">Get started by scheduling a new interview.</p>
+          <div class="mt-6">
+            <button type="button" onclick="openScheduleModal()"
+              class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              New Interview
+            </button>
+          </div>
+        </div>
+        {% endfor %}
       </div>
 
     </main>
@@ -301,27 +376,144 @@
       </div>
 
       <div class="flex-1 overflow-y-auto p-6">
-        <form action="{{ url_for('admin.interviews_schedule') }}" method="POST" class="space-y-6">
+        <form id="scheduleForm" action="{{ url_for('admin.interviews_schedule') }}" method="POST" class="space-y-6"
+          onsubmit="return validateForm()" enctype="multipart/form-data">
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Student</label>
-            <select name="student_id" required
-              class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all bg-white">
-              <option value="">Select Student</option>
-              {% for student in students %}
-              <option value="{{ student.id }}">{{ student.full_name }}</option>
-              {% endfor %}
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Student Selection</label>
+            <select name="student_selection" id="studentSelection" onchange="updateStudentSelection()"
+              class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all bg-white mb-2">
+              <option value="single">Select a single student</option>
+              <option value="all_registered">All Registered Users</option>
+              <option value="all_enrolled">All Enrolled Students</option>
             </select>
+
+            <div id="singleStudentContainer">
+              <select name="student_id" id="studentId"
+                class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all bg-white mt-2">
+                <option value="">Select Student</option>
+                {% for student in students %}
+                <option value="{{ student.id }}">{{ student.full_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <input type="hidden" name="all_registered" id="allRegistered" value="0">
+            <input type="hidden" name="all_enrolled" id="allEnrolled" value="0">
           </div>
 
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Session Type</label>
-            <select name="type" required
-              class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all bg-white">
-              <option value="personal">1:1 Interview</option>
-              <option value="meeting">General Meeting</option>
-              <option value="group">Group Session</option>
-              <option value="mock">Mock Interview</option>
-            </select>
+          <script>
+            function updateStudentSelection() {
+              const selection = document.getElementById('studentSelection').value;
+              const singleContainer = document.getElementById('singleStudentContainer');
+              const studentSelect = document.getElementById('studentId');
+              const allRegistered = document.getElementById('allRegistered');
+              const allEnrolled = document.getElementById('allEnrolled');
+
+              // Reset all states
+              singleContainer.style.display = 'block';
+              studentSelect.required = true;
+              allRegistered.value = '0';
+              allEnrolled.value = '0';
+
+              if (selection === 'all_registered') {
+                singleContainer.style.display = 'none';
+                studentSelect.required = false;
+                allRegistered.value = '1';
+              } else if (selection === 'all_enrolled') {
+                singleContainer.style.display = 'none';
+                studentSelect.required = false;
+                allEnrolled.value = '1';
+              }
+            }
+
+            function validateForm() {
+              const form = document.getElementById('scheduleForm');
+              const selection = document.getElementById('studentSelection').value;
+              const studentId = document.getElementById('studentId').value;
+              const title = form.querySelector('input[name="title"]');
+              const date = form.querySelector('input[name="date"]');
+              const time = form.querySelector('input[name="time"]');
+              const type = form.querySelector('select[name="type"]');
+              const meetingUrl = form.querySelector('input[name="meeting_link"]');
+
+              // Reset error states
+              [title, date, time, type].forEach(field => {
+                field.classList.remove('border-red-500');
+              });
+
+              // Check student selection
+              if (selection === 'single' && !studentId) {
+                alert('Please select a student');
+                document.getElementById('studentId').focus();
+                return false;
+              }
+
+              // Check required fields
+              if (!title.value.trim()) {
+                title.focus();
+                title.classList.add('border-red-500');
+                alert('Please enter a session title');
+                return false;
+              }
+
+              if (!date.value) {
+                date.focus();
+                date.classList.add('border-red-500');
+                alert('Please select a date for the session');
+                return false;
+              }
+
+              if (!time.value) {
+                time.focus();
+                time.classList.add('border-red-500');
+                alert('Please select a time for the session');
+                return false;
+              }
+
+              if (!type.value) {
+                type.focus();
+                type.classList.add('border-red-500');
+                alert('Please select a session type');
+                return false;
+              }
+
+              // Validate meeting URL format if provided
+              if (meetingUrl && meetingUrl.value) {
+                try {
+                  new URL(meetingUrl.value);
+                } catch (_) {
+                  meetingUrl.focus();
+                  meetingUrl.classList.add('border-red-500');
+                  alert('Please enter a valid URL for the meeting link (e.g., https://meet.google.com/abc-xyz)');
+                  return false;
+                }
+              }
+
+              return true; /* Changed from isValid to true, assuming isValid was a placeholder */
+            }
+
+            // Initialize on page load
+            document.addEventListener('DOMContentLoaded', function () {
+              updateStudentSelection();
+            });
+          </script>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Session Type</label>
+              <select name="type" required
+                class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all bg-white">
+                <option value="personal">1:1 Interview</option>
+                <option value="meeting">General Meeting</option>
+                <option value="group">Group Session</option>
+                <option value="mock">Mock Interview</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Session Poster (Optional)</label>
+              <input type="file" name="image" accept="image/*"
+                class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100">
+            </div>
           </div>
 
           <div>
@@ -349,14 +541,23 @@
           </div>
 
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Session Title</label>
-            <input type="text" name="title" placeholder="e.g. Final Review Interview"
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Session Title <span
+                class="text-red-500">*</span></label>
+            <input type="text" name="title" placeholder="e.g. Final Review Interview" required
               class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all">
           </div>
 
           <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Meeting Link</label>
+            <input type="url" name="meeting_link" placeholder="https://meet.google.com/abc-xyz-def"
+              class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all mb-4"
+              pattern="https?://.+">
+            <p class="text-xs text-gray-500 mb-4">Enter the full meeting URL (e.g., Google Meet, Zoom, etc.)</p>
+          </div>
+
+          <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-            <textarea name="description" rows="3" placeholder="Additional notes or meeting link..."
+            <textarea name="description" rows="3" placeholder="Additional notes about the session..."
               class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"></textarea>
           </div>
 
@@ -369,6 +570,10 @@
               class="flex-1 px-4 py-2 bg-violet-600 text-white rounded-xl text-sm font-semibold hover:bg-violet-700 shadow-lg shadow-violet-200 transition-all">
               Schedule Session
             </button>
+          </div>
+          <div class="text-xs text-gray-500 mt-2">
+            <p class="mb-1"><span class="text-red-500">*</span> Required fields</p>
+            <p>Please make sure to fill in all required fields before submitting.</p>
           </div>
         </form>
       </div>
@@ -394,96 +599,135 @@
       </div>
 
       <div class="flex-1 overflow-y-auto p-6">
-        <form id="editForm" method="POST" class="space-y-6">
-          <div class="grid grid-cols-2 gap-4">
+        <form id="editForm" method="POST" class="space-y-6" enctype="multipart/form-data">
+          <div class="space-y-4">
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Student</label>
-              <select name="student_id" id="edit_student" required
-                class="w-full px-4 py-2 border border-gray-200 rounded-xl bg-gray-50 cursor-not-allowed" readonly>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Student Selection</label>
+              <select name="student_selection" id="edit_student_selection" onchange="updateEditStudentSelection()"
+                class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all bg-white">
+                <option value="single">Select a single student</option>
+                <option value="all_registered">All Registered Users</option>
+                <option value="all_enrolled">All Enrolled Students</option>
+              </select>
+            </div>
+
+            <div id="editSingleStudentContainer" class="pt-1">
+              <select name="student_id" id="edit_student"
+                class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all bg-white">
+                <option value="">Select Student</option>
                 {% for student in students %}
                 <option value="{{ student.id }}">{{ student.full_name }}</option>
                 {% endfor %}
               </select>
             </div>
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Current Status</label>
-              <select name="status" id="edit_status" required
-                class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-violet-500/20 focus:border-violet-500">
-                <option value="scheduled">Scheduled</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="rescheduled">Rescheduled</option>
-                <option value="no_show">No Show</option>
-              </select>
-            </div>
+
+            <input type="hidden" name="all_registered" id="edit_all_registered" value="0">
+            <input type="hidden" name="all_enrolled" id="edit_all_enrolled" value="0">
+          </div>
+          <div class="pt-2">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Current Status</label>
+            <select name="status" id="edit_status" required
+              class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all">
+              <option value="scheduled">Scheduled</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="rescheduled">Rescheduled</option>
+              <option value="no_show">No Show</option>
+            </select>
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Session Type</label>
-              <select name="type" id="edit_type" required class="w-full px-4 py-2 border border-gray-200 rounded-xl">
-                <option value="personal">1:1 Interview</option>
-                <option value="meeting">General Meeting</option>
-                <option value="group">Group Session</option>
-                <option value="mock">Mock Interview</option>
-              </select>
+          <div class="pt-2">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Session Type</label>
+            <select name="type" id="edit_type" required
+              class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all">
+              <option value="personal">1:1 Interview</option>
+              <option value="meeting">General Meeting</option>
+              <option value="group">Group Session</option>
+              <option value="mock">Mock Interview</option>
+            </select>
+          </div>
+
+          <div class="pt-2">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Update Poster (Optional)</label>
+            <div id="currentImageContainer" class="mb-2 hidden">
+              <img id="currentImagePreview" src="" alt="Current Poster"
+                class="h-20 w-auto rounded-lg border border-gray-200 object-cover">
             </div>
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Mentor</label>
-              <select name="mentor_id" id="edit_mentor" class="w-full px-4 py-2 border border-gray-200 rounded-xl">
-                <option value="">Select Mentor</option>
-                {% for mentor in mentors %}
-                <option value="{{ mentor.id }}">{{ mentor.full_name }}</option>
-                {% endfor %}
-              </select>
-            </div>
+            <input type="file" name="image" accept="image/*"
+              class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100">
+          </div>
+          <div class="pt-2">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Assign Mentor</label>
+            <select name="mentor_id" id="edit_mentor"
+              class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all bg-white">
+              <option value="">Select Mentor (Optional)</option>
+              {% for mentor in mentors %}
+              <option value="{{ mentor.id }}">{{ mentor.full_name }}</option>
+              {% endfor %}
+            </select>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Date</label>
               <input type="date" name="date" id="edit_date" required
-                class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all">
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Time</label>
               <input type="time" name="time" id="edit_time" required
-                class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all">
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Title</label>
+            <label class="block text-sm font-semibold text-gray-700 mb-2 mt-2">Title <span
+                class="text-red-500">*</span></label>
             <input type="text" name="title" id="edit_title" required
-              class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+              class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all">
           </div>
 
-          <div>
+          <div class="pt-1">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Meeting Link</label>
+            <div class="space-y-1">
+              <input type="url" name="meeting_link" id="edit_meeting_url"
+                placeholder="https://meet.google.com/abc-xyz-def"
+                class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
+                pattern="https?://.+">
+              <p class="text-xs text-gray-500">Enter the full meeting URL (e.g., Google Meet, Zoom, etc.)</p>
+            </div>
+          </div>
+
+          <div class="pt-1">
             <label class="block text-sm font-semibold text-gray-700 mb-2">Feedback / Notes</label>
             <textarea name="feedback" id="edit_feedback" rows="3" placeholder="Add session notes or feedback..."
-              class="w-full px-4 py-2 border border-gray-200 rounded-xl"></textarea>
+              class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"></textarea>
           </div>
 
-          <div class="pt-4 border-t border-gray-100 flex gap-3">
-            <button type="button" onclick="confirmDelete()"
-              class="px-4 py-2 border border-red-200 text-red-600 rounded-xl text-sm font-semibold hover:bg-red-50 transition-all">
-              Delete
-            </button>
-            <div class="flex-1 flex gap-3">
-              <button type="button" onclick="closeManageModal()"
-                class="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all">
-                Cancel
-              </button>
-              <button type="submit"
-                class="flex-1 px-4 py-2 bg-violet-600 text-white rounded-xl text-sm font-semibold hover:bg-violet-700 shadow-lg shadow-violet-200 transition-all">
-                Save Changes
-              </button>
-            </div>
-          </div>
+
         </form>
 
         <form id="deleteForm" method="POST" style="display:none"></form>
+      </div>
+
+      <div class="p-6 border-t border-gray-100 bg-white relative z-20">
+        <div class="flex gap-3">
+          <button type="button" onclick="confirmDelete()"
+            class="px-4 py-2 border border-red-200 text-red-600 rounded-xl text-sm font-semibold hover:bg-red-50 transition-all">
+            Delete
+          </button>
+          <div class="flex-1 flex gap-3">
+            <button type="button" onclick="closeManageModal()"
+              class="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all">
+              Cancel
+            </button>
+            <button type="submit" form="editForm"
+              class="flex-1 px-4 py-2 bg-violet-600 text-white rounded-xl text-sm font-semibold hover:bg-violet-700 shadow-lg shadow-violet-200 transition-all">
+              Save Changes
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -508,18 +752,152 @@
       }, 300);
     }
 
+    function updateEditStudentSelection() {
+      const selection = document.getElementById('edit_student_selection').value;
+      const singleContainer = document.getElementById('editSingleStudentContainer');
+      const studentSelect = document.getElementById('edit_student');
+      const allRegistered = document.getElementById('edit_all_registered');
+      const allEnrolled = document.getElementById('edit_all_enrolled');
+
+      // Reset all states
+      singleContainer.style.display = 'block';
+      studentSelect.required = true;
+      allRegistered.value = '0';
+      allEnrolled.value = '0';
+
+      if (selection === 'all_registered') {
+        singleContainer.style.display = 'none';
+        studentSelect.required = false;
+        studentSelect.value = ''; // Clear value
+        allRegistered.value = '1';
+      } else if (selection === 'all_enrolled') {
+        singleContainer.style.display = 'none';
+        studentSelect.required = false;
+        studentSelect.value = ''; // Clear value
+        allEnrolled.value = '1';
+      }
+    }
+
+    function validateEditForm() {
+      const form = document.getElementById('editForm');
+      const selection = document.getElementById('edit_student_selection').value;
+      const studentId = document.getElementById('edit_student').value;
+      const title = document.getElementById('edit_title');
+      const date = document.getElementById('edit_date');
+      const time = document.getElementById('edit_time');
+      const type = document.getElementById('edit_type');
+      const meetingUrl = document.getElementById('edit_meeting_url');
+
+      // Reset error states
+      [title, date, time, type].forEach(field => {
+        field.classList.remove('border-red-500');
+      });
+
+      // Check student selection
+      if (selection === 'single' && !studentId) {
+        alert('Please select a student');
+        document.getElementById('edit_student').focus();
+        return false;
+      }
+
+      // Check required fields
+      if (!title.value.trim()) {
+        title.focus();
+        title.classList.add('border-red-500');
+        alert('Please enter a session title');
+        return false;
+      }
+
+      if (!date.value) {
+        date.focus();
+        date.classList.add('border-red-500');
+        alert('Please select a date for the session');
+        return false;
+      }
+
+      if (!time.value) {
+        time.focus();
+        time.classList.add('border-red-500');
+        alert('Please select a time for the session');
+        return false;
+      }
+
+      // Validate meeting URL format if provided
+      if (meetingUrl && meetingUrl.value) {
+        try {
+          new URL(meetingUrl.value);
+        } catch (_) {
+          meetingUrl.focus();
+          meetingUrl.classList.add('border-red-500');
+          alert('Please enter a valid URL for the meeting link (e.g., https://meet.google.com/abc-xyz)');
+          return false;
+        }
+      }
+
+      return true;
+    }
+
     function openManageModal(data) {
-      document.getElementById('edit_student').value = data.student_id;
+      // Set student selection based on target_audience
+      const selectionSelect = document.getElementById('edit_student_selection');
+      const studentSelect = document.getElementById('edit_student');
+      const singleContainer = document.getElementById('editSingleStudentContainer');
+      const allRegistered = document.getElementById('edit_all_registered');
+      const allEnrolled = document.getElementById('edit_all_enrolled');
+
+      // Reset hidden inputs
+      allRegistered.value = '0';
+      allEnrolled.value = '0';
+
+      if (data.target_audience === 'all_registered') {
+        selectionSelect.value = 'all_registered';
+        allRegistered.value = '1';
+        singleContainer.style.display = 'none';
+        studentSelect.required = false;
+      } else if (data.target_audience === 'all_enrolled') {
+        selectionSelect.value = 'all_enrolled';
+        allEnrolled.value = '1';
+        singleContainer.style.display = 'none';
+        studentSelect.required = false;
+      } else {
+        selectionSelect.value = 'single';
+        studentSelect.value = data.student_id || '';
+        singleContainer.style.display = 'block';
+        studentSelect.required = true;
+      }
+
       document.getElementById('edit_status').value = data.raw_status;
-      document.getElementById('edit_type').value = data.raw_type;
+
+      const typeInput = document.getElementById('edit_type');
+      if (typeInput) {
+        typeInput.value = data.raw_type;
+      }
+
       document.getElementById('edit_date').value = data.raw_date;
       document.getElementById('edit_time').value = data.raw_time;
       document.getElementById('edit_title').value = data.title || '';
+      document.getElementById('edit_meeting_url').value = data.meeting_link || '';
       document.getElementById('edit_feedback').value = data.feedback || '';
 
-      // Handle mentor selection if possible (matching by name is risky, but we can try if raw_mentor_id was there)
-      // Since we don't have mentor_id in the row, we'll leave it as is for now or use name
-      // For now, I'll just set the title/desc if they match
+      // Show current image if exists
+      const imageContainer = document.getElementById('currentImageContainer');
+      const imagePreview = document.getElementById('currentImagePreview');
+      if (imageContainer && imagePreview) {
+        if (data.image_url) {
+          imagePreview.src = data.image_url;
+          imageContainer.classList.remove('hidden');
+        } else {
+          imageContainer.classList.add('hidden');
+        }
+      }
+
+      // Set mentor if available
+      if (data.mentor_id) {
+        const mentorSelect = document.getElementById('edit_mentor');
+        if (mentorSelect) {
+          mentorSelect.value = data.mentor_id;
+        }
+      }
 
       document.getElementById('editForm').action = "/admin/interviews/update/" + data.id;
       document.getElementById('deleteForm').action = "/admin/interviews/delete/" + data.id;

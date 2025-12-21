@@ -349,8 +349,8 @@ def batches_delete(batch_id):
 def interviews():
     """List all interviews"""
     interviews_data = db.session.query(Interview, Student, User)\
-        .join(Student, Interview.student_id == Student.id)\
-        .join(User, Student.user_id == User.id)\
+        .outerjoin(Student, Interview.student_id == Student.id)\
+        .outerjoin(User, Student.user_id == User.id)\
         .order_by(Interview.scheduled_date.desc())\
         .all()
     
@@ -365,8 +365,9 @@ def interviews():
             
         interviews_list.append({
             'id': interview.id,
-            'student_name': student.full_name,
-            'student_id': student.id,
+            'student_name': student.full_name if student else None,
+            'student_id': student.id if student else None,
+            'target_audience': interview.target_audience,
             'type': type_display,
             'raw_type': interview.interview_type,
             'mentor': interview.interviewer_name or 'TBD',
@@ -380,7 +381,10 @@ def interviews():
             'title': interview.title,
             'description': interview.description,
             'feedback': interview.feedback,
-            'rating': interview.rating
+            'rating': interview.rating,
+            'meeting_link': interview.meeting_link,
+            'meeting_platform': interview.meeting_platform,
+            'image_url': interview.image_url
         })
     
     # Fetch students and mentors for scheduling modal
@@ -405,8 +409,18 @@ def interviews_schedule():
         scheduled_date_str = request.form.get('date')
         scheduled_time_str = request.form.get('time')
         
-        if not student_id or not scheduled_date_str or not scheduled_time_str:
-            flash('Missing required fields for scheduling', 'error')
+        # Check for bulk flags
+        all_registered = request.form.get('all_registered') == '1'
+        all_enrolled = request.form.get('all_enrolled') == '1'
+        
+        # Validate required fields (date, time, title are always required)
+        if not scheduled_date_str or not scheduled_time_str:
+            flash('Date and time are required for scheduling', 'error')
+            return redirect(url_for('admin.interviews'))
+            
+        # Validate student selection
+        if not student_id and not all_registered and not all_enrolled:
+            flash('Please select a student or a group of students', 'error')
             return redirect(url_for('admin.interviews'))
             
         scheduled_datetime = datetime.strptime(f"{scheduled_date_str} {scheduled_time_str}", "%Y-%m-%d %H:%M")
@@ -419,20 +433,98 @@ def interviews_schedule():
                 interviewer_name = mentor.full_name
                 interviewer_email = mentor.email
         
-        interview = Interview(
-            student_id=student_id,
-            interview_type=interview_type,
-            title=title or f"{interview_type.title()} with {interviewer_name or 'Mentor'}",
-            description=description,
-            scheduled_date=scheduled_datetime,
-            interviewer_name=interviewer_name,
-            interviewer_email=interviewer_email,
-            status='scheduled'
-        )
+        # Handle Image Upload
+        image_url = None
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                filename = secure_filename(f"interview_{datetime.now().timestamp()}_{file.filename}")
+                upload_path = os.path.join('app', 'static', 'uploads', 'interviews', filename)
+                
+                # Ensure directory exists
+                os.makedirs(os.path.dirname(upload_path), exist_ok=True)
+                
+                file.save(upload_path)
+                image_url = url_for('static', filename=f'uploads/interviews/{filename}')
+
+        # Determine target list of students
+        target_students = []
         
-        db.session.add(interview)
+        if all_registered:
+            target_students = Student.query.all()
+        elif all_enrolled:
+            # Get students with completed or partial payments
+            target_students = db.session.query(Student)\
+                .join(Enrollment, Student.id == Enrollment.student_id)\
+                .filter(Enrollment.payment_status.in_(['completed', 'partial']))\
+                .distinct().all()
+        else:
+            # Single student
+            student = Student.query.get(student_id)
+            if student:
+                target_students = [student]
+        
+        if not target_students:
+            flash('No students found for the selected criteria', 'warning')
+            return redirect(url_for('admin.interviews'))
+            
+        # Create single interview for group OR individual
+        target_audience = None
+        if all_registered:
+            target_audience = 'all_registered'
+        elif all_enrolled:
+            target_audience = 'all_enrolled'
+        else:
+            target_audience = 'individual'
+
+        # If it's a group interview, we create ONE record with student_id=None
+        if target_audience != 'individual':
+            interview = Interview(
+                student_id=None,
+                target_audience=target_audience,
+                interview_type=interview_type,
+                title=title or f"{interview_type.title()} with {interviewer_name or 'Mentor'}",
+                description=description,
+                scheduled_date=scheduled_datetime,
+                interviewer_name=interviewer_name,
+                interviewer_email=interviewer_email,
+                status='scheduled',
+                meeting_link=request.form.get('meeting_link'),
+                meeting_platform=request.form.get('meeting_platform'),
+                image_url=image_url
+            )
+            db.session.add(interview)
+            count = len(target_students) # Just for display purposes
+        else:
+            # Individual - create one record
+            # We can still loop if for some reason multiple students were passed, but here it's usually one
+            for student in target_students:
+                interview = Interview(
+                    student_id=student.id,
+                    target_audience='individual',
+                    interview_type=interview_type,
+                    title=title or f"{interview_type.title()} with {interviewer_name or 'Mentor'}",
+                    description=description,
+                    scheduled_date=scheduled_datetime,
+                    interviewer_name=interviewer_name,
+                    interviewer_email=interviewer_email,
+                    status='scheduled',
+                    meeting_link=request.form.get('meeting_link'),
+                    meeting_platform=request.form.get('meeting_platform'),
+                    image_url=image_url
+                )
+                db.session.add(interview)
+            count = len(target_students)
+            
         db.session.commit()
-        flash('Interview scheduled successfully!', 'success')
+        
+        if count > 1 and target_audience == 'individual':
+            flash(f'Successfully scheduled interviews for {count} students!', 'success')
+        elif target_audience != 'individual':
+             flash(f'Successfully scheduled group interview for {target_audience.replace("_", " ").title()}!', 'success')
+        else:
+            flash('Interview scheduled successfully!', 'success')
+            
     except Exception as e:
         db.session.rollback()
         flash(f'Error scheduling interview: {str(e)}', 'error')
@@ -446,7 +538,19 @@ def interviews_update(interview_id):
     try:
         interview = Interview.query.get_or_404(interview_id)
         
-        interview.student_id = request.form.get('student_id')
+        student_id = request.form.get('student_id')
+        all_registered = request.form.get('all_registered') == '1'
+        all_enrolled = request.form.get('all_enrolled') == '1'
+        
+        if all_registered:
+            interview.target_audience = 'all_registered'
+            interview.student_id = None
+        elif all_enrolled:
+            interview.target_audience = 'all_enrolled'
+            interview.student_id = None
+        else:
+            interview.target_audience = 'individual'
+            interview.student_id = student_id if student_id and student_id.strip() else None
         mentor_id = request.form.get('mentor_id')
         interview.interview_type = request.form.get('type')
         interview.title = request.form.get('title')
@@ -468,6 +572,31 @@ def interviews_update(interview_id):
             if mentor:
                 interview.interviewer_name = mentor.full_name
                 interview.interviewer_email = mentor.email
+                
+        # Update meeting link and platform
+        interview.meeting_link = request.form.get('meeting_link')
+        interview.meeting_platform = request.form.get('meeting_platform')
+        
+        # Handle Image Update
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                # Optional: Delete old image if exists
+                if interview.image_url:
+                    try:
+                        old_path = os.path.join('app', interview.image_url.lstrip('/'))
+                        if os.path.exists(old_path):
+                            os.remove(old_path)
+                    except Exception:
+                        pass # Ignore deletion errors
+
+                filename = secure_filename(f"interview_{interview.id}_{datetime.now().timestamp()}_{file.filename}")
+                upload_path = os.path.join('app', 'static', 'uploads', 'interviews', filename)
+                
+                os.makedirs(os.path.dirname(upload_path), exist_ok=True)
+                
+                file.save(upload_path)
+                interview.image_url = url_for('static', filename=f'uploads/interviews/{filename}')
         
         db.session.commit()
         flash('Interview updated successfully!', 'success')
@@ -490,6 +619,22 @@ def interviews_delete(interview_id):
         db.session.rollback()
         flash(f'Error deleting interview: {str(e)}', 'error')
         
+    return redirect(url_for('admin.interviews'))
+
+
+@bp.route('/interviews/delete_all', methods=['POST'])
+@admin_required
+def interviews_delete_all():
+    """Delete all interviews"""
+    try:
+        # Delete all interviews
+        Interview.query.delete()
+        db.session.commit()
+        flash('All interviews have been deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting interviews: {str(e)}', 'error')
+    
     return redirect(url_for('admin.interviews'))
 
 
@@ -772,8 +917,12 @@ def announcements():
             'date': announcement.published_at.strftime('%b %d, %Y'),
             'target': target,
             'content': announcement.content[:100] + '...' if len(announcement.content) > 100 else announcement.content,
+            'full_content': announcement.content,
+            'priority': announcement.priority,
             'type': type_label,
-            'type_color': type_color
+            'type_color': type_color,
+            'raw_target_audience': announcement.target_audience,
+            'raw_target_batch_id': announcement.target_batch_id
         })
     
     # Fetch batches for targeting
@@ -782,6 +931,37 @@ def announcements():
     return render_template('dashboard/admin/announcements.html', 
                           announcements=announcements_list,
                           batches=all_batches)
+
+@bp.route('/announcements/update/<int:announcement_id>', methods=['POST'])
+@admin_required
+def announcements_update(announcement_id):
+    """Update an announcement"""
+    try:
+        announcement = Announcement.query.get_or_404(announcement_id)
+        
+        title = request.form.get('title')
+        content = request.form.get('content')
+        priority = request.form.get('priority')
+        target_audience = request.form.get('target_audience')
+        target_batch_id = request.form.get('target_batch_id')
+        
+        if not title or not content:
+            flash('Title and content are required', 'error')
+            return redirect(url_for('admin.announcements'))
+            
+        announcement.title = title
+        announcement.content = content
+        announcement.priority = priority
+        announcement.target_audience = target_audience
+        announcement.target_batch_id = target_batch_id if target_audience == 'specific_batch' and target_batch_id else None
+        
+        db.session.commit()
+        flash('Announcement updated successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error updating announcement: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.announcements'))
 @bp.route('/announcements/create', methods=['POST'])
 @admin_required
 def announcements_create():

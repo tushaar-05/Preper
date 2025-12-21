@@ -6,7 +6,8 @@ class Interview(db.Model):
     __tablename__ = 'interviews'
     
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=True)
+    target_audience = db.Column(db.String(50), nullable=True)  # all_registered, all_enrolled, individual, etc.
     
     # Interview Details
     interview_type = db.Column(db.String(20), nullable=False)  # personal, group, mock
@@ -31,6 +32,7 @@ class Interview(db.Model):
     # Meeting Details
     meeting_link = db.Column(db.String(500))
     meeting_platform = db.Column(db.String(50))  # zoom, meet, teams, etc.
+    image_url = db.Column(db.String(500)) # Poster image URL
     
     # Timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

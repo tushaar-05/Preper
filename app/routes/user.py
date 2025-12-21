@@ -344,11 +344,74 @@ def dashboard():
         .limit(5)\
         .all()
 
+    # Determine enrollment status for group interviews
+    is_enrolled = False
+    for enrollment, batch in enrollments:
+        if enrollment.payment_status in ['completed', 'partial']:
+            is_enrolled = True
+            break
+
+    # Fetch queries
+    from sqlalchemy import or_
+    
+    interview_filters = [Interview.student_id == student.id, Interview.target_audience == 'all_registered']
+    if is_enrolled:
+        interview_filters.append(Interview.target_audience == 'all_enrolled')
+        
+    upcoming_interviews = Interview.query\
+        .filter(or_(*interview_filters))\
+        .filter(Interview.scheduled_date >= datetime.utcnow())\
+        .filter(Interview.status.in_(['scheduled', 'confirmed']))\
+        .order_by(Interview.scheduled_date)\
+        .limit(3)\
+        .all()
+
+    # Format upcoming interviews
+    formatted_interviews = []
+    for interview in upcoming_interviews:
+        formatted_interviews.append({
+            'id': interview.id,
+            'title': interview.title,
+            'date': interview.scheduled_date.strftime('%b %d, %Y'),
+            'time': interview.scheduled_date.strftime('%I:%M %p'),
+            'mentor': interview.interviewer_name or 'TBD',
+            'type': interview.interview_type.replace('_', ' ').title(),
+            'image_url': interview.image_url,  # New field
+            'link': interview.meeting_link or '#',
+            'status': interview.status
+        })
+        
+    # Calculate Statistics
+    total_mocks_count = MockTest.query.filter_by(is_active=True).count()
+    attempted_mocks_count = TestAttempt.query.filter_by(student_id=student.id).count()
+    
+    interviews_done_count = Interview.query.filter_by(student_id=student.id, status='completed').count()
+    
+    # Simple readiness logic
+    if attempted_mocks_count > 5:
+        interview_readiness = "Excellent"
+        readiness_color = "green"
+    elif attempted_mocks_count > 0:
+        interview_readiness = "Good"
+        readiness_color = "blue"
+    else:
+        interview_readiness = "Beginner"
+        readiness_color = "yellow"
+
     return render_template(
         'dashboard/user/user.html',
         student=student,
         announcements=announcements,
-        enrollments=enrollments
+        enrollments=enrollments,
+        upcoming_interviews=formatted_interviews,
+        stats={
+            'total_mocks': total_mocks_count,
+            'attempted_mocks': attempted_mocks_count,
+            'interviews_done': interviews_done_count,
+            'readiness': interview_readiness,
+            'readiness_color': readiness_color,
+            'pending_doubts': 0
+        }
     )
 
 
@@ -378,3 +441,38 @@ def profile():
             print(e)
 
     return render_template('dashboard/user/profile.html', student=student, user=user)
+
+
+@bp.route('/announcement')
+@student_required
+def announcement():
+    """View announcements"""
+    student = get_current_student()
+    batch_ids = get_user_batch_ids(student.id)
+    
+    # Get all relevant announcements
+    announcements_query = Announcement.query\
+        .filter(
+            (Announcement.target_audience == 'all') |
+            (Announcement.target_audience == 'students') |
+            (Announcement.target_batch_id.in_(batch_ids) if batch_ids else False)
+        )\
+        .filter(Announcement.is_published == True)\
+        .order_by(Announcement.is_pinned.desc(), Announcement.published_at.desc())\
+        .all()
+        
+    # Serialize for frontend
+    announcements_data = []
+    for ann in announcements_query:
+        announcements_data.append({
+            'id': ann.id,
+            'title': ann.title,
+            'description': ann.content[:100] + '...' if len(ann.content) > 100 else ann.content,
+            'content': ann.content,
+            'date': ann.published_at.strftime('%b %d, %Y'),
+            'category': 'System' if ann.priority == 'medium' else 'Academic' if ann.priority == 'high' else 'Important',
+            'priority': ann.priority,
+            'unread': True # Logic for unread status can be added later
+        })
+    
+    return render_template('dashboard/user/announcement.html', announcements=announcements_data)
