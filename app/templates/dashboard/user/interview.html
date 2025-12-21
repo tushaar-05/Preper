@@ -136,7 +136,8 @@
           Prep Kit
         </a>
 
-        <a href="/interview" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+        <a href="/interview"
+          class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 6.072l.745 6.353 6.353.745-6.353.745-.745 6.353-.745-6.353-6.353-.745 6.353-.745zM22 12a10 10 0 11-20 0 10 10 0 0120 0z">
@@ -213,10 +214,10 @@
             class="flex items-center gap-3 bg-white pl-2 pr-4 py-1.5 rounded-full shadow-sm hover:shadow-md cursor-pointer transition-all border border-transparent hover:border-gray-100">
             <div
               class="w-9 h-9 rounded-full bg-gradient-to-tr from-[var(--purple)] to-indigo-500 flex items-center justify-center text-white text-sm font-bold">
-              T</div>
+              {{ student.full_name[0]|upper }}</div>
             <div class="text-sm">
               <a href="/profile">
-                <p class="font-semibold text-gray-900 leading-tight">Tushar</p>
+                <p class="font-semibold text-gray-900 leading-tight">{{ student.full_name }}</p>
                 <p class="text-xs text-gray-500">Student</p>
               </a>
             </div>
