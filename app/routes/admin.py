@@ -1217,3 +1217,68 @@ def settings_change_password():
 def analytics():
     """Analytics coming soon page"""
     return render_template('dashboard/admin/analytics.html')
+
+
+@bp.route('/doubts')
+@admin_required
+def doubts():
+    """Manage student doubts"""
+    from app.models.doubt import Doubt, DoubtReply
+    
+    # Get filter parameters
+    status_filter = request.args.get('status', 'all')
+    category_filter = request.args.get('category', 'all')
+    
+    # Base query
+    query = Doubt.query
+    
+    # Apply filters
+    if status_filter != 'all':
+        query = query.filter_by(status=status_filter)
+    if category_filter != 'all':
+        query = query.filter_by(category=category_filter)
+    
+    # Get all doubts with student info
+    doubts_query = query.order_by(Doubt.created_at.desc()).all()
+    
+    # Format doubts for template
+    doubts_list = []
+    for doubt in doubts_query:
+        # Calculate time ago
+        time_diff = datetime.utcnow() - doubt.created_at
+        if time_diff.days > 0:
+            timestamp = f"{time_diff.days} day{'s' if time_diff.days > 1 else ''} ago"
+        elif time_diff.seconds >= 3600:
+            hours = time_diff.seconds // 3600
+            timestamp = f"{hours} hour{'s' if hours > 1 else ''} ago"
+        else:
+            minutes = max(1, time_diff.seconds // 60)
+            timestamp = f"{minutes} minute{'s' if minutes > 1 else ''} ago"
+        
+        doubts_list.append({
+            'id': doubt.id,
+            'title': doubt.title,
+            'content': doubt.content,
+            'category': doubt.category,
+            'status': doubt.status,
+            'student_name': doubt.student.full_name,
+            'student_email': User.query.get(doubt.student.user_id).email if doubt.student.user_id else 'N/A',
+            'timestamp': timestamp,
+            'created_at': doubt.created_at.strftime('%Y-%m-%d %H:%M'),
+            'replies': doubt.replies.count(),
+            'views': doubt.views
+        })
+    
+    # Get statistics
+    stats = {
+        'total': Doubt.query.count(),
+        'pending': Doubt.query.filter_by(status='pending').count(),
+        'answered': Doubt.query.filter_by(status='answered').count(),
+        'closed': Doubt.query.filter_by(status='closed').count()
+    }
+    
+    return render_template('dashboard/admin/doubts.html', 
+                         doubts=doubts_list, 
+                         stats=stats,
+                         current_status=status_filter,
+                         current_category=category_filter)

@@ -273,3 +273,80 @@ def interview():
         })
     
     return render_template('dashboard/user/interview.html', upcoming=upcoming, past=past, student=student)
+
+
+@bp.route('/doubts')
+@student_required
+def doubts():
+    """View doubts forum"""
+    from app.models.doubt import Doubt, DoubtReply
+    student = get_current_student()
+    
+    # Fetch all doubts from database
+    doubts_query = Doubt.query.order_by(Doubt.created_at.desc()).all()
+    
+    # Format doubts for template
+    doubts_list = []
+    for doubt in doubts_query:
+        # Calculate time ago
+        time_diff = datetime.utcnow() - doubt.created_at
+        if time_diff.days > 0:
+            timestamp = f"{time_diff.days} day{'s' if time_diff.days > 1 else ''} ago"
+        elif time_diff.seconds >= 3600:
+            hours = time_diff.seconds // 3600
+            timestamp = f"{hours} hour{'s' if hours > 1 else ''} ago"
+        else:
+            minutes = max(1, time_diff.seconds // 60)
+            timestamp = f"{minutes} minute{'s' if minutes > 1 else ''} ago"
+        
+        doubts_list.append({
+            'id': doubt.id,
+            'title': doubt.title,
+            'content': doubt.content,
+            'author': doubt.student.full_name,
+            'timestamp': timestamp,
+            'replies': doubt.replies.count(),
+            'views': doubt.views,
+            'category': doubt.category
+        })
+    
+    return render_template('dashboard/user/doubts.html', doubts=doubts_list, student=student)
+
+
+@bp.route('/post_doubt', methods=['POST'])
+@student_required
+def post_doubt():
+    """Handle posting a new doubt"""
+    from app.models.doubt import Doubt
+    student = get_current_student()
+    
+    # Get form data
+    title = request.form.get('title')
+    category = request.form.get('category', 'General Query')
+    content = request.form.get('content')
+    
+    # Validate input
+    if not title or not content:
+        flash('Please provide both a title and description for your doubt.', 'danger')
+        return redirect(url_for('user.doubts'))
+    
+    try:
+        # Create new doubt
+        new_doubt = Doubt(
+            student_id=student.id,
+            title=title,
+            category=category,
+            content=content,
+            status='pending'
+        )
+        
+        db.session.add(new_doubt)
+        db.session.commit()
+        
+        flash('Your doubt has been posted successfully! Our team will respond soon.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('Failed to post doubt. Please try again.', 'danger')
+        print(f"Error posting doubt: {e}")
+    
+    return redirect(url_for('user.doubts'))

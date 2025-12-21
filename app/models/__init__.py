@@ -10,7 +10,8 @@ from .batch import Batch  # noqa
 from .enrollment import Enrollment  # noqa
 from .interview import Interview  # noqa
 from .announcement import Announcement  # noqa
-from .resource import Resource  # noqa
+from app.models.resource import Resource
+from app.models.doubt import Doubt, DoubtReply  # noqa
 from .payment import Payment  # noqa
 from .mentor import Mentor  # noqa
 from .site_config import SiteConfig  # noqa
