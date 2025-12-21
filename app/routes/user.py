@@ -476,3 +476,44 @@ def announcement():
         })
     
     return render_template('dashboard/user/announcement.html', announcements=announcements_data)
+
+
+@bp.route('/prepkit')
+@student_required
+def prepkit():
+    """View resources/prep kit"""
+    student = get_current_student()
+    batch_ids = get_user_batch_ids(student.id)
+    
+    # Get accessible resources
+    resources_query = Resource.query\
+        .filter(Resource.is_active == True)\
+        .filter(
+            (Resource.access_level == 'free') |
+            (Resource.target_batch_id.in_(batch_ids) if batch_ids else False)
+        )\
+        .order_by(Resource.created_at.desc())\
+        .all()
+    
+    # Group resources by category
+    resources = {}
+    for resource in resources_query:
+        category = resource.category.title()
+        if category not in resources:
+            resources[category] = []
+        
+        # Format file size
+        if resource.file_size:
+            size_mb = resource.file_size / (1024 * 1024)
+            size = f'{size_mb:.1f} MB'
+        else:
+            size = 'N/A'
+        
+        resources[category].append({
+            'title': resource.title,
+            'type': resource.file_type.upper() if resource.file_type else 'Link',
+            'size': size,
+            'link': resource.file_url or resource.file_path or '#'
+        })
+    
+    return render_template('dashboard/user/prepkit.html', resources=resources, student=student)
