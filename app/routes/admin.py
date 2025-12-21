@@ -7,7 +7,8 @@ from app.extensions import db
 from app.utils.decorators import admin_required
 from app.models import (
     User, Student, Batch, Enrollment, Interview,
-    MockTest, Question, TestAttempt, Announcement, Resource, Payment, Mentor
+    MockTest, Question, TestAttempt, Announcement, Resource, Payment, Mentor,
+    SiteConfig
 )
 from app.utils import admin_required, get_batch_status_color, get_interview_status_color
 from datetime import datetime, timedelta
@@ -836,9 +837,17 @@ def announcements_delete(announcement_id):
 @admin_required
 def resources():
     """List all resources"""
-    resources_data = Resource.query\
-        .order_by(Resource.created_at.desc())\
-        .all()
+    category = request.args.get('category')
+    batch_id = request.args.get('batch_id')
+    
+    query = Resource.query
+    
+    if category:
+        query = query.filter_by(category=category)
+    if batch_id:
+        query = query.filter_by(target_batch_id=batch_id)
+        
+    resources_data = query.order_by(Resource.created_at.desc()).all()
     
     resources_list = []
     for resource in resources_data:
@@ -852,7 +861,7 @@ def resources():
         # Format file size
         if resource.file_size:
             size_mb = resource.file_size / (1024 * 1024)
-            file_size = f'{size_mb:.1f} MB'
+            file_size = f'{size_mb:.1f} MB' if size_mb >= 0.1 else f'{resource.file_size / 1024:.1f} KB'
         else:
             file_size = 'N/A'
         
@@ -864,10 +873,97 @@ def resources():
             'uploaded_date': resource.created_at.strftime('%b %d, %Y'),
             'file_size': file_size,
             'downloads': resource.download_count,
-            'type': resource.file_type.upper() if resource.file_type else 'Link'
+            'type': resource.file_type.upper() if resource.file_type else 'LINK',
+            'file_path': resource.file_path,
+            'file_url': resource.file_url
         })
     
-    return render_template('dashboard/admin/resources.html', resources=resources_list)
+    # Fetch batches for dropdown
+    all_batches = Batch.query.filter(Batch.status.in_(['active', 'upcoming'])).all()
+    
+    return render_template('dashboard/admin/resources.html', resources=resources_list, batches=all_batches)
+
+
+@bp.route('/resources/create', methods=['POST'])
+@admin_required
+def resources_create():
+    """Create a new resource"""
+    try:
+        title = request.form.get('title')
+        description = request.form.get('description')
+        category = request.form.get('category')
+        resource_type = request.form.get('resource_type', 'file')
+        access_level = request.form.get('access_level', 'free')
+        target_batch_id = request.form.get('target_batch_id')
+        
+        # Validation
+        if not title or not category:
+            flash('Title and Category are required', 'error')
+            return redirect(url_for('admin.resources'))
+
+        file_path = None
+        file_url = None
+        file_size = 0
+        file_type = None
+
+        if resource_type == 'file' and 'resource_file' in request.files:
+            file = request.files['resource_file']
+            if file and file.filename:
+                filename = secure_filename(f"res_{datetime.now().timestamp()}_{file.filename}")
+                upload_path = os.path.join('app', 'static', 'uploads', 'resources', filename)
+                file.save(upload_path)
+                file_path = f'static/uploads/resources/{filename}'
+                file_size = os.path.getsize(upload_path)
+                file_type = filename.split('.')[-1].lower()
+        else:
+            file_url = request.form.get('file_url')
+            file_type = 'LINK'
+
+        resource = Resource(
+            title=title,
+            description=description,
+            category=category,
+            resource_type=resource_type,
+            file_path=file_path,
+            file_url=file_url,
+            file_size=file_size,
+            file_type=file_type,
+            access_level=access_level,
+            target_batch_id=target_batch_id if target_batch_id and access_level == 'batch_specific' else None,
+            uploaded_by=session.get('admin_id')
+        )
+        
+        db.session.add(resource)
+        db.session.commit()
+        flash('Resource uploaded successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error uploading resource: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.resources'))
+
+
+@bp.route('/resources/delete/<int:resource_id>', methods=['POST'])
+@admin_required
+def resources_delete(resource_id):
+    """Delete a resource"""
+    try:
+        resource = Resource.query.get_or_404(resource_id)
+        
+        # Delete physical file if exists
+        if resource.file_path:
+            abs_path = os.path.join('app', resource.file_path)
+            if os.path.exists(abs_path):
+                os.remove(abs_path)
+                
+        db.session.delete(resource)
+        db.session.commit()
+        flash('Resource deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting resource: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.resources'))
 
 
 @bp.route('/settings')
@@ -876,22 +972,68 @@ def settings():
     """Platform settings page"""
     settings = {
         'platform': {
-            'name': 'NST Prep',
-            'email': 'admin@nstprep.com',
-            'phone': '+91 98765 43210',
-            'timezone': 'Asia/Kolkata'
-        },
-        'features': {
-            'registrations_open': True,
-            'mock_tests_enabled': True,
-            'interview_booking': True,
-            'doubt_forum': True
-        },
-        'notifications': {
-            'email_notifications': True,
-            'sms_notifications': False,
-            'push_notifications': True
+            'name': SiteConfig.get_val('platform_name', 'NST Prep'),
+            'email': SiteConfig.get_val('contact_email', 'admin@nstprep.com'),
+            'phone': SiteConfig.get_val('contact_phone', '+91 98765 43210')
         }
     }
     
     return render_template('dashboard/admin/settings.html', settings=settings)
+
+
+@bp.route('/settings/update', methods=['POST'])
+@admin_required
+def settings_update():
+    """Update platform settings"""
+    try:
+        platform_name = request.form.get('platform_name')
+        contact_email = request.form.get('contact_email')
+        contact_phone = request.form.get('contact_phone')
+        
+        if platform_name:
+            SiteConfig.set_val('platform_name', platform_name)
+        if contact_email:
+            SiteConfig.set_val('contact_email', contact_email)
+        if contact_phone:
+            SiteConfig.set_val('contact_phone', contact_phone)
+            
+        flash('Settings updated successfully!', 'success')
+    except Exception as e:
+        flash(f'Error updating settings: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.settings'))
+
+
+@bp.route('/settings/change-password', methods=['POST'])
+@admin_required
+def settings_change_password():
+    """Update admin password"""
+    try:
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if new_password != confirm_password:
+            flash('New passwords do not match', 'error')
+            return redirect(url_for('admin.settings'))
+            
+        admin = User.query.get(session.get('admin_id'))
+        if not admin or not admin.check_password(current_password):
+            flash('Incorrect current password', 'error')
+            return redirect(url_for('admin.settings'))
+            
+        admin.set_password(new_password)
+        db.session.commit()
+        flash('Password updated successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error updating password: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.settings'))
+
+
+@bp.route('/analytics')
+@admin_required
+def analytics():
+    """Analytics coming soon page"""
+    return render_template('dashboard/admin/analytics.html')
