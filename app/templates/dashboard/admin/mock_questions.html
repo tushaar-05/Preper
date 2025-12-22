@@ -98,6 +98,9 @@
                   <span
                     class="px-3 py-1 rounded-full bg-violet-50 text-violet-600 text-xs font-bold border border-violet-100 uppercase tracking-wide">{{
                     q.section }}</span>
+                  <span
+                    class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-100 uppercase tracking-wide">+{{
+                    q.marks }} Marks</span>
                 </div>
                 <div class="flex gap-2">
                   <button data-question='{{ q.to_dict()|tojson|safe }}'
@@ -215,13 +218,20 @@
             <!-- Left Side: Basic Info -->
             <div class="space-y-6">
               <div>
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Section</label>
-                <select name="section" required
-                  class="w-full px-5 py-4 border border-slate-200 rounded-2xl bg-white focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 transition-all font-medium appearance-none">
-                  {% for sec in mock.sections %}
-                  <option value="{{ sec }}">{{ sec }}</option>
-                  {% endfor %}
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Section</label>
+                <select name="section" class="w-full px-4 py-2 border border-blue-100 rounded-xl bg-blue-50/50"
+                  required>
+                  <option value="" disabled selected>Select Section</option>
+                  <option value="General Aptitude">General Aptitude</option>
+                  <option value="English">English</option>
+                  <option value="Mathematics">Mathematics</option>
                 </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Marks</label>
+                <input type="number" name="marks" value="1" min="0" required
+                  class="w-full px-5 py-4 border border-slate-200 rounded-2xl bg-white focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 transition-all font-medium">
               </div>
 
               <div>
@@ -345,10 +355,16 @@
               <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Section</label>
               <select name="section" id="edit_section" required
                 class="w-full px-5 py-4 border border-slate-200 rounded-2xl bg-white focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 transition-all font-medium appearance-none">
-                {% for sec in mock.sections %}
-                <option value="{{ sec }}">{{ sec }}</option>
-                {% endfor %}
+                <option value="General Aptitude">General Aptitude</option>
+                <option value="English">English</option>
+                <option value="Mathematics">Mathematics</option>
               </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Marks</label>
+              <input type="number" name="marks" id="edit_marks" required min="0"
+                class="w-full px-5 py-4 border border-slate-200 rounded-2xl bg-white focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 transition-all font-medium">
             </div>
 
             <div>
@@ -444,6 +460,7 @@
     function openEditModal(q) {
       const modal = document.getElementById('editQuestionModal');
       document.getElementById('edit_section').value = q.section;
+      document.getElementById('edit_marks').value = q.marks;
       document.getElementById('edit_question_text').value = q.question_text;
       document.getElementById('edit_explanation').value = q.explanation || '';
 

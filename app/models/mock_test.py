@@ -120,7 +120,9 @@ class Question(db.Model):
             'correct_answer': self.correct_answer,
             'explanation': self.explanation,
             'explanation_image_url': self.explanation_image_url,
-            'question_number': self.question_number
+            'explanation_image_url': self.explanation_image_url,
+            'question_number': self.question_number,
+            'marks': self.marks
         }
     
     def __repr__(self):

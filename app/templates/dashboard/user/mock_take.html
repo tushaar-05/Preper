@@ -125,7 +125,7 @@
             <div class="space-y-3">
               {% for opt in q.options %}
               <label class="group block relative cursor-pointer outline-none">
-                <input type="radio" name="q_{{ q.id }}" value="{{ opt.text }}" onchange="markAnswered({{ q_index }})"
+                <input type="radio" name="q_{{ q.id }}" value="{{ loop.index }}" onchange="markAnswered({{ q_index }})"
                   class="peer sr-only">
                 <div
                   class="px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl transition-all peer-checked:border-[var(--purple)] peer-checked:bg-[var(--purple)]/5 group-hover:bg-gray-100">

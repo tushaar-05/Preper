@@ -74,10 +74,27 @@ def dashboard():
         })
         
     # Calculate Statistics
-    total_mocks_count = MockTest.query.filter_by(is_active=True).count()
-    attempted_mocks_count = TestAttempt.query.filter_by(student_id=student.id).count()
+    from sqlalchemy import or_
+    total_mocks_count = MockTest.query.filter(
+        MockTest.is_active == True
+    ).filter(
+        or_(
+            MockTest.is_free == True,
+            MockTest.batch_id.in_(batch_ids) if batch_ids else False,
+            MockTest.batch_id == None
+        )
+    ).count()
+    
+    attempted_mocks_count = TestAttempt.query.filter_by(
+        student_id=student.id,
+        status='completed'
+    ).count()
     
     interviews_done_count = Interview.query.filter_by(student_id=student.id, status='completed').count()
+    
+    # Calculate pending doubts
+    from app.models.doubt import Doubt
+    pending_doubts = Doubt.query.filter_by(student_id=student.id, status='pending').count()
     
     # Simple readiness logic
     if attempted_mocks_count > 5:
@@ -102,7 +119,7 @@ def dashboard():
             'interviews_done': interviews_done_count,
             'readiness': interview_readiness,
             'readiness_color': readiness_color,
-            'pending_doubts': 0
+            'pending_doubts': pending_doubts
         }
     )
 
@@ -530,7 +547,7 @@ def mock():
         ).first()
         
         # Determine status
-        status = 'Upcoming'
+        status = 'Live'
         if test.available_from and test.available_until:
             if now < test.available_from:
                 status = 'Upcoming'
@@ -540,6 +557,10 @@ def mock():
                 status = 'Live'
         elif test.available_from:
             status = 'Live' if now >= test.available_from else 'Upcoming'
+        elif test.available_until:
+            status = 'Live' if now <= test.available_until else 'Ended'
+        else:
+            status = 'Live'
             
         formatted_tests.append({
             'id': test.id,
@@ -596,7 +617,6 @@ def mock_take(test_id):
         flash('You have already completed this test.', 'info')
         return redirect(url_for('user.mock_result', attempt_id=existing_attempt.id))
     
-    # Check or create an in-progress attempt
     attempt = TestAttempt.query.filter_by(
         student_id=student.id, 
         mock_test_id=test.id,

@@ -637,6 +637,20 @@ def interviews_delete_all():
     
     return redirect(url_for('admin.interviews'))
 
+def _update_mock_total_marks(mock_id):
+    """Recalculate and update the total marks for a mock test based on its questions"""
+    try:
+        mock = MockTest.query.get(mock_id)
+        if mock:
+            # Calculate total marks from questions
+            # Handle potential None result from sum if no questions exist
+            total = db.session.query(func.sum(Question.marks)).filter_by(mock_test_id=mock_id).scalar() or 0
+            mock.total_marks = int(total)
+            db.session.commit()
+    except Exception as e:
+        print(f"Error updating total marks for mock {mock_id}: {e}")
+        db.session.rollback()
+
 
 @bp.route('/mocks')
 @admin_required
@@ -645,6 +659,9 @@ def mocks():
     mocks_data = MockTest.query.order_by(MockTest.created_at.desc()).all()
     batches = Batch.query.all()
     
+    # Auto-update total marks for legacy data consistency check (optional but good for safety)
+    # We won't do it on every load to save performance, but the system relies on it being correct.
+
     mocks_list = []
     for mock in mocks_data:
         # Get attempt statistics
@@ -695,15 +712,16 @@ def mocks_create():
     try:
         title = request.form.get('title')
         category = request.form.get('category', 'General')
-        duration = int(request.form.get('duration', 60))
-        total_marks = int(request.form.get('total_marks', 100))
+        duration = int(request.form.get('duration', 180))
+        # Total marks starts at 0, updated as questions are added
+        total_marks = 0 
         sections = request.form.getlist('sections')
         
         available_from_str = request.form.get('available_from')
-        available_until_str = request.form.get('available_until')
+        # available_until is auto-calculated based on duration
         
         available_from = datetime.fromisoformat(available_from_str) if available_from_str else None
-        available_until = datetime.fromisoformat(available_until_str) if available_until_str else None
+        available_until = available_from + timedelta(minutes=duration) if available_from else None
         
         batch_id = request.form.get('batch_id')
         batch_id = int(batch_id) if batch_id else None
@@ -739,18 +757,24 @@ def mocks_update(mock_id):
         
         mock.title = request.form.get('title')
         mock.category = request.form.get('category', 'General')
-        mock.duration_minutes = int(request.form.get('duration', 60))
-        mock.total_marks = int(request.form.get('total_marks', 100))
+        
+        # Duration is manually editable, Total Marks is auto-calculated
+        mock.duration_minutes = int(request.form.get('duration', 180))
+        # mock.total_marks is managed automatically
         mock.passing_marks = int(request.form.get('passing_marks', 40))
         
         batch_id = request.form.get('batch_id')
         mock.batch_id = int(batch_id) if batch_id else None
         
         available_from_str = request.form.get('available_from')
-        available_until_str = request.form.get('available_until')
+        # available_until is auto-calculated based on duration
         
-        mock.available_from = datetime.fromisoformat(available_from_str) if available_from_str else None
-        mock.available_until = datetime.fromisoformat(available_until_str) if available_until_str else None
+        if available_from_str:
+            mock.available_from = datetime.fromisoformat(available_from_str)
+            mock.available_until = mock.available_from + timedelta(minutes=mock.duration_minutes)
+        else:
+            mock.available_from = None
+            mock.available_until = None
         
         db.session.commit()
         flash('Mock test updated successfully!', 'success')
@@ -779,6 +803,7 @@ def mock_questions_add(mock_id):
         question_text = request.form.get('question_text')
         correct_answer = request.form.get('correct_answer')
         explanation = request.form.get('explanation')
+        marks = int(request.form.get('marks', 1))
         
         # Handle Question Image
         question_image_url = None
@@ -820,11 +845,16 @@ def mock_questions_add(mock_id):
             options=options,
             correct_answer=correct_answer,
             explanation=explanation,
-            question_number=qn
+            question_number=qn,
+            marks=marks
         )
         
         db.session.add(question)
         db.session.commit()
+        
+        # Update mock total marks
+        _update_mock_total_marks(mock_id)
+        
         flash('Question added successfully!', 'success')
     except Exception as e:
         db.session.rollback()
@@ -843,12 +873,14 @@ def mock_questions_edit(mock_id, question_id):
         question_text = request.form.get('question_text')
         correct_answer = request.form.get('correct_answer')
         explanation = request.form.get('explanation')
+        marks = int(request.form.get('marks', 1))
         
         # Update basic fields
         question.section = section
         question.question_text = question_text
         question.correct_answer = correct_answer
         question.explanation = explanation
+        question.marks = marks
 
         # Handle Question Image Update
         if 'question_image' in request.files:
@@ -885,6 +917,10 @@ def mock_questions_edit(mock_id, question_id):
 
         question.options = updated_options
         db.session.commit()
+        
+        # Update mock total marks
+        _update_mock_total_marks(mock_id)
+        
         flash('Question updated successfully!', 'success')
     except Exception as e:
         db.session.rollback()
@@ -901,6 +937,10 @@ def mock_questions_delete(mock_id, question_id):
         question = Question.query.get_or_404(question_id)
         db.session.delete(question)
         db.session.commit()
+        
+        # Update mock total marks
+        _update_mock_total_marks(mock_id)
+        
         flash('Question deleted successfully!', 'success')
     except Exception as e:
         db.session.rollback()

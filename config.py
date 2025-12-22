@@ -6,3 +6,6 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'mysql+pymysql://root@localhost/nst_prep_db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+# Debug print to verify if config is loaded
+print("Config loaded: SQLAlchemy URI set to {}".format(Config.SQLALCHEMY_DATABASE_URI))
