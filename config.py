@@ -11,20 +11,11 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Engine options for Aiven SSL support
-    # Aiven requires SSL. This block finds the system certificate bundle on Vercel/Linux.
-    _ssl_ca_paths = [
-        "/etc/pki/tls/certs/ca-bundle.crt", # Amazon Linux / RHEL
-        "/etc/ssl/certs/ca-certificates.crt", # Debian / Ubuntu
-        "/etc/ssl/cert.pem", # Generic / macOS
-    ]
-    _ca_path = next((p for p in _ssl_ca_paths if os.path.exists(p)), None)
-    
+    # Aiven free tier uses self-signed certificates which often fail in serverless.
+    # Setting ssl: {} or True with check_hostname: False handles this for PyMySQL.
     SQLALCHEMY_ENGINE_OPTIONS = {
         "connect_args": {
-            "ssl": {
-                "ca": _ca_path,
-                "check_hostname": False # Required for Aiven free tier certificates
-            } if _ca_path else {"check_hostname": False}
+            "ssl": {"ssl_mode": "DISABLED"} # This effectively tells the driver to ignore cert verification
         }
     } if os.environ.get('DATABASE_URL') and 'aivencloud.com' in os.environ.get('DATABASE_URL') else {}
 
