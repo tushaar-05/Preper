@@ -11,9 +11,17 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Engine options for Aiven SSL support
+    # Aiven requires SSL. This block finds the system certificate bundle on Vercel/Linux.
+    _ssl_ca_paths = [
+        "/etc/pki/tls/certs/ca-bundle.crt", # Amazon Linux / RHEL
+        "/etc/ssl/certs/ca-certificates.crt", # Debian / Ubuntu
+        "/etc/ssl/cert.pem", # Generic / macOS
+    ]
+    _ca_path = next((p for p in _ssl_ca_paths if os.path.exists(p)), None)
+    
     SQLALCHEMY_ENGINE_OPTIONS = {
         "connect_args": {
-            "ssl": {"ca": "/etc/pki/tls/certs/ca-bundle.crt"} if os.path.exists("/etc/pki/tls/certs/ca-bundle.crt") else True
+            "ssl": {"ca": _ca_path} if _ca_path else {}
         }
     } if os.environ.get('DATABASE_URL') and 'aivencloud.com' in os.environ.get('DATABASE_URL') else {}
 
