@@ -7,3 +7,4 @@ pymysql
 python-dotenv
 cryptography
 Babel>=2.9.0
+razorpay

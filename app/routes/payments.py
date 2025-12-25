@@ -2,7 +2,8 @@
 Payment routes for handling payments and transactions
 """
 
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
+import razorpay
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app
 from flask import session
 from app.extensions import db
 from app.models import Student, Batch, Enrollment, Payment
@@ -29,6 +30,10 @@ def payment():
         .filter(Enrollment.payment_status.in_(['completed', 'partial']))\
         .join(Batch)\
         .first()
+        
+    # If no active enrollment, redirect to pending payments page
+    if not active_enrollment:
+        return redirect(url_for('payments.payment_pending'))
     
     # Subscription info
     subscription = None
@@ -80,8 +85,13 @@ def payment_pending():
         .order_by(Batch.created_at.desc())\
         .all()
     
-    # Check which batches student is already enrolled in
-    enrolled_batch_ids = [e.batch_id for e in Enrollment.query.filter_by(student_id=student.id).all()]
+    # Check which batches student is already enrolled in (completed or partial)
+    enrolled_batch_ids = [
+        e.batch_id for e in Enrollment.query
+        .filter_by(student_id=student.id)
+        .filter(Enrollment.payment_status.in_(['completed', 'partial']))
+        .all()
+    ]
     
     batches = []
     for batch in active_batches:
@@ -129,47 +139,77 @@ def initiate_payment():
     existing_enrollment = Enrollment.query\
         .filter_by(student_id=student.id, batch_id=batch.id)\
         .first()
-    
-    if existing_enrollment:
+        
+    if existing_enrollment and existing_enrollment.payment_status == 'completed':
         return jsonify({'success': False, 'message': 'Already enrolled in this batch'}), 400
     
     try:
-        # Create enrollment
-        enrollment = Enrollment(
-            student_id=student.id,
-            batch_id=batch.id,
-            payment_status='pending',
-            total_amount=batch.discounted_price,
-            amount_paid=0
-        )
-        db.session.add(enrollment)
-        db.session.flush()
+        # Create enrollment if not exists
+        enrollment = existing_enrollment
+        if not enrollment:
+            enrollment = Enrollment(
+                student_id=student.id,
+                batch_id=batch.id,
+                payment_status='pending',
+                total_amount=batch.discounted_price,
+                amount_paid=0
+            )
+            db.session.add(enrollment)
+            db.session.flush()
+        
+        # Initialize Razorpay Client
+        razorpay_client = razorpay.Client(auth=(
+            current_app.config['RAZORPAY_KEY_ID'], 
+            current_app.config['RAZORPAY_KEY_SECRET']
+        ))
+
+        # Create Razorpay Order
+        amount_in_paise = int(batch.discounted_price * 100)
+        currency = 'INR'
+        
+        razorpay_order = razorpay_client.order.create(dict(
+            amount=amount_in_paise,
+            currency=currency,
+            payment_capture='1',
+            notes={
+                'enrollment_id': enrollment.id,
+                'student_id': student.id,
+                'batch_id': batch.id
+            }
+        ))
+        
+        razorpay_order_id = razorpay_order['id']
         
         # Create payment record
         transaction_id = f'TXN_{datetime.utcnow().strftime("%Y%m%d%H%M%S")}_{secrets.token_hex(4)}'
-        order_id = f'ORD_{secrets.token_hex(8)}'
         
         payment = Payment(
             student_id=student.id,
             enrollment_id=enrollment.id,
             amount=batch.discounted_price,
-            currency='INR',
+            currency=currency,
             transaction_id=transaction_id,
-            order_id=order_id,
+            order_id=razorpay_order_id,
+            gateway='razorpay',
             status='pending',
             description=f'Enrollment in {batch.name}'
         )
         db.session.add(payment)
         db.session.commit()
         
-        # In a real application, redirect to payment gateway here
-        # For now, we'll simulate a successful payment
-        
         return jsonify({
             'success': True,
             'message': 'Payment initiated successfully',
-            'order_id': order_id,
-            'redirect_url': url_for('payments.payment_callback', order_id=order_id)
+            'order_id': razorpay_order_id,
+            'amount': amount_in_paise,
+            'currency': currency,
+            'key': current_app.config['RAZORPAY_KEY_ID'],
+            'prefill': {
+                'name': student.full_name,
+                'email': student.user.email,
+                'contact': student.phone
+            },
+            'description': f'Payment for {batch.name}'
         })
         
     except Exception as e:
@@ -178,69 +218,75 @@ def initiate_payment():
         return jsonify({'success': False, 'message': 'Error initiating payment'}), 500
 
 
-@bp.route('/callback')
+@bp.route('/verify', methods=['POST'])
 @student_required
-def payment_callback():
-    """Handle payment gateway callback (simulated)"""
-    order_id = request.args.get('order_id')
+def verify_payment():
+    """Verify payment signature from Razorpay"""
+    data = request.json
     
-    if not order_id:
-        flash('Invalid payment callback.', 'danger')
-        return redirect(url_for('payments.payment_pending'))
+    razorpay_payment_id = data.get('razorpay_payment_id')
+    razorpay_order_id = data.get('razorpay_order_id')
+    razorpay_signature = data.get('razorpay_signature')
     
-    # Find payment
-    payment = Payment.query.filter_by(order_id=order_id).first()
-    
-    if not payment:
-        flash('Payment not found.', 'danger')
-        return redirect(url_for('payments.payment_pending'))
-    
-    # Simulate successful payment (in real app, verify with gateway)
-    try:
-        # Update payment status
-        payment.status = 'completed'
-        payment.completed_at = datetime.utcnow()
+    if not all([razorpay_payment_id, razorpay_order_id, razorpay_signature]):
+        return jsonify({'success': False, 'message': 'Missing payment details'}), 400
         
-        # Update enrollment
+    try:
+        # Initialize Razorpay Client
+        razorpay_client = razorpay.Client(auth=(
+            current_app.config['RAZORPAY_KEY_ID'], 
+            current_app.config['RAZORPAY_KEY_SECRET']
+        ))
+
+        # Verify Signature
+        params_dict = {
+            'razorpay_order_id': razorpay_order_id,
+            'razorpay_payment_id': razorpay_payment_id,
+            'razorpay_signature': razorpay_signature
+        }
+        
+        razorpay_client.utility.verify_payment_signature(params_dict)
+        
+        # Update Payment Record
+        payment = Payment.query.filter_by(order_id=razorpay_order_id).first()
+        
+        if not payment:
+            return jsonify({'success': False, 'message': 'Payment record not found'}), 404
+            
+        payment.status = 'completed'
+        payment.gateway_response = str(data)
+        payment.completed_at = datetime.utcnow()
+        payment.payment_method = 'razorpay'
+        
+        # Update Enrollment
         enrollment = Enrollment.query.get(payment.enrollment_id)
         if enrollment:
             enrollment.payment_status = 'completed'
             enrollment.amount_paid = payment.amount
             
-            # Update batch enrollment count
-            batch = Batch.query.get(enrollment.batch_id)
-            if batch:
-                batch.current_enrollment += 1
+            # Update Batch Count (only if first time completion)
+            if enrollment.payment_status != 'completed':
+                 batch = Batch.query.get(enrollment.batch_id)
+                 if batch:
+                     batch.current_enrollment += 1
             
-            # Update student status
+            # Update Student Status
             student = Student.query.get(enrollment.student_id)
-            if student and student.enrollment_status == 'pending':
+            if student:
                 student.enrollment_status = 'active'
-        
+                
         db.session.commit()
         
-        flash('Payment successful! You are now enrolled in the batch.', 'success')
-        return redirect(url_for('user.dashboard'))
+        flash('Payment successful! You are now enrolled.', 'success')
+        return jsonify({'success': True, 'redirect_url': url_for('payments.payment')})
+        
+    except razorpay.errors.SignatureVerificationError:
+        return jsonify({'success': False, 'message': 'Payment signature verification failed'}), 400
         
     except Exception as e:
         db.session.rollback()
-        print(f"Payment callback error: {e}")
-        flash('Error processing payment. Please contact support.', 'danger')
-        return redirect(url_for('payments.payment_pending'))
+        print(f"Payment verification error: {e}")
+        return jsonify({'success': False, 'message': 'Error verifying payment'}), 500
 
 
-@bp.route('/verify/<order_id>')
-@student_required
-def verify_payment(order_id):
-    """Verify payment status"""
-    payment = Payment.query.filter_by(order_id=order_id).first()
-    
-    if not payment:
-        return jsonify({'success': False, 'message': 'Payment not found'}), 404
-    
-    return jsonify({
-        'success': True,
-        'status': payment.status,
-        'amount': payment.amount,
-        'transaction_id': payment.transaction_id
-    })
+

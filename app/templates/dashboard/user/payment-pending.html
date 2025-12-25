@@ -13,6 +13,8 @@
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Razorpay -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
   <style>
     :root {
@@ -237,8 +239,8 @@
           {% if batches %}
           {% for batch in batches %}
           <label class="block cursor-pointer group">
-            <input type="radio" name="batch" value="{{ batch.id }}" class="hidden" {% if batch.recommended %}checked{%
-              endif %}>
+            <input type="radio" name="batch" value="{{ batch.id }}" data-price="{{ batch.price }}"
+              class="hidden batch-radio" {% if batch.recommended %}checked{% endif %}>
             <div
               class="bg-white p-6 rounded-2xl border-2 border-transparent shadow-sm hover:shadow-md transition-all relative overflow-hidden">
               {% if batch.recommended %}
@@ -287,11 +289,7 @@
             <div class="space-y-4 border-b border-gray-100 pb-6">
               <div class="flex justify-between text-sm">
                 <span class="text-gray-600">Batch Price</span>
-                <span class="font-medium text-gray-900">₹499.00</span>
-              </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-600">GST (18%)</span>
-                <span class="font-medium text-gray-900">₹89.82</span>
+                <span id="batch-price" class="font-medium text-gray-900">₹0.00</span>
               </div>
               <div class="flex justify-between text-sm text-green-600">
                 <span>Discount</span>
@@ -301,14 +299,16 @@
 
             <div class="flex justify-between items-center py-6">
               <span class="text-lg font-bold text-gray-900">Total</span>
-              <span class="text-2xl font-bold text-[var(--purple)]">₹588.82</span>
+              <span id="total-amount" class="text-2xl font-bold text-[var(--purple)]">₹0.00</span>
             </div>
 
-            <button
+            <button id="pay-button"
               class="w-full py-4 bg-[var(--black)] text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-200 flex items-center justify-center gap-2">
-              Pay Now
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3">
+              <span id="pay-text">Pay Now</span>
+              <svg id="pay-spinner" class="w-5 h-5 animate-spin hidden" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                 </path>
               </svg>
             </button>
@@ -333,6 +333,137 @@
     </main>
   </div>
 
+  </main>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const batchRadios = document.querySelectorAll('.batch-radio');
+      const batchPriceEl = document.getElementById('batch-price');
+
+      const totalAmountEl = document.getElementById('total-amount');
+      const payButton = document.getElementById('pay-button');
+      const payText = document.getElementById('pay-text');
+      const paySpinner = document.getElementById('pay-spinner');
+
+      function updateSummary() {
+        const selectedRadio = document.querySelector('input[name="batch"]:checked');
+        if (selectedRadio) {
+          const price = parseFloat(selectedRadio.dataset.price);
+
+          // No GST calculation
+          const total = price;
+
+          batchPriceEl.textContent = '₹' + price.toFixed(2);
+          totalAmountEl.textContent = '₹' + total.toFixed(2);
+        }
+      }
+
+      batchRadios.forEach(radio => {
+        radio.addEventListener('change', updateSummary);
+      });
+
+      // Initialize summary
+      updateSummary();
+
+      payButton.addEventListener('click', async function () {
+        const selectedRadio = document.querySelector('input[name="batch"]:checked');
+        if (!selectedRadio) {
+          alert('Please select a batch');
+          return;
+        }
+
+        const batchId = selectedRadio.value;
+
+        // Show loading
+        payButton.disabled = true;
+        payText.textContent = 'Processing...';
+        paySpinner.classList.remove('hidden');
+
+        try {
+          // 1. Initiate Payment
+          const formData = new FormData();
+          formData.append('batch_id', batchId);
+
+          const response = await fetch('/payment/initiate', {
+            method: 'POST',
+            body: formData
+          });
+
+          const data = await response.json();
+
+          if (!data.success) {
+            throw new Error(data.message || 'Error initiating payment');
+          }
+
+          // 2. Open Razorpay Checkout
+          const options = {
+            "key": data.key,
+            "amount": data.amount,
+            "currency": data.currency,
+            "name": "NST Prep",
+            "description": data.description,
+            "image": "https://via.placeholder.com/150", // Replace with logo
+            "order_id": data.order_id,
+            "handler": async function (response) {
+              try {
+                // 3. Verify Payment
+                const verifyResponse = await fetch('/payment/verify', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature
+                  })
+                });
+
+                const verifyData = await verifyResponse.json();
+
+                if (verifyData.success) {
+                  window.location.href = verifyData.redirect_url;
+                } else {
+                  alert(verifyData.message || 'Payment verification failed');
+                }
+              } catch (err) {
+                console.error(err);
+                alert('An error occurred during verification');
+              }
+            },
+            "prefill": data.prefill,
+            "theme": {
+              "color": "#9685fe"
+            },
+            "modal": {
+              "ondismiss": function () {
+                payButton.disabled = false;
+                payText.textContent = 'Pay Now';
+                paySpinner.classList.add('hidden');
+              }
+            }
+          };
+
+          const rzp1 = new Razorpay(options);
+          rzp1.on('payment.failed', function (response) {
+            alert(response.error.description);
+            payButton.disabled = false;
+            payText.textContent = 'Pay Now';
+            paySpinner.classList.add('hidden');
+          });
+          rzp1.open();
+
+        } catch (error) {
+          console.error(error);
+          alert(error.message);
+          payButton.disabled = false;
+          payText.textContent = 'Pay Now';
+          paySpinner.classList.add('hidden');
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>
