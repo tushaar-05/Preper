@@ -7,7 +7,6 @@ except Exception as e:
     error_info = traceback.format_exc()
     print(error_info)
     
-    # Create a dummy app to display the error if the real one fails
     from flask import Flask
     app = Flask(__name__)
     @app.route('/')
