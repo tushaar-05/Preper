@@ -25,7 +25,9 @@ def dashboard():
     
     # Get statistics with proper error handling and default values
     try:
-        total_payments = float(db.session.query(func.sum(Payment.amount)).scalar() or 0)
+        total_payments = float(db.session.query(func.sum(Payment.amount))\
+            .filter(Payment.status == 'completed')\
+            .scalar() or 0)
         
         # Get total students (all registered)
         total_students = Student.query.count() or 0
@@ -39,6 +41,7 @@ def dashboard():
         one_week_ago = datetime.utcnow().date() - timedelta(days=7)
         new_enrollments = db.session.query(Enrollment.student_id)\
             .filter(Enrollment.enrollment_date >= one_week_ago)\
+            .filter(Enrollment.payment_status.in_(['completed', 'partial']))\
             .distinct().count() or 0
             
         stats = {
@@ -72,6 +75,7 @@ def dashboard():
         .join(Student, Enrollment.student_id == Student.id)\
         .join(Batch, Enrollment.batch_id == Batch.id)\
         .join(User, Student.user_id == User.id)\
+        .filter(Enrollment.payment_status.in_(['completed', 'partial']))\
         .order_by(Enrollment.enrollment_date.desc())\
         .limit(5).all()
         
