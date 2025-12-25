@@ -13,7 +13,7 @@ class Config:
     # Engine options for Aiven SSL support
     SQLALCHEMY_ENGINE_OPTIONS = {
         "connect_args": {
-            "ssl": {"ca": "/etc/ssl/cert.pem"} if os.path.exists("/etc/ssl/cert.pem") else True
+            "ssl": {"ca": "/etc/pki/tls/certs/ca-bundle.crt"} if os.path.exists("/etc/pki/tls/certs/ca-bundle.crt") else True
         }
     } if os.environ.get('DATABASE_URL') and 'aivencloud.com' in os.environ.get('DATABASE_URL') else {}
 
