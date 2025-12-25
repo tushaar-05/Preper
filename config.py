@@ -21,7 +21,10 @@ class Config:
     
     SQLALCHEMY_ENGINE_OPTIONS = {
         "connect_args": {
-            "ssl": {"ca": _ca_path} if _ca_path else {}
+            "ssl": {
+                "ca": _ca_path,
+                "check_hostname": False # Required for Aiven free tier certificates
+            } if _ca_path else {"check_hostname": False}
         }
     } if os.environ.get('DATABASE_URL') and 'aivencloud.com' in os.environ.get('DATABASE_URL') else {}
 
