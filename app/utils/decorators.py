@@ -38,3 +38,30 @@ def enrollment_required(f):
 
         return f(*args, **kwargs)
     return wrapper
+
+
+def paid_student_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if 'student_id' not in session:
+            flash('Please login as student', 'warning')
+            return redirect(url_for('auth.login'))
+            
+        from app.utils.helpers import get_current_student
+        student = get_current_student()
+        
+        if not student:
+             return redirect(url_for('auth.login'))
+             
+        # Check active enrollment
+        has_paid = Enrollment.query.filter_by(student_id=student.id)\
+            .filter(Enrollment.payment_status.in_(['completed', 'partial']))\
+            .first()
+            
+        if not has_paid:
+            # flash('This feature requires an active batch subscription.', 'warning') 
+            # Commented out flash to avoid double messaging with the dedicated page
+            return redirect(url_for('user.enrollment_required_page'))
+            
+        return f(*args, **kwargs)
+    return wrapper

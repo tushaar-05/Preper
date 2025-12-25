@@ -5,10 +5,22 @@ from app.models import (
     User, Student, Batch, Enrollment, Interview,
     MockTest, Question, TestAttempt, Announcement, Resource
 )
-from app.utils.decorators import student_required
+from app.utils.decorators import student_required, paid_student_required
 from app.utils.helpers import get_current_student, get_user_batch_ids
 
 bp = Blueprint('user', __name__)
+
+@bp.context_processor
+def inject_payment_status():
+    student = get_current_student()
+    is_paid = False
+    if student:
+        enrollment = Enrollment.query.filter_by(student_id=student.id)\
+            .filter(Enrollment.payment_status.in_(['completed', 'partial']))\
+            .first()
+        if enrollment:
+            is_paid = True
+    return dict(is_paid=is_paid)
 
 @bp.route('/dashboard')
 @student_required
@@ -185,7 +197,7 @@ def profile():
 
 
 @bp.route('/announcement')
-@student_required
+@paid_student_required
 def announcement():
     """View announcements"""
     student = get_current_student()
@@ -220,7 +232,7 @@ def announcement():
 
 
 @bp.route('/prepkit')
-@student_required
+@paid_student_required
 def prepkit():
     """View resources/prep kit"""
     student = get_current_student()
@@ -325,7 +337,7 @@ def interview():
 
 
 @bp.route('/doubts')
-@student_required
+@paid_student_required
 def doubts():
     """View doubts forum"""
     from app.models.doubt import Doubt, DoubtReply
@@ -516,7 +528,7 @@ def post_reply(doubt_id):
     
     return redirect(url_for('user.doubt_detail', doubt_id=doubt_id))
 @bp.route('/mock')
-@student_required
+@paid_student_required
 def mock():
     """View available mock tests"""
     student = get_current_student()
@@ -737,3 +749,10 @@ def mock_result(attempt_id):
                          questions=questions, 
                          answers=answers,
                          student=student)
+
+@bp.route('/enrollment-required')
+@student_required
+def enrollment_required_page():
+    """Show page asking user to enroll"""
+    student = get_current_student()
+    return render_template('dashboard/user/enrollment_required.html', student=student)

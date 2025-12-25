@@ -2,7 +2,7 @@
 Utils package initialization
 """
 
-from app.utils.decorators import admin_required, student_required, enrollment_required
+from app.utils.decorators import admin_required, student_required, enrollment_required, paid_student_required
 from app.utils.helpers import (
     get_current_student,
     format_currency,
@@ -18,6 +18,7 @@ from app.utils.helpers import (
 __all__ = [
     'admin_required',
     'student_required',
+    'paid_student_required',
     'enrollment_required',
     'get_current_student',
     'format_currency',
