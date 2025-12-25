@@ -13,13 +13,10 @@ class Config:
     # Engine options for Aiven SSL support
     SQLALCHEMY_ENGINE_OPTIONS = {
         "connect_args": {
-            "ssl": {"check_hostname": False} if os.environ.get('DATABASE_URL') and 'aivencloud.com' in os.environ.get('DATABASE_URL') else None
+            "ssl": {"ca": "/etc/ssl/cert.pem"} if os.path.exists("/etc/ssl/cert.pem") else True
         }
-    }
-    
+    } if os.environ.get('DATABASE_URL') and 'aivencloud.com' in os.environ.get('DATABASE_URL') else {}
+
     # Razorpay Configuration
     RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID')
     RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET')
-
-# Debug print to verify if config is loaded
-print("Config loaded: SQLAlchemy URI set to {}".format(Config.SQLALCHEMY_DATABASE_URI))
