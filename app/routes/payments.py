@@ -214,8 +214,11 @@ def initiate_payment():
         
     except Exception as e:
         db.session.rollback()
+        import traceback
+        traceback.print_exc()
         print(f"Payment initiation error: {e}")
-        return jsonify({'success': False, 'message': 'Error initiating payment'}), 500
+        print(f"Key ID configured: {bool(current_app.config.get('RAZORPAY_KEY_ID'))}")
+        return jsonify({'success': False, 'message': f'Error initiating payment: {str(e)}'}), 500
 
 
 @bp.route('/verify', methods=['POST'])

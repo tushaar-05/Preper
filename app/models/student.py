@@ -36,6 +36,7 @@ class Student(db.Model):
     interviews = db.relationship('Interview', backref='student', lazy='dynamic', cascade='all, delete-orphan')
     test_attempts = db.relationship('TestAttempt', backref='student', lazy='dynamic', cascade='all, delete-orphan')
     payments = db.relationship('Payment', backref='student', lazy='dynamic', cascade='all, delete-orphan')
+    user = db.relationship('User', backref=db.backref('student_profile', uselist=False))
     
     def __repr__(self):
         return f'<Student {self.full_name}>'
