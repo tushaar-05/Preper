@@ -1,6 +1,13 @@
 try:
     from app import create_app
     app = create_app()
+    
+    # Global error handler to catch errors during page load
+    @app.errorhandler(Exception)
+    def handle_runtime_error(e):
+        import traceback
+        return f"<h1>Runtime Error</h1><pre>{traceback.format_exc()}</pre>", 500
+        
     application = app
 except Exception as e:
     import traceback
