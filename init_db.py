@@ -45,7 +45,7 @@ def init_database():
             email='admin@nstprep.com',
             role='admin',
             is_active=True,
-            is_verified=True
+            is_active=True
         )
         admin.set_password('admin123')
         db.session.add(admin)
@@ -56,7 +56,7 @@ def init_database():
             email='rahul@example.com',
             role='student',
             is_active=True,
-            is_verified=True
+            is_active=True
         )
         student_user1.set_password('password123')
         db.session.add(student_user1)
@@ -66,7 +66,7 @@ def init_database():
             email='priya@example.com',
             role='student',
             is_active=True,
-            is_verified=True
+            is_active=True
         )
         student_user2.set_password('password123')
         db.session.add(student_user2)
