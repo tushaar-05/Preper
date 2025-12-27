@@ -113,22 +113,13 @@
       <section data-color="black" class="section video-section py-20 px-4">
         <div class="max-w-5xl mx-auto">
           <div class="relative group">
-            <div class="video-thumbnail relative cursor-pointer overflow-hidden rounded-lg shadow-2xl">
-              <video class="w-full h-auto" poster="../static/images/ChatGPT Image Dec 17, 2025, 02_51_48 PM.png" loop
-                muted>
-                <source src="../static/video/your-video.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-              </video>
-              <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                <div
-                  class="play-button w-20 h-20 bg-white bg-opacity-90 rounded-full flex items-center justify-center transform transition-transform duration-300 group-hover:scale-110">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="ml-1 text-black">
-                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                  </svg>
-                </div>
-              </div>
+            <div class="relative w-full pt-[56.25%] overflow-hidden rounded-lg shadow-2xl bg-black">
+              <iframe class="absolute top-0 left-0 w-full h-full"
+                src="https://www.youtube.com/embed/7mETCG-uFvU?si=nozI3PO17Bc-yVlK" title="YouTube video player"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+              </iframe>
             </div>
           </div>
 
@@ -148,22 +139,6 @@
 
         </div>
       </section>
-
-      <div data-color="black"
-        class="section video-modal fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="relative w-full max-w-4xl mx-4">
-          <button
-            class="close-button absolute -top-12 right-0 text-white text-3xl z-10 hover:text-gray-300 transition-colors">
-            &times;
-          </button>
-          <div class="relative pt-[56.25%]">
-            <video id="modal-video" class="absolute top-0 left-0 w-full h-full" controls>
-              <source src="../static/video/DotVid.mp4" type="video/mp4">
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        </div>
-      </div>
 
       <div data-color="black" class="section cursor-dot">
         <div class="cursor-dot-fill">PLAY</div>
@@ -803,30 +778,33 @@
         <h1 class="font-[BwGradual-Bold] text-[32px] md:text-[55px] mb-[20px] md:ml-[70px] text-center md:text-left">
           Frequently <span class="text-[var(--purple)]">Asked Questions</span></h1>
         <div class="faq-container md:ml-[70px]">
-          <div class="question border-b py-[25px]  border-white/20">
-            <h2 class="font-[BwGradual-Medium] mb-[6px] text-[30px]">What is the refund policy?</h2>
-            <p class="font-[BwGradual-Thin] opacity-[0.7] text-[21px]">Lorem ipsum dolor sit amet consectetur
-              adipisicing elit. Quisquam, quod.</p>
+          <div class="question border-b py-[25px] border-white/20">
+            <h2 class="font-[BwGradual-Medium] mb-[6px] text-[20px] md:text-[24px]">What is the refund policy?</h2>
+            <p class="font-[BwGradual-Thin] opacity-[0.7] text-[16px] md:text-[18px]">We have a strict no-refund and
+              no-cancellation policy. Please review the course details carefully before making a purchase.</p>
           </div>
-          <div class="question border-b py-[25px]  border-white/20">
-            <h2 class="font-[BwGradual-Medium] mb-[6px] text-[30px]">What is the refund policy?</h2>
-            <p class="font-[BwGradual-Thin] opacity-[0.7] text-[21px]">Lorem ipsum dolor sit amet consectetur
-              adipisicing elit. Quisquam, quod.</p>
+          <div class="question border-b py-[25px] border-white/20">
+            <h2 class="font-[BwGradual-Medium] mb-[6px] text-[20px] md:text-[24px]">How can I access the study material?
+            </h2>
+            <p class="font-[BwGradual-Thin] opacity-[0.7] text-[16px] md:text-[18px]">Once enrolled, you can access all
+              study materials, mock tests, and lectures directly from your student dashboard.</p>
           </div>
-          <div class="question border-b py-[25px]  border-white/20">
-            <h2 class="font-[BwGradual-Medium] mb-[6px] text-[30px]">What is the refund policy?</h2>
-            <p class="font-[BwGradual-Thin] opacity-[0.7] text-[21px]">Lorem ipsum dolor sit amet consectetur
-              adipisicing elit. Quisquam, quod.</p>
+          <div class="question border-b py-[25px] border-white/20">
+            <h2 class="font-[BwGradual-Medium] mb-[6px] text-[20px] md:text-[24px]">Is the content accessible after the
+              course ends?</h2>
+            <p class="font-[BwGradual-Thin] opacity-[0.7] text-[16px] md:text-[18px]">Yes! Once you enroll in a batch,
+              you get **lifetime access** to all the course materials, recordings, and resources.</p>
           </div>
-          <div class="question border-b py-[25px]  border-white/20">
-            <h2 class="font-[BwGradual-Medium] mb-[6px] text-[30px]">What is the refund policy?</h2>
-            <p class="font-[BwGradual-Thin] opacity-[0.7] text-[21px]">Lorem ipsum dolor sit amet consectetur
-              adipisicing elit. Quisquam, quod.</p>
+          <div class="question border-b py-[25px] border-white/20">
+            <h2 class="font-[BwGradual-Medium] mb-[6px] text-[20px] md:text-[24px]">How do I contact support?</h2>
+            <p class="font-[BwGradual-Thin] opacity-[0.7] text-[16px] md:text-[18px]">You can reach out to our support
+              team at contact@preper.co.in or via the contact form in the footer for any assistance.</p>
           </div>
-          <div class="question border-b py-[25px]  border-white/20">
-            <h2 class="font-[BwGradual-Medium] mb-[6px] text-[30px]">What is the refund policy?</h2>
-            <p class="font-[BwGradual-Thin] opacity-[0.7] text-[21px]">Lorem ipsum dolor sit amet consectetur
-              adipisicing elit. Quisquam, quod.</p>
+          <div class="question border-b py-[25px] border-white/20">
+            <h2 class="font-[BwGradual-Medium] mb-[6px] text-[20px] md:text-[24px]">Can I switch batches after
+              enrollment?</h2>
+            <p class="font-[BwGradual-Thin] opacity-[0.7] text-[16px] md:text-[18px]">Batch switching is generally not
+              permitted. However, in exceptional cases, you may contact support for review.</p>
           </div>
         </div>
       </section>
@@ -884,13 +862,12 @@
           </div>
 
           <div>
-            <h3 class="text-sm font-[BwGradual-Bold] uppercase tracking-wider text-gray-400 mb-4">Resources</h3>
+            <h3 class="text-sm font-[BwGradual-Bold] uppercase tracking-wider text-gray-400 mb-4">Policies</h3>
             <ul class="space-y-2">
-              <li><a href="#" class="text-gray-300 hover:text-white transition">Blog</a></li>
-              <li><a href="#" class="text-gray-300 hover:text-white transition">Study Materials</a></li>
-              <li><a href="#" class="text-gray-300 hover:text-white transition">Practice Tests</a></li>
-              <li><a href="#" class="text-gray-300 hover:text-white transition">Video Lectures</a></li>
-              <li><a href="#" class="text-gray-300 hover:text-white transition">Success Stories</a></li>
+              <li><a href="/terms" class="text-gray-300 hover:text-white transition">Terms of Service</a></li>
+              <li><a href="/refund-policy" class="text-gray-300 hover:text-white transition">Cancellation & Refund
+                  Policy</a></li>
+              <li><a href="/privacy-policy" class="text-gray-300 hover:text-white transition">Privacy Policy</a></li>
             </ul>
           </div>
 
@@ -902,16 +879,16 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                <span class="text-gray-300">contact@nstprep.com</span>
+                <span class="text-gray-300">contact@preper.co.in</span>
               </li>
               <li class="flex items-start">
                 <svg class="h-5 w-5 text-gray-400 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
-                <span class="text-gray-300">+91 99999 99999</span>
+                <span class="text-gray-300">+91 91191 16529</span>
               </li>
-              <li class="flex items-start">
+              <!-- <li class="flex items-start">
                 <svg class="h-5 w-5 text-gray-400 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -919,7 +896,7 @@
                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
                 <span class="text-gray-300">Lorem ipsum dolor sit amet consectetur adipisicing elit.</span>
-              </li>
+              </li> -->
             </ul>
           </div>
         </div>
