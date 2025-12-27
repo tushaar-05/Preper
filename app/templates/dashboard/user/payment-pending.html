@@ -399,7 +399,125 @@
       // Existing payment logic remains unchanged...
       const batchRadios = document.querySelectorAll('.batch-radio');
       const batchPriceEl = document.getElementById('batch-price');
-      // ... (no changes needed to the existing script logic)
+      const totalAmountEl = document.getElementById('total-amount');
+      const payButton = document.getElementById('pay-button');
+      const payText = document.getElementById('pay-text');
+      const paySpinner = document.getElementById('pay-spinner');
+
+      function updateSummary() {
+        const selectedRadio = document.querySelector('input[name="batch"]:checked');
+        if (selectedRadio) {
+          const price = parseFloat(selectedRadio.dataset.price);
+          batchPriceEl.textContent = '₹' + price.toLocaleString('en-IN');
+          totalAmountEl.textContent = '₹' + price.toLocaleString('en-IN');
+        }
+      }
+
+      batchRadios.forEach(radio => {
+        radio.addEventListener('change', updateSummary);
+      });
+
+      // Initial update
+      updateSummary();
+
+      payButton.addEventListener('click', async function () {
+        const selectedRadio = document.querySelector('input[name="batch"]:checked');
+        if (!selectedRadio) {
+          alert('Please select a batch first');
+          return;
+        }
+
+        const batchId = selectedRadio.value;
+
+        // Loading State
+        payButton.disabled = true;
+        payText.textContent = 'Processing...';
+        paySpinner.classList.remove('hidden');
+
+        try {
+          // 1. Initiate Payment
+          const formData = new FormData();
+          formData.append('batch_id', batchId);
+
+          const response = await fetch('/payment/initiate', {
+            method: 'POST',
+            body: formData
+          });
+
+          const data = await response.json();
+
+          if (!data.success) {
+            throw new Error(data.message || 'Error initiating payment');
+          }
+
+          // 2. Open Razorpay
+          const options = {
+            "key": data.key,
+            "amount": data.amount,
+            "currency": data.currency,
+            "name": "NST Prep",
+            "description": data.description,
+            "order_id": data.order_id,
+            "handler": async function (response) {
+              // 3. Verify Payment
+              try {
+                const verifyResponse = await fetch('/payment/verify', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature
+                  })
+                });
+
+                const verifyData = await verifyResponse.json();
+
+                if (verifyData.success) {
+                  window.location.href = verifyData.redirect_url;
+                } else {
+                  alert(verifyData.message || 'Payment Verification Failed');
+                  resetButton();
+                }
+
+              } catch (error) {
+                console.error('Verification Error:', error);
+                alert('Payment verification failed. Please contact support.');
+                resetButton();
+              }
+            },
+            "prefill": data.prefill,
+            "theme": {
+              "color": "#9685fe"
+            },
+            "modal": {
+              "ondismiss": function () {
+                resetButton();
+              }
+            }
+          };
+
+          const rzp1 = new Razorpay(options);
+          rzp1.on('payment.failed', function (response) {
+            alert(response.error.description);
+            resetButton();
+          });
+          rzp1.open();
+
+        } catch (error) {
+          console.error('Payment Error:', error);
+          alert(error.message);
+          resetButton();
+        }
+      });
+
+      function resetButton() {
+        payButton.disabled = false;
+        payText.textContent = 'Pay Now';
+        paySpinner.classList.add('hidden');
+      }
     });
   </script>
 </body>
