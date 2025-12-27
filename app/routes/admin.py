@@ -819,6 +819,8 @@ def mock_questions_add(mock_id):
                     question_image_url = upload_result.get('secure_url')
                 except Exception as e:
                     print(f"Question image upload failed: {e}")
+                    flash(f"Error uploading question image: {str(e)}", "error")
+                    return redirect(url_for('admin.mock_questions', mock_id=mock_id))
 
         # Handle Options
         options = []
@@ -833,6 +835,8 @@ def mock_questions_add(mock_id):
                         opt_image_url = upload_result.get('secure_url')
                     except Exception as e:
                         print(f"Option image upload failed: {e}")
+                        flash(f"Error uploading option image: {str(e)}", "error")
+                        return redirect(url_for('admin.mock_questions', mock_id=mock_id))
             
             options.append({
                 'text': opt_text,
@@ -897,6 +901,8 @@ def mock_questions_edit(mock_id, question_id):
                     question.question_image_url = upload_result.get('secure_url')
                 except Exception as e:
                     print(f"Question image upload failed: {e}")
+                    flash(f"Error uploading question image: {str(e)}", "error")
+                    return redirect(url_for('admin.mock_questions', mock_id=mock_id))
 
         # Handle Options Update
         current_options = question.options or []
@@ -917,6 +923,8 @@ def mock_questions_edit(mock_id, question_id):
                         opt_image_url = upload_result.get('secure_url')
                     except Exception as e:
                         print(f"Option image upload failed: {e}")
+                        flash(f"Error uploading option image: {str(e)}", "error")
+                        return redirect(url_for('admin.mock_questions', mock_id=mock_id))
             
             updated_options.append({
                 'text': opt_text,
