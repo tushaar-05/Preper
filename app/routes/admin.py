@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import func, or_
 import os
 from werkzeug.utils import secure_filename
+from app.utils.storage import upload_file, delete_file
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -442,14 +443,14 @@ def interviews_schedule():
         if 'image' in request.files:
             file = request.files['image']
             if file and file.filename:
-                filename = secure_filename(f"interview_{datetime.now().timestamp()}_{file.filename}")
-                upload_path = os.path.join('app', 'static', 'uploads', 'interviews', filename)
-                
-                # Ensure directory exists
-                os.makedirs(os.path.dirname(upload_path), exist_ok=True)
-                
-                file.save(upload_path)
-                image_url = url_for('static', filename=f'uploads/interviews/{filename}')
+                # Cloudinary Upload
+                try:
+                    upload_result = upload_file(file, folder='interviews')
+                    image_url = upload_result.get('secure_url')
+                except Exception as e:
+                    print(f"Upload failed: {e}")
+                    # Continue without image or handle error
+                    pass
 
         # Determine target list of students
         target_students = []
@@ -588,19 +589,18 @@ def interviews_update(interview_id):
                 # Optional: Delete old image if exists
                 if interview.image_url:
                     try:
-                        old_path = os.path.join('app', interview.image_url.lstrip('/'))
-                        if os.path.exists(old_path):
-                            os.remove(old_path)
+                        # TODO: Implement deletion if using Cloudinary public_id
+                        pass 
                     except Exception:
                         pass # Ignore deletion errors
 
-                filename = secure_filename(f"interview_{interview.id}_{datetime.now().timestamp()}_{file.filename}")
-                upload_path = os.path.join('app', 'static', 'uploads', 'interviews', filename)
-                
-                os.makedirs(os.path.dirname(upload_path), exist_ok=True)
-                
-                file.save(upload_path)
-                interview.image_url = url_for('static', filename=f'uploads/interviews/{filename}')
+                # Cloudinary Upload
+                try:
+                    upload_result = upload_file(file, folder='interviews')
+                    interview.image_url = upload_result.get('secure_url')
+                except Exception as e:
+                    print(f"Upload failed: {e}")
+                    pass
         
         db.session.commit()
         flash('Interview updated successfully!', 'success')
@@ -814,10 +814,11 @@ def mock_questions_add(mock_id):
         if 'question_image' in request.files:
             file = request.files['question_image']
             if file and file.filename:
-                filename = secure_filename(f"q_{mock_id}_{datetime.now().timestamp()}_{file.filename}")
-                upload_path = os.path.join('app', 'static', 'uploads', 'mocks', filename)
-                file.save(upload_path)
-                question_image_url = url_for('static', filename=f'uploads/mocks/{filename}')
+                try:
+                    upload_result = upload_file(file, folder='mocks/questions')
+                    question_image_url = upload_result.get('secure_url')
+                except Exception as e:
+                    print(f"Question image upload failed: {e}")
 
         # Handle Options
         options = []
@@ -827,10 +828,11 @@ def mock_questions_add(mock_id):
             if f'option_{i}_image' in request.files:
                 file = request.files[f'option_{i}_image']
                 if file and file.filename:
-                    filename = secure_filename(f"opt_{mock_id}_{i}_{datetime.now().timestamp()}_{file.filename}")
-                    upload_path = os.path.join('app', 'static', 'uploads', 'mocks', filename)
-                    file.save(upload_path)
-                    opt_image_url = url_for('static', filename=f'uploads/mocks/{filename}')
+                    try:
+                        upload_result = upload_file(file, folder='mocks/options')
+                        opt_image_url = upload_result.get('secure_url')
+                    except Exception as e:
+                        print(f"Option image upload failed: {e}")
             
             options.append({
                 'text': opt_text,
@@ -890,10 +892,11 @@ def mock_questions_edit(mock_id, question_id):
         if 'question_image' in request.files:
             file = request.files['question_image']
             if file and file.filename:
-                filename = secure_filename(f"q_{mock_id}_{datetime.now().timestamp()}_{file.filename}")
-                upload_path = os.path.join('app', 'static', 'uploads', 'mocks', filename)
-                file.save(upload_path)
-                question.question_image_url = url_for('static', filename=f'uploads/mocks/{filename}')
+                try:
+                    upload_result = upload_file(file, folder='mocks/questions')
+                    question.question_image_url = upload_result.get('secure_url')
+                except Exception as e:
+                    print(f"Question image upload failed: {e}")
 
         # Handle Options Update
         current_options = question.options or []
@@ -909,10 +912,11 @@ def mock_questions_edit(mock_id, question_id):
             if f'option_{i}_image' in request.files:
                 file = request.files[f'option_{i}_image']
                 if file and file.filename:
-                    filename = secure_filename(f"opt_{mock_id}_{i}_{datetime.now().timestamp()}_{file.filename}")
-                    upload_path = os.path.join('app', 'static', 'uploads', 'mocks', filename)
-                    file.save(upload_path)
-                    opt_image_url = url_for('static', filename=f'uploads/mocks/{filename}')
+                    try:
+                        upload_result = upload_file(file, folder='mocks/options')
+                        opt_image_url = upload_result.get('secure_url')
+                    except Exception as e:
+                        print(f"Option image upload failed: {e}")
             
             updated_options.append({
                 'text': opt_text,
@@ -1177,12 +1181,16 @@ def resources_create():
         if resource_type == 'file' and 'resource_file' in request.files:
             file = request.files['resource_file']
             if file and file.filename:
-                filename = secure_filename(f"res_{datetime.now().timestamp()}_{file.filename}")
-                upload_path = os.path.join('app', 'static', 'uploads', 'resources', filename)
-                file.save(upload_path)
-                file_path = f'static/uploads/resources/{filename}'
-                file_size = os.path.getsize(upload_path)
-                file_type = filename.split('.')[-1].lower()
+                try:
+                    upload_result = upload_file(file, folder='resources')
+                    file_path = None # No local path
+                    file_url = upload_result.get('secure_url')
+                    file_size = upload_result.get('bytes', 0)
+                    file_type = upload_result.get('format', filename.split('.')[-1].lower())
+                except Exception as e:
+                    print(f"Resource upload failed: {e}")
+                    flash(f'Error uploading resource: {str(e)}', 'error')
+                    return redirect(url_for('admin.resources'))
         else:
             file_url = request.form.get('file_url')
             file_type = 'LINK'
@@ -1219,7 +1227,10 @@ def resources_delete(resource_id):
         resource = Resource.query.get_or_404(resource_id)
         
         # Delete physical file if exists
-        if resource.file_path:
+        # Cloudinary or local?
+        # If it starts with http, it might be Cloudinary, but we don't have public_id stored easily
+        # For now, skip deletion of remote files to be safe
+        if resource.file_path and not resource.file_path.startswith('http') and 'static/uploads' in resource.file_path:
             abs_path = os.path.join('app', resource.file_path)
             if os.path.exists(abs_path):
                 os.remove(abs_path)

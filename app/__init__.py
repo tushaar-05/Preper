@@ -13,6 +13,10 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     init_mail(app)  # Initialize Flask-Mail
 
+    # Initialize Cloudinary
+    from app.utils.storage import init_cloudinary
+    init_cloudinary(app)
+
     # Register blueprints - import here to avoid circular imports
     from app.routes.main import bp as main_bp
     from app.routes.auth import bp as auth_bp
