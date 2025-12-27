@@ -29,6 +29,9 @@ def register():
             flash('Please fill in all required fields.', 'danger')
             return render_template('register.html')
 
+        # Normalize email
+        email = email.strip().lower()
+
         # Check existing user
         if User.query.filter_by(email=email).first():
             flash('Email address already registered.', 'danger')
@@ -182,6 +185,9 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
+        # Normalize email
+        email = email.strip().lower()
+
         user = User.query.filter_by(email=email, role='student').first()
 
         if not user or not user.check_password(password):
@@ -207,6 +213,9 @@ def admin_login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
+
+        # Normalize email
+        email = email.strip().lower()
 
         admin = User.query.filter_by(email=email, role='admin').first()
 
@@ -275,11 +284,15 @@ def google_callback():
             flash('Email not provided by Google.', 'danger')
             return redirect(url_for('auth.login'))
         
+        # Normalize email (strip whitespace and convert to lowercase)
+        email = email.strip().lower()
+        
         # Check if user exists
         user = User.query.filter_by(email=email).first()
         
         if user:
             # User exists - log them in
+            print(f"[Google OAuth] Existing user found: {email} (User ID: {user.id})")
             if user.role != 'student':
                 flash('This account is not a student account.', 'danger')
                 return redirect(url_for('auth.login'))
@@ -291,7 +304,7 @@ def google_callback():
             # Get student profile
             student = Student.query.filter_by(user_id=user.id).first()
             if student:
-                session['student_id'] = student.id
+                session['student_id'] = user.id
                 flash(f'Welcome back, {student.full_name}!', 'success')
                 return redirect(url_for('user.dashboard'))
             else:
@@ -299,6 +312,7 @@ def google_callback():
                 return redirect(url_for('auth.login'))
         else:
             # New user - create account
+            print(f"[Google OAuth] Creating new account for: {email}")
             try:
                 # Generate unique username
                 username = email.split('@')[0]
@@ -333,7 +347,7 @@ def google_callback():
                     print(f"Failed to send welcome email: {e}")
                 
                 # Log them in
-                session['student_id'] = student.id
+                session['student_id'] = user.id
                 flash(f'Welcome to NST Prep, {student.full_name}!', 'success')
                 return redirect(url_for('user.dashboard'))
                 
