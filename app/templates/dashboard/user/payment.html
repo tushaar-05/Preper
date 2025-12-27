@@ -240,10 +240,9 @@
         </div>
       </header>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-
+      <div class="max-w-4xl mx-auto mb-12">
         <!-- Current Plan Card -->
-        <div class="lg:col-span-2 bg-[var(--black)] text-white rounded-2xl shadow-xl p-8 relative overflow-hidden">
+        <div class="bg-[var(--black)] text-white rounded-2xl shadow-xl p-8 relative overflow-hidden">
           <!-- Decorative Circles -->
           <div
             class="absolute top-0 right-0 w-64 h-64 bg-[var(--purple)] rounded-full opacity-10 blur-3xl transform translate-x-12 -translate-y-12">
@@ -288,87 +287,21 @@
             </div>
           </div>
         </div>
-
-        <!-- Payment Method Summary -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-center">
-          <h4 class="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-4">Payment Method</h4>
-          <div class="flex items-center gap-4 mb-6">
-            <div
-              class="w-12 h-8 bg-gray-100 rounded flex items-center justify-center text-gray-500 font-bold text-xs border border-gray-200">
-              UPI
-            </div>
-            <div>
-              <p class="text-gray-900 font-medium text-sm">xxxxxx@okhdfcbank</p>
-            </div>
-          </div>
-          <button
-            class="w-full py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
-            Manage Payment Method
-          </button>
-        </div>
       </div>
 
-      <!-- Transaction History -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center">
-          <h3 class="font-bold text-gray-900">Transaction History</h3>
-          <button class="text-[var(--purple)] text-sm font-medium hover:underline flex items-center gap-1">
-            Download All
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-            </svg>
-          </button>
+      <!-- Footer Policy Links -->
+      <div class="mt-8 mb-4 border-t border-gray-200 pt-6">
+        <div class="text-center text-xs text-gray-500 font-medium space-x-3">
+          <a href="/terms" target="_blank" class="hover:text-[var(--purple)] hover:underline transition-colors">Terms of
+            Service</a>
+          <span class="text-gray-300">|</span>
+          <a href="/refund-policy" target="_blank"
+            class="hover:text-[var(--purple)] hover:underline transition-colors">Cancellation & Refund Policy</a>
+          <span class="text-gray-300">|</span>
+          <a href="/privacy-policy" target="_blank"
+            class="hover:text-[var(--purple)] hover:underline transition-colors">Privacy Policy</a>
         </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left">
-            <thead>
-              <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
-                <th class="px-6 py-4 font-semibold">Description</th>
-                <th class="px-6 py-4 font-semibold">Date</th>
-                <th class="px-6 py-4 font-semibold">Amount</th>
-                <th class="px-6 py-4 font-semibold">Status</th>
-                <th class="px-6 py-4 font-semibold text-right">Invoice</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              {% for txn in transactions %}
-              <tr class="hover:bg-gray-50/50 transition-colors">
-                <td class="px-6 py-4">
-                  <p class="text-sm font-medium text-gray-900">{{ txn.description }}</p>
-                  <p class="text-xs text-gray-400">ID: {{ txn.id }}</p>
-                </td>
-                <td class="px-6 py-4 text-sm text-gray-500">{{ txn.date }}</td>
-                <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ txn.amount }}</td>
-                <td class="px-6 py-4">
-                  {% if txn.status == 'Success' %}
-                  <span
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Success
-                  </span>
-                  {% else %}
-                  <span
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                    Failed
-                  </span>
-                  {% endif %}
-                </td>
-                <td class="px-6 py-4 text-right">
-                  <a href="{{ txn.invoice_url }}"
-                    class="text-gray-400 hover:text-[var(--purple)] transition-colors inline-block p-1">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                      </path>
-                    </svg>
-                  </a>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+        <p class="text-center text-[10px] text-gray-400 mt-2">&copy; 2025 PREPER. All rights reserved.</p>
       </div>
 
     </main>
