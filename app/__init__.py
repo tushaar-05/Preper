@@ -26,6 +26,10 @@ def create_app(config_class=Config):
     app.register_blueprint(admin_bp)
     app.register_blueprint(payments_bp)
 
+    # Initialize OAuth
+    from app.routes.auth import init_oauth
+    init_oauth(app)
+
     # Register error handlers
     from flask import render_template
     @app.errorhandler(404)

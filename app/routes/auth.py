@@ -3,8 +3,14 @@ from datetime import datetime
 from app.extensions import db
 from app.models import User, Student, Batch, Enrollment
 from app.utils.email_service import send_mojoauth_otp, verify_mojoauth_otp, send_welcome_email
+from authlib.integrations.flask_client import OAuth
+from flask import current_app
+import secrets
 
 bp = Blueprint('auth', __name__)
+
+# Initialize OAuth
+oauth = OAuth()
 
 
 # ---------------- STUDENT REGISTRATION ----------------
@@ -228,3 +234,116 @@ def logout():
     session.pop('admin_id', None)
     flash('Logged out successfully', 'info')
     return redirect(url_for('main.index'))
+
+
+# ---------------- GOOGLE OAUTH ----------------
+def init_oauth(app):
+    """Initialize OAuth with app context"""
+    oauth.init_app(app)
+    oauth.register(
+        name='google',
+        client_id=app.config['GOOGLE_CLIENT_ID'],
+        client_secret=app.config['GOOGLE_CLIENT_SECRET'],
+        server_metadata_url=app.config['GOOGLE_DISCOVERY_URL'],
+        client_kwargs={
+            'scope': 'openid email profile'
+        }
+    )
+
+@bp.route('/google/login')
+def google_login():
+    """Initiate Google OAuth flow"""
+    redirect_uri = url_for('auth.google_callback', _external=True)
+    return oauth.google.authorize_redirect(redirect_uri)
+
+@bp.route('/google/callback')
+def google_callback():
+    """Handle Google OAuth callback"""
+    try:
+        token = oauth.google.authorize_access_token()
+        user_info = token.get('userinfo')
+        
+        if not user_info:
+            flash('Failed to get user information from Google.', 'danger')
+            return redirect(url_for('auth.login'))
+        
+        email = user_info.get('email')
+        name = user_info.get('name')
+        google_id = user_info.get('sub')
+        
+        if not email:
+            flash('Email not provided by Google.', 'danger')
+            return redirect(url_for('auth.login'))
+        
+        # Check if user exists
+        user = User.query.filter_by(email=email).first()
+        
+        if user:
+            # User exists - log them in
+            if user.role != 'student':
+                flash('This account is not a student account.', 'danger')
+                return redirect(url_for('auth.login'))
+            
+            # Update last login
+            user.last_login = datetime.utcnow()
+            db.session.commit()
+            
+            # Get student profile
+            student = Student.query.filter_by(user_id=user.id).first()
+            if student:
+                session['student_id'] = student.id
+                flash(f'Welcome back, {student.full_name}!', 'success')
+                return redirect(url_for('user.dashboard'))
+            else:
+                flash('Student profile not found.', 'danger')
+                return redirect(url_for('auth.login'))
+        else:
+            # New user - create account
+            try:
+                # Generate unique username
+                username = email.split('@')[0]
+                base_username = username
+                counter = 1
+                while User.query.filter_by(username=username).first():
+                    username = f"{base_username}{counter}"
+                    counter += 1
+                
+                # Create user with random password (OAuth users don't need it)
+                user = User(username=username, email=email, role='student')
+                random_password = secrets.token_urlsafe(32)
+                user.set_password(random_password)
+                db.session.add(user)
+                db.session.flush()
+                
+                # Create student profile
+                student = Student(
+                    user_id=user.id,
+                    full_name=name or email.split('@')[0],
+                    phone=None  # Phone is optional for OAuth users
+                )
+                db.session.add(student)
+                db.session.flush()
+                
+                db.session.commit()
+                
+                # Send welcome email
+                try:
+                    send_welcome_email(email, name or email.split('@')[0])
+                except Exception as e:
+                    print(f"Failed to send welcome email: {e}")
+                
+                # Log them in
+                session['student_id'] = student.id
+                flash(f'Welcome to NST Prep, {student.full_name}!', 'success')
+                return redirect(url_for('user.dashboard'))
+                
+            except Exception as e:
+                db.session.rollback()
+                print(f"Error creating user from Google OAuth: {e}")
+                flash('An error occurred during registration. Please try again.', 'danger')
+                return redirect(url_for('auth.register'))
+    
+    except Exception as e:
+        print(f"Google OAuth error: {e}")
+        flash('Authentication failed. Please try again.', 'danger')
+        return redirect(url_for('auth.login'))
