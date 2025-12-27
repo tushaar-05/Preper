@@ -9,6 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
   <style>
     body {
       font-family: 'Space Grotesk', sans-serif;
@@ -501,18 +502,58 @@
       modal.classList.remove('hidden');
     }
 
-    function previewImg(input, previewId) {
+    async function previewImg(input, previewId) {
       const preview = document.getElementById(previewId);
       const content = document.getElementById(previewId + '_content') || document.getElementById(previewId + '_placeholder');
 
       if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          preview.src = e.target.result;
-          preview.classList.remove('hidden');
-          if (content) content.classList.add('hidden');
+        const file = input.files[0];
+
+        // Options for compression
+        const options = {
+          maxSizeMB: 0.8, // Compress to ~800KB
+          maxWidthOrHeight: 1920,
+          useWebWorker: true
+        };
+
+        try {
+          // Show loading state if needed (optional)
+          console.log(`Original size: ${file.size / 1024 / 1024} MB`);
+
+          const compressedFile = await imageCompression(file, options);
+          console.log(`Compressed size: ${compressedFile.size / 1024 / 1024} MB`);
+
+          // Create a new File object from the compressed Blob (preserves name)
+          const newFile = new File([compressedFile], file.name, {
+            type: file.type,
+            lastModified: Date.now()
+          });
+
+          // Replace the file in the input
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(newFile);
+          input.files = dataTransfer.files;
+
+          // Update Preview
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+            if (content) content.classList.add('hidden');
+          }
+          reader.readAsDataURL(newFile);
+
+        } catch (error) {
+          console.error('Compression failed:', error);
+          // Fallback to original file preview on error
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+            if (content) content.classList.add('hidden');
+          }
+          reader.readAsDataURL(file);
         }
-        reader.readAsDataURL(input.files[0]);
       }
     }
   </script>
