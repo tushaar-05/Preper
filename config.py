@@ -22,3 +22,18 @@ class Config:
     # Razorpay Configuration
     RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID')
     RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET')
+    
+    # Flask-Mail Configuration
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'True').lower() in ['true', '1', 't']
+    MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', 'False').lower() in ['true', '1', 't']
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER') or os.environ.get('MAIL_USERNAME')
+    
+    # Resend Configuration
+    RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
+
+    # MojoAuth Configuration
+    MOJOAUTH_API_KEY = os.environ.get('MOJOAUTH_API_KEY')

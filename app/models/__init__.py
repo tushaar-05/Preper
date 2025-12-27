@@ -15,6 +15,7 @@ from app.models.doubt import Doubt, DoubtReply  # noqa
 from .payment import Payment  # noqa
 from .mentor import Mentor  # noqa
 from .site_config import SiteConfig  # noqa
+from .otp import OTP  # noqa
 
 # Import mock test related models conditionally to avoid circular imports
 try:
@@ -36,7 +37,8 @@ __all__ = [
     'Resource',
     'Payment',
     'Mentor',
-    'SiteConfig'
+    'SiteConfig',
+    'OTP'
 ]
 
 # This ensures SQLAlchemy can discover all models
