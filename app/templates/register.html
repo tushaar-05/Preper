@@ -204,11 +204,11 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="relative z-10 flex items-center justify-center px-4 py-12">
-      <div class="w-full max-w-6xl grid md:grid-cols-2 gap-12 items-center">
+    <div class="relative z-10 flex items-center justify-center px-4 py-6 sm:py-12">
+      <div class="w-full max-w-6xl grid md:grid-cols-2 gap-8 md:gap-12 items-center">
 
         <!-- Left Side - Info -->
-        <div class="slide-in mt-[-100px]">
+        <div class="slide-in md:mt-[-100px] hidden md:block">
           <div class="mb-6">
             <span
               class="inline-block px-4 py-2 rounded-full text-sm font-medium text-[var(--purple)] bg-[var(--purple)]/10 border border-[var(--purple)]/20">
@@ -217,7 +217,7 @@
             </span>
           </div>
 
-          <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight"
+          <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight"
             style="font-family: 'BwGradual-Bold', sans-serif;">
             Start Your <span class="gradient-text">Journey</span> Today
           </h1>
@@ -273,16 +273,18 @@
         </div>
 
         <!-- Right Side - Signup Form -->
-        <div class="slide-in" style="animation-delay: 0.2s;">
-          <div class="signup-card bg-[#0a0a0a] rounded-3xl p-8 border border-white/10 relative overflow-hidden">
+        <div class="slide-in w-full" style="animation-delay: 0.2s;">
+          <div
+            class="signup-card bg-[#0a0a0a] rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-white/10 relative overflow-hidden">
             <!-- Grainy texture overlay -->
             <div class="absolute inset-0 opacity-5 pointer-events-none"
               style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 400 400%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');">
             </div>
 
             <div class="relative z-10">
-              <h2 class="text-3xl font-bold mb-2" style="font-family: 'BwGradual-Bold', sans-serif;">Create Account</h2>
-              <p class="text-gray-400 mb-8">Fill in your details to get started</p>
+              <h2 class="text-2xl sm:text-3xl font-bold mb-2" style="font-family: 'BwGradual-Bold', sans-serif;">Create
+                Account</h2>
+              <p class="text-gray-400 mb-6 sm:mb-8 text-sm sm:text-base">Fill in your details to get started</p>
 
               <!-- Flash Messages -->
               {% with messages = get_flashed_messages(with_categories=true) %}
@@ -296,40 +298,44 @@
               {% endif %}
               {% endwith %}
 
-              <form class="space-y-5" method="POST" action="/register">
+              <form class="space-y-4 sm:space-y-5" method="POST" action="/register">
                 <div>
-                  <label class="block text-sm font-medium mb-2 text-gray-300" for="fullname">Full Name</label>
+                  <label class="block text-xs sm:text-sm font-medium mb-2 text-gray-300" for="fullname">Full
+                    Name</label>
                   <input type="text" id="fullname" name="fullname" required
-                    class="input-glow w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300"
+                    class="input-glow w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-black/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300 text-sm sm:text-base"
                     placeholder="John Doe" />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium mb-2 text-gray-300" for="email">Email Address</label>
+                  <label class="block text-xs sm:text-sm font-medium mb-2 text-gray-300" for="email">Email
+                    Address</label>
                   <input type="email" id="email" name="email" required
-                    class="input-glow w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300"
+                    class="input-glow w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-black/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300 text-sm sm:text-base"
                     placeholder="john@example.com" />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium mb-2 text-gray-300" for="phone">Phone Number</label>
+                  <label class="block text-xs sm:text-sm font-medium mb-2 text-gray-300" for="phone">Phone
+                    Number</label>
                   <input type="tel" id="phone" name="phone" required pattern="[0-9]{10}"
-                    class="input-glow w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300"
+                    class="input-glow w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-black/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300 text-sm sm:text-base"
                     placeholder="9876543210" />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium mb-2 text-gray-300" for="password">Password</label>
+                  <label class="block text-xs sm:text-sm font-medium mb-2 text-gray-300" for="password">Password</label>
                   <input type="password" id="password" name="password" required minlength="8"
-                    class="input-glow w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300"
+                    class="input-glow w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-black/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300 text-sm sm:text-base"
                     placeholder="••••••••" />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium mb-2 text-gray-300" for="campus_pref">NST Campus Preference
+                  <label class="block text-xs sm:text-sm font-medium mb-2 text-gray-300" for="campus_pref">NST Campus
+                    Preference
                     <span class="text-gray-500 text-xs">(Optional)</span></label>
                   <select id="campus_pref" name="campus_pref"
-                    class="input-glow w-full px-4 py-3 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300">
+                    class="input-glow w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-black/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300 text-sm sm:text-base">
                     <option value="" disabled selected>Select Campus</option>
                     <option value="pune">Pune</option>
                     <option value="bangalore">Bangalore</option>
@@ -349,10 +355,10 @@
                 </div>
 
                 <button type="submit"
-                  class="w-full bg-white text-black py-4 rounded-full font-semibold hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] flex items-center justify-center gap-2"
+                  class="w-full bg-white text-black py-3 sm:py-4 rounded-full font-semibold hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] flex items-center justify-center gap-2 text-sm sm:text-base"
                   style="font-family: 'BwGradual-Medium', sans-serif;">
                   Create Account
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3">
                     </path>
                   </svg>
