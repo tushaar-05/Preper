@@ -108,7 +108,7 @@ def payment_pending():
             'description': batch.description
         })
     
-    return render_template('dashboard/user/payment-pending.html', batches=batches, student=student)
+    return render_template('dashboard/user/payment-pending.html', batches=batches)
 
 
 @bp.route('/initiate', methods=['POST'])
