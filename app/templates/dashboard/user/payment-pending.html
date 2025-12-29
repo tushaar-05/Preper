@@ -229,7 +229,7 @@
         <h1 class="text-xl font-bold tracking-tight">PREPER<span class="text-[var(--purple)]">.</span></h1>
         <div
           class="w-9 h-9 rounded-full bg-gradient-to-tr from-[var(--purple)] to-indigo-500 flex items-center justify-center text-white text-xs font-bold">
-          T
+          {{ student.full_name[0]|upper }}
         </div>
       </div>
 
@@ -244,10 +244,10 @@
             class="hidden sm:flex items-center gap-3 bg-white pl-2 pr-4 py-1.5 rounded-full shadow-sm hover:shadow-md cursor-pointer transition-all border border-transparent hover:border-gray-100">
             <div
               class="w-9 h-9 rounded-full bg-gradient-to-tr from-[var(--purple)] to-indigo-500 flex items-center justify-center text-white text-sm font-bold">
-              T</div>
+              {{ student.full_name[0]|upper }}</div>
             <div class="text-sm">
               <a href="/profile">
-                <p class="font-semibold text-gray-900 leading-tight">Tushar</p>
+                <p class="font-semibold text-gray-900 leading-tight">{{ student.full_name.split()[0] }}</p>
                 <p class="text-xs text-gray-500">Student</p>
               </a>
             </div>
