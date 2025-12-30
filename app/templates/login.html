@@ -186,6 +186,28 @@
         transform: translate(-20px, 20px);
       }
     }
+
+    .testimonial-slide {
+      opacity: 0;
+      transform: translateX(30px);
+      transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+    }
+
+    .testimonial-slide.active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+      z-index: 10;
+    }
+
+    .testimonial-slide.exit {
+      opacity: 0;
+      transform: translateX(-30px);
+      z-index: 0;
+    }
   </style>
 </head>
 
@@ -287,29 +309,79 @@
             </div>
             <div class="text-center">
               <div class="text-3xl font-bold text-[var(--purple)] mb-1"
-                style="font-family: 'BwGradual-Bold', sans-serif;">20+</div>
+                style="font-family: 'BwGradual-Bold', sans-serif;">10+</div>
               <div class="text-sm text-gray-400">Expert Mentors</div>
             </div>
             <div class="text-center">
               <div class="text-3xl font-bold text-[var(--purple)] mb-1"
-                style="font-family: 'BwGradual-Bold', sans-serif;">100+</div>
+                style="font-family: 'BwGradual-Bold', sans-serif;">30+</div>
               <div class="text-sm text-gray-400">Study Materials</div>
             </div>
           </div>
 
-          <!-- Testimonial -->
-          <div class="mt-12 p-6 bg-[#0a0a0a] rounded-2xl border border-white/10">
-            <div class="flex items-center gap-3 mb-3">
-              <img
-                src="https://artistsimages.b-cdn.net/johnny-sins/johnny-sins-1.jpg?width=3840&quality=100&format=webp&flop=false"
-                alt="Student" class="w-12 h-12 rounded-full border-2 border-[var(--purple)]">
-              <div>
-                <h4 class="font-semibold" style="font-family: 'BwGradual-Medium', sans-serif;">Tushar</h4>
-                <p class="text-sm text-gray-400">NST Aspirant 2025</p>
+          <!-- Testimonial Slider -->
+          <div class="mt-12 relative h-[180px] sm:h-[160px]">
+            <div id="testimonial-slider" class="relative h-full">
+              <!-- Slide 1 -->
+              <div class="testimonial-slide active p-6 bg-[#0a0a0a] rounded-2xl border border-white/10">
+                <div class="flex items-center gap-3 mb-3">
+                  <img
+                    src="https://artistsimages.b-cdn.net/johnny-sins/johnny-sins-1.jpg?width=3840&quality=100&format=webp&flop=false"
+                    alt="Student" class="w-12 h-12 rounded-full border-2 border-[var(--purple)] object-cover">
+                  <div>
+                    <h4 class="font-semibold" style="font-family: 'BwGradual-Medium', sans-serif;">Tushar</h4>
+                    <p class="text-sm text-gray-400">NSAT Aspirant 2025</p>
+                  </div>
+                </div>
+                <p class="text-gray-300 text-sm italic">The structured approach helped me stay on track and cover all
+                  important topics.</p>
+              </div>
+
+              <!-- Slide 2 -->
+              <div class="testimonial-slide p-6 bg-[#0a0a0a] rounded-2xl border border-white/10">
+                <div class="flex items-center gap-3 mb-3">
+                  <img
+                    src="https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=150&h=150&fit=crop&crop=faces"
+                    alt="Student" class="w-12 h-12 rounded-full border-2 border-[var(--purple)] object-cover">
+                  <div>
+                    <h4 class="font-semibold" style="font-family: 'BwGradual-Medium', sans-serif;">Aarav Patel</h4>
+                    <p class="text-sm text-gray-400">NSAT Aspirant 2024</p>
+                  </div>
+                </div>
+                <p class="text-gray-300 text-sm italic">The Mock NSATs here were actually slightly tougher than the real
+                  exam. That made the actual test day feel so much easier.</p>
+              </div>
+
+              <!-- Slide 3 -->
+              <div class="testimonial-slide p-6 bg-[#0a0a0a] rounded-2xl border border-white/10">
+                <div class="flex items-center gap-3 mb-3">
+                  <img
+                    src="https://images.unsplash.com/photo-1623091410901-00e2d268901f?w=150&h=150&fit=crop&crop=faces"
+                    alt="Student" class="w-12 h-12 rounded-full border-2 border-[var(--purple)] object-cover">
+                  <div>
+                    <h4 class="font-semibold" style="font-family: 'BwGradual-Medium', sans-serif;">Priya Sharma</h4>
+                    <p class="text-sm text-gray-400">NSAT Aspirant 2023</p>
+                  </div>
+                </div>
+                <p class="text-gray-300 text-sm italic">The doubt clearing sessions were a lifesaver—mentors don't just
+                  solve the problem, they explain the 'why' behind it.</p>
+              </div>
+
+              <!-- Slide 4 -->
+              <div class="testimonial-slide p-6 bg-[#0a0a0a] rounded-2xl border border-white/10">
+                <div class="flex items-center gap-3 mb-3">
+                  <img
+                    src="https://images.unsplash.com/photo-1615813967515-e1838c1c5116?w=150&h=150&fit=crop&crop=faces"
+                    alt="Student" class="w-12 h-12 rounded-full border-2 border-[var(--purple)] object-cover">
+                  <div>
+                    <h4 class="font-semibold" style="font-family: 'BwGradual-Medium', sans-serif;">Rahul Krishnan</h4>
+                    <p class="text-sm text-gray-400">NSAT Aspirant 2024</p>
+                  </div>
+                </div>
+                <p class="text-gray-300 text-sm italic">Mock interviews simulated the real pressure perfectly, so I
+                  wasn't nervous on the big day. Feedback gave me confidence.</p>
               </div>
             </div>
-            <p class="text-gray-300 text-sm italic">The structured approach helped me stay on track and cover all
-              important topics.</p>
           </div>
         </div>
 
@@ -474,6 +546,30 @@
           s.style.opacity = '1';
         });
       });
+    });
+
+    // Testimonial Slider Logic
+    document.addEventListener('DOMContentLoaded', () => {
+      const slides = document.querySelectorAll('.testimonial-slide');
+      let currentSlide = 0;
+
+      function nextSlide() {
+        slides[currentSlide].classList.remove('active');
+        slides[currentSlide].classList.add('exit');
+
+        const prevSlide = currentSlide;
+        currentSlide = (currentSlide + 1) % slides.length;
+
+        slides[currentSlide].classList.remove('exit');
+        slides[currentSlide].classList.add('active');
+
+        // Reset exit class after animation
+        setTimeout(() => {
+          slides[prevSlide].classList.remove('exit');
+        }, 1000);
+      }
+
+      setInterval(nextSlide, 7000);
     });
   </script>
 </body>
