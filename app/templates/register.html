@@ -332,7 +332,8 @@
                 <div>
                   <label class="block text-xs sm:text-sm font-medium mb-2 text-gray-300" for="fullname">Full
                     Name</label>
-                  <input type="text" id="fullname" name="fullname" required
+                  <input type="text" id="fullname" name="fullname" required maxlength="100" pattern="[A-Za-z\s]+"
+                    title="Please enter only letters and spaces (max 100 characters)."
                     class="input-glow w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-black/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[var(--purple)]/50 transition-all duration-300 text-sm sm:text-base"
                     placeholder="John Doe" value="{{ form_data.full_name if form_data else '' }}" />
                 </div>
