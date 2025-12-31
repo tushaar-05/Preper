@@ -3,7 +3,7 @@ from datetime import datetime
 from app.extensions import db
 from app.models import (
     User, Student, Batch, Enrollment, Interview,
-    MockTest, Question, TestAttempt, Announcement, Resource, AnnouncementRead
+    MockTest, Question, TestAttempt, Announcement, Resource
 )
 from app.utils.decorators import student_required, paid_student_required
 from app.utils.helpers import get_current_student, get_user_batch_ids
@@ -11,30 +11,16 @@ from app.utils.helpers import get_current_student, get_user_batch_ids
 bp = Blueprint('user', __name__)
 
 @bp.context_processor
-def inject_user_stats():
+def inject_payment_status():
     student = get_current_student()
     is_paid = False
-    unread_count = 0
     if student:
-        # Check payment status
         enrollment = Enrollment.query.filter_by(student_id=student.id)\
             .filter(Enrollment.payment_status.in_(['completed', 'partial']))\
             .first()
         if enrollment:
             is_paid = True
-            
-        # Get unread announcements count
-        batch_ids = get_user_batch_ids(student.id)
-        all_announcements = Announcement.query.filter(
-            (Announcement.target_audience == 'all') |
-            (Announcement.target_audience == 'students') |
-            (Announcement.target_batch_id.in_(batch_ids) if batch_ids else False)
-        ).filter(Announcement.is_published == True).all()
-        
-        read_ids = [r.announcement_id for r in AnnouncementRead.query.filter_by(student_id=student.id).all()]
-        unread_count = len([a for a in all_announcements if a.id not in read_ids])
-        
-    return dict(is_paid=is_paid, unread_announcements_count=unread_count)
+    return dict(is_paid=is_paid)
 
 @bp.route('/dashboard')
 @student_required
@@ -51,7 +37,7 @@ def dashboard():
 
     batch_ids = get_user_batch_ids(student.id)
 
-    announcements_query = Announcement.query\
+    announcements = Announcement.query\
         .filter(
             (Announcement.target_audience == 'all') |
             (Announcement.target_audience == 'students') |
@@ -61,19 +47,6 @@ def dashboard():
         .order_by(Announcement.published_at.desc())\
         .limit(5)\
         .all()
-
-    # Get read announcement IDs
-    read_ids = [r.announcement_id for r in AnnouncementRead.query.filter_by(student_id=student.id).all()]
-    
-    announcements = []
-    for ann in announcements_query:
-        announcements.append({
-            'id': ann.id,
-            'title': ann.title,
-            'content': ann.content,
-            'date': ann.published_at.strftime('%b %d, %Y'),
-            'unread': ann.id not in read_ids
-        })
 
     # Determine enrollment status for group interviews
     is_enrolled = False
@@ -241,9 +214,6 @@ def announcement():
         .order_by(Announcement.is_pinned.desc(), Announcement.published_at.desc())\
         .all()
         
-    # Get read IDs
-    read_ids = [r.announcement_id for r in AnnouncementRead.query.filter_by(student_id=student.id).all()]
-    
     # Serialize for frontend
     announcements_data = []
     for ann in announcements_query:
@@ -255,41 +225,10 @@ def announcement():
             'date': ann.published_at.strftime('%b %d, %Y'),
             'category': 'System' if ann.priority == 'medium' else 'Academic' if ann.priority == 'high' else 'Important',
             'priority': ann.priority,
-            'unread': ann.id not in read_ids
+            'unread': True # Logic for unread status can be added later
         })
     
     return render_template('dashboard/user/announcement.html', announcements=announcements_data, student=student)
-
-
-@bp.route('/announcement/mark-read', methods=['POST'])
-@paid_student_required
-def mark_announcements_read():
-    """Mark announcements as read"""
-    student = get_current_student()
-    data = request.get_json()
-    announcement_id = data.get('announcement_id') # If None, mark all as read
-    
-    if announcement_id:
-        # Mark single as read
-        if not AnnouncementRead.query.filter_by(student_id=student.id, announcement_id=announcement_id).first():
-            read = AnnouncementRead(student_id=student.id, announcement_id=announcement_id)
-            db.session.add(read)
-    else:
-        # Mark all as read
-        batch_ids = get_user_batch_ids(student.id)
-        relevant_announcements = Announcement.query.filter(
-            (Announcement.target_audience == 'all') |
-            (Announcement.target_audience == 'students') |
-            (Announcement.target_batch_id.in_(batch_ids) if batch_ids else False)
-        ).filter(Announcement.is_published == True).all()
-        
-        for ann in relevant_announcements:
-            if not AnnouncementRead.query.filter_by(student_id=student.id, announcement_id=ann.id).first():
-                read = AnnouncementRead(student_id=student.id, announcement_id=ann.id)
-                db.session.add(read)
-                
-    db.session.commit()
-    return jsonify({'success': True})
 
 
 @bp.route('/prepkit')
