@@ -187,6 +187,14 @@
         // Update notification badge
         const unreadCount = announcements.filter(a => a.unread).length;
         updateNotificationBadge(unreadCount);
+
+        // Sync with backend
+        fetch('/announcement/mark-all-read', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
       });
     });
 
@@ -269,6 +277,14 @@
             this.classList.remove('unread');
             const unreadCount = announcements.filter(a => a.unread).length;
             updateNotificationBadge(unreadCount);
+
+            // Sync with backend
+            fetch(`/announcement/mark-read/${announcement.id}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
           }
         });
 
@@ -499,7 +515,7 @@
               </svg>
               <span
                 class="notification-badge absolute top-2 right-2.5 w-5 h-5 bg-[var(--purple)] text-white text-xs rounded-full flex items-center justify-center">
-                {{ announcements|length }}
+                {{ announcements|selectattr('unread', 'equalto', True)|list|length }}
               </span>
             </button>
           </div>
@@ -557,7 +573,8 @@
           <div class="mb-4 flex items-center justify-between">
             <h3 class="text-lg font-bold text-gray-900">Recent Announcements</h3>
             <p class="text-sm text-gray-500">
-              <span class="font-medium text-[var(--purple)]">{{ announcements|length }}</span> unread announcements
+              <span class="font-medium text-[var(--purple)]">{{ announcements|selectattr('unread', 'equalto',
+                True)|list|length }}</span> unread announcements
             </p>
           </div>
 

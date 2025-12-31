@@ -44,3 +44,23 @@ class Announcement(db.Model):
     
     def __repr__(self):
         return f'<Announcement {self.title} - {self.priority}>'
+
+
+class AnnouncementRead(db.Model):
+    __tablename__ = 'announcement_reads'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+    announcement_id = db.Column(db.Integer, db.ForeignKey('announcements.id'), nullable=False)
+    read_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    student = db.relationship('Student', backref='announcement_reads')
+    announcement = db.relationship('Announcement', backref='read_records')
+    
+    __table_args__ = (
+        db.UniqueConstraint('student_id', 'announcement_id', name='unique_student_announcement_read'),
+    )
+
+    def __repr__(self):
+        return f'<AnnouncementRead student={self.student_id} announcement={self.announcement_id}>'

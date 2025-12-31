@@ -1,9 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from datetime import datetime
 from app.extensions import db
-from app.models import (
     User, Student, Batch, Enrollment, Interview,
-    MockTest, Question, TestAttempt, Announcement, Resource
+    MockTest, Question, TestAttempt, Announcement, AnnouncementRead, Resource
 )
 from app.utils.decorators import student_required, paid_student_required
 from app.utils.helpers import get_current_student, get_user_batch_ids
@@ -35,8 +34,22 @@ def dashboard():
         .filter(Enrollment.student_id == student.id)\
         .all()
 
+    # Get batch IDs
     batch_ids = get_user_batch_ids(student.id)
 
+    # Get unread announcements count
+    unread_announcements_count = Announcement.query\
+        .filter(
+            (Announcement.target_audience == 'all') |
+            (Announcement.target_audience == 'students') |
+            (Announcement.target_batch_id.in_(batch_ids) if batch_ids else False)
+        )\
+        .filter(Announcement.is_published == True)\
+        .outerjoin(AnnouncementRead, (AnnouncementRead.announcement_id == Announcement.id) & (AnnouncementRead.student_id == student.id))\
+        .filter(AnnouncementRead.id == None)\
+        .count()
+
+    # Get latest announcements for dashboard display
     announcements = Announcement.query\
         .filter(
             (Announcement.target_audience == 'all') |
@@ -123,6 +136,7 @@ def dashboard():
         'dashboard/user/user.html',
         student=student,
         announcements=announcements,
+        unread_announcements_count=unread_announcements_count,
         enrollments=enrollments,
         upcoming_interviews=formatted_interviews,
         stats={
@@ -203,20 +217,21 @@ def announcement():
     student = get_current_student()
     batch_ids = get_user_batch_ids(student.id)
     
-    # Get all relevant announcements
-    announcements_query = Announcement.query\
+    # Get all relevant announcements with read status
+    announcements_query = db.session.query(Announcement, AnnouncementRead.id.label('is_read'))\
         .filter(
             (Announcement.target_audience == 'all') |
             (Announcement.target_audience == 'students') |
             (Announcement.target_batch_id.in_(batch_ids) if batch_ids else False)
         )\
         .filter(Announcement.is_published == True)\
+        .outerjoin(AnnouncementRead, (AnnouncementRead.announcement_id == Announcement.id) & (AnnouncementRead.student_id == student.id))\
         .order_by(Announcement.is_pinned.desc(), Announcement.published_at.desc())\
         .all()
         
     # Serialize for frontend
     announcements_data = []
-    for ann in announcements_query:
+    for ann, read_id in announcements_query:
         announcements_data.append({
             'id': ann.id,
             'title': ann.title,
@@ -225,10 +240,58 @@ def announcement():
             'date': ann.published_at.strftime('%b %d, %Y'),
             'category': 'System' if ann.priority == 'medium' else 'Academic' if ann.priority == 'high' else 'Important',
             'priority': ann.priority,
-            'unread': True # Logic for unread status can be added later
+            'unread': read_id is None
         })
     
     return render_template('dashboard/user/announcement.html', announcements=announcements_data, student=student)
+
+
+@bp.route('/announcement/mark-read/<int:ann_id>', methods=['POST'])
+@student_required
+def mark_announcement_read(ann_id):
+    """Mark a single announcement as read"""
+    student = get_current_student()
+    if not student:
+        return {"error": "Unauthorized"}, 401
+    
+    # Check if a record already exists
+    existing = AnnouncementRead.query.filter_by(student_id=student.id, announcement_id=ann_id).first()
+    if not existing:
+        new_read = AnnouncementRead(student_id=student.id, announcement_id=ann_id)
+        db.session.add(new_read)
+        db.session.commit()
+    
+    return {"status": "success"}
+
+
+@bp.route('/announcement/mark-all-read', methods=['POST'])
+@student_required
+def mark_all_announcements_read():
+    """Mark all relevant announcements as read for the student"""
+    student = get_current_student()
+    if not student:
+        return {"error": "Unauthorized"}, 401
+    
+    batch_ids = get_user_batch_ids(student.id)
+    
+    # Get all unread relevant announcements
+    unread_announcements = Announcement.query\
+        .filter(
+            (Announcement.target_audience == 'all') |
+            (Announcement.target_audience == 'students') |
+            (Announcement.target_batch_id.in_(batch_ids) if batch_ids else False)
+        )\
+        .filter(Announcement.is_published == True)\
+        .outerjoin(AnnouncementRead, (AnnouncementRead.announcement_id == Announcement.id) & (AnnouncementRead.student_id == student.id))\
+        .filter(AnnouncementRead.id == None)\
+        .all()
+    
+    for ann in unread_announcements:
+        read_record = AnnouncementRead(student_id=student.id, announcement_id=ann.id)
+        db.session.add(read_record)
+    
+    db.session.commit()
+    return {"status": "success"}
 
 
 @bp.route('/prepkit')
