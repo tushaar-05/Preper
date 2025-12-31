@@ -228,7 +228,7 @@ def announcement():
             'unread': True # Logic for unread status can be added later
         })
     
-    return render_template('dashboard/user/announcement.html', announcements=announcements_data)
+    return render_template('dashboard/user/announcement.html', announcements=announcements_data, student=student)
 
 
 @bp.route('/prepkit')

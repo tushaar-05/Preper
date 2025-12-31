@@ -69,7 +69,8 @@ def payment():
     
     return render_template('dashboard/user/payment.html', 
                          subscription=subscription, 
-                         transactions=transactions)
+                         transactions=transactions,
+                         student=student)
 
 
 @bp.route('/pending')
