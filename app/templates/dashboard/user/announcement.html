@@ -181,12 +181,28 @@
 
       // Set up mark all as read
       document.getElementById('mark-all-read').addEventListener('click', function () {
+        // Optimistic UI update
         announcements.forEach(ann => ann.unread = false);
         loadAnnouncements();
 
         // Update notification badge
-        const unreadCount = announcements.filter(a => a.unread).length;
-        updateNotificationBadge(unreadCount);
+        updateNotificationBadge(0);
+
+        // Call backend API
+        fetch('/announcement/mark-read', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({})
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (!data.success) {
+              console.error('Error marking all as read');
+            }
+          })
+          .catch(err => console.error('Error:', err));
       });
     });
 
@@ -321,6 +337,40 @@
 
         </div>
       `;
+
+      // Mark as read in backend
+      if (announcement.unread) {
+        announcement.unread = false;
+        // Optimistic UI update for the unread dot in the list
+        const listItem = document.querySelector(`.announcement-item[data-id="${id}"]`);
+        if (listItem) {
+          listItem.classList.remove('unread');
+          const dot = listItem.querySelector('.bg-\\[var\\(--purple\\)\\]');
+          if (dot) dot.remove();
+        }
+
+        // Update notification badge
+        const unreadCount = announcements.filter(a => a.unread).length;
+        updateNotificationBadge(unreadCount);
+
+        // Call backend API
+        fetch('/announcement/mark-read', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            announcement_id: id
+          })
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (!data.success) {
+              console.error('Error marking as read');
+            }
+          })
+          .catch(err => console.error('Error:', err));
+      }
 
       // Update active announcement in list
       document.querySelectorAll('#announcements-list .announcement-item').forEach(item => {
@@ -497,10 +547,12 @@
                   d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
                 </path>
               </svg>
+              {% if unread_announcements_count > 0 %}
               <span
                 class="notification-badge absolute top-2 right-2.5 w-5 h-5 bg-[var(--purple)] text-white text-xs rounded-full flex items-center justify-center">
-                {{ announcements|length }}
+                {{ unread_announcements_count }}
               </span>
+              {% endif %}
             </button>
           </div>
 

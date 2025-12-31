@@ -9,7 +9,7 @@ from .student import Student  # noqa
 from .batch import Batch  # noqa
 from .enrollment import Enrollment  # noqa
 from .interview import Interview  # noqa
-from .announcement import Announcement  # noqa
+from .announcement import Announcement, AnnouncementRead  # noqa
 from app.models.resource import Resource
 from app.models.doubt import Doubt, DoubtReply  # noqa
 from .payment import Payment  # noqa
@@ -34,6 +34,7 @@ __all__ = [
     'Question',
     'TestAttempt',
     'Announcement',
+    'AnnouncementRead',
     'Resource',
     'Payment',
     'Mentor',
