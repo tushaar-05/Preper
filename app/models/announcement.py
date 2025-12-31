@@ -56,7 +56,7 @@ class AnnouncementRead(db.Model):
     
     # Relationships
     student = db.relationship('Student', backref='announcement_reads')
-    announcement = db.relationship('Announcement', backref='read_records')
+    announcement = db.relationship('Announcement', backref=db.backref('read_records', cascade='all, delete-orphan'))
     
     __table_args__ = (
         db.UniqueConstraint('student_id', 'announcement_id', name='unique_student_announcement_read'),
