@@ -52,29 +52,50 @@ def get_download_url(url):
         return url
         
     try:
-        # Standard: res.cloudinary.com/<cloud>/<resource_type>/upload/[v<ver>/]<public_id>
-        parts = url.split('/upload/')
+        # If it's a raw resource, fl_attachment is not supported and usually not needed
+        if '/raw/upload/' in url:
+            return url
+            
+        # Standard: res.cloudinary.com/<cloud>/image/upload/[s--...--/][v<ver>/]<public_id>
+        parts = url.split('/image/upload/')
         if len(parts) < 2:
             return url
             
-        id_part = parts[1]
-        # Remove version if present
-        if id_part.startswith('v') and '/' in id_part:
-            public_id = id_part.split('/', 1)[1]
-        else:
-            public_id = id_part
-            
-        # Determine resource type
-        resource_type = 'image' if '/image/upload/' in url else 'raw'
+        path_part = parts[1]
         
-        # Generate signed URL with attachment flag
-        # We keep the extension for images/PDFs in image type, but not for raw
-        signed_url, _ = cloudinary.utils.cloudinary_url(
-            public_id,
-            flags="attachment",
-            resource_type=resource_type,
-            sign_url=True
-        )
+        # Remove any existing signature if present
+        if path_part.startswith('s--'):
+            slash_idx = path_part.find('/')
+            if slash_idx != -1:
+                path_part = path_part[slash_idx+1:]
+            
+        # Detect version
+        version = None
+        if path_part.startswith('v') and '/' in path_part:
+            v_part, rest = path_part.split('/', 1)
+            if v_part[1:].isdigit():
+                version = v_part[1:]
+                path_part = rest
+        
+        # Split public_id and extension (format)
+        if '.' in path_part:
+            public_id, extension = path_part.rsplit('.', 1)
+        else:
+            public_id = path_part
+            extension = None
+            
+        # Use the SDK helper to generate a clean, signed URL
+        options = {
+            "resource_type": "image",
+            "flags": "attachment",
+            "sign_url": True,
+            "secure": True,
+            "version": version
+        }
+        if extension:
+            options["format"] = extension
+            
+        signed_url, _ = cloudinary.utils.cloudinary_url(public_id, **options)
         return signed_url
     except Exception as e:
         print(f"Error generating download URL: {e}")
