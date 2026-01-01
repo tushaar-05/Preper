@@ -713,7 +713,7 @@ def mock_take(test_id):
             student_id=student.id,
             mock_test_id=test.id,
             status='in_progress',
-            started_at=datetime.now()
+            started_at=datetime.now(IST).replace(tzinfo=None)
         )
         db.session.add(attempt)
         db.session.commit()
@@ -764,7 +764,7 @@ def mock_submit(test_id):
             user_answers[q_id] = value
             
     attempt.answers = user_answers
-    attempt.submitted_at = datetime.now()
+    attempt.submitted_at = datetime.now(IST).replace(tzinfo=None)
     attempt.status = 'completed'
     
     # Grading logic
