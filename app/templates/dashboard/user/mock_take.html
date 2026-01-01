@@ -82,9 +82,10 @@
   <main class="flex-1 flex overflow-hidden">
     <!-- Left Sidebar: Question Navigation -->
     <aside class="w-80 bg-white border-r border-gray-100 flex flex-col hidden lg:flex">
-      <div class="flex-1 overflow-y-auto">
+      <div class="flex-1 overflow-y-auto" id="sidebar-palette">
         {% for section in sections %}
-        <div class="p-6 {% if not loop.last %}border-b border-gray-50{% endif %}">
+        <div class="p-6 {% if not loop.last %}border-b border-gray-50{% endif %} section-group"
+          id="sidebar-section-{{ section|replace(' ', '-') }}" style="display: none;">
           <h3 class="font-bold text-gray-900 mb-4 flex items-center justify-between">
             <span>{{ section }}</span>
             <span
@@ -234,8 +235,10 @@
       document.querySelectorAll('.question-btn').forEach(b => b.classList.remove('active'));
       document.getElementById(`palette-btn-${index}`).classList.add('active');
 
-      // Update section tab
+      // Update section tab and sidebar visibility
       const section = card.getAttribute('data-section');
+
+      // Update Tabs
       document.querySelectorAll('.section-tab').forEach(t => {
         t.classList.remove('bg-[var(--purple)]', 'text-white', 'border-[var(--purple)]');
         t.classList.add('text-gray-500');
@@ -244,6 +247,13 @@
       if (sectionTab) {
         sectionTab.classList.remove('text-gray-500');
         sectionTab.classList.add('bg-[var(--purple)]', 'text-white', 'border-[var(--purple)]');
+      }
+
+      // Update Sidebar Groups Visibility
+      document.querySelectorAll('.section-group').forEach(g => g.style.display = 'none');
+      const sidebarGroup = document.getElementById(`sidebar-section-${section.replace(/\s+/g, '-')}`);
+      if (sidebarGroup) {
+        sidebarGroup.style.display = 'block';
       }
 
       currentQuestion = index;
