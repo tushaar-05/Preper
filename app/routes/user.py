@@ -7,6 +7,7 @@ from app.models import (
 )
 from app.utils.decorators import student_required, paid_student_required
 from app.utils.helpers import get_current_student, get_user_batch_ids
+from app.utils.storage import get_download_url
 
 bp = Blueprint('user', __name__)
 
@@ -328,8 +329,7 @@ def prepkit():
         
         link = resource.file_url or resource.file_path or '#'
         if link and 'cloudinary.com' in link and resource.file_type and resource.file_type.lower() == 'pdf':
-            if '/upload/' in link and '/fl_attachment' not in link:
-                link = link.replace('/upload/', '/upload/fl_attachment/')
+            link = get_download_url(link)
 
         resources[category].append({
             'title': resource.title,

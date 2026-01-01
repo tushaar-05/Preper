@@ -1190,7 +1190,8 @@ def resources_create():
             file = request.files['resource_file']
             if file and file.filename:
                 try:
-                    upload_result = upload_file(file, folder='resources')
+                    res_type = 'raw' if file.filename.lower().endswith('.pdf') else 'auto'
+                    upload_result = upload_file(file, folder='resources', resource_type=res_type)
                     file_path = None # No local path
                     file_url = upload_result.get('secure_url')
                     file_size = upload_result.get('bytes', 0)
