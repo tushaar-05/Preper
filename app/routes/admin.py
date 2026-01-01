@@ -11,8 +11,11 @@ from app.models import (
     SiteConfig
 )
 from app.utils import admin_required, get_batch_status_color, get_interview_status_color
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy import func, or_
+
+# Define IST timezone
+IST = timezone(timedelta(hours=5, minutes=30))
 import os
 from werkzeug.utils import secure_filename
 from app.utils.storage import upload_file, delete_file
@@ -676,7 +679,7 @@ def mocks():
             .scalar()
         
         # Determine status based on availability
-        now = datetime.now()
+        now = datetime.now(IST).replace(tzinfo=None)
         if mock.is_anytime:
             status = 'Live'
             status_color = 'bg-green-100 text-green-700'

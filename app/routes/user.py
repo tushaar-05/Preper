@@ -1,5 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+
+# Define IST timezone
+IST = timezone(timedelta(hours=5, minutes=30))
 from app.extensions import db
 from app.models import (
     User, Student, Batch, Enrollment, Interview,
@@ -617,7 +620,7 @@ def mock():
     ).order_by(MockTest.available_from.desc()).all()
     
     formatted_tests = []
-    now = datetime.now()
+    now = datetime.now(IST).replace(tzinfo=None)
     
     for test in tests_query:
         # Check if attempt already exists
@@ -716,7 +719,7 @@ def mock_take(test_id):
         db.session.commit()
     
     # Calculate remaining time
-    now = datetime.now()
+    now = datetime.now(IST).replace(tzinfo=None)
     elapsed = (now - attempt.started_at).total_seconds() / 60
     remaining_minutes = max(0, test.duration_minutes - elapsed)
     
