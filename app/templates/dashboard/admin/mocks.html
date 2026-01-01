@@ -413,11 +413,23 @@
                   </div>
                 </div>
 
-                <div class="grid grid-cols-1 gap-4">
+                <div class="space-y-4">
+                  <div class="flex items-center gap-3 p-4 bg-violet-50 rounded-xl border border-violet-100">
+                    <input type="checkbox" name="is_anytime" id="is_anytime"
+                      onchange="toggleDateInput(this, 'date_input_group')"
+                      class="w-5 h-5 text-violet-600 rounded-lg border-gray-300 focus:ring-violet-500">
+                    <div>
+                      <label for="is_anytime" class="text-sm font-bold text-gray-900 block">Attempt Anytime</label>
+                      <p class="text-xs text-violet-600">Students can start this test whenever they want.</p>
+                    </div>
+                  </div>
+
                   <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Start Date & Time</label>
-                    <input type="datetime-local" name="available_from" required
-                      class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                    <div id="date_input_group">
+                      <input type="datetime-local" name="available_from" required
+                        class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                    </div>
                   </div>
                 </div>
               </div>
@@ -498,11 +510,23 @@
                     class="w-full px-4 py-2 border border-gray-200 rounded-xl">
                 </div>
 
-                <div class="grid grid-cols-1 gap-4">
+                <div class="space-y-4">
+                  <div class="flex items-center gap-3 p-4 bg-violet-50 rounded-xl border border-violet-100">
+                    <input type="checkbox" name="is_anytime" id="edit_is_anytime"
+                      onchange="toggleDateInput(this, 'edit_date_input_group')"
+                      class="w-5 h-5 text-violet-600 rounded-lg border-gray-300 focus:ring-violet-500">
+                    <div>
+                      <label for="edit_is_anytime" class="text-sm font-bold text-gray-900 block">Attempt Anytime</label>
+                      <p class="text-xs text-violet-600">Students can start this test whenever they want.</p>
+                    </div>
+                  </div>
+
                   <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Start Date & Time</label>
-                    <input type="datetime-local" name="available_from" id="edit_available_from" required
-                      class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                    <div id="edit_date_input_group">
+                      <input type="datetime-local" name="available_from" id="edit_available_from" required
+                        class="w-full px-4 py-2 border border-gray-200 rounded-xl">
+                    </div>
                   </div>
                 </div>
               </div>
@@ -555,6 +579,18 @@
           }, 300);
         }
 
+        function toggleDateInput(checkbox, groupId) {
+          const group = document.getElementById(groupId);
+          const input = group.querySelector('input');
+          if (checkbox.checked) {
+            group.style.display = 'none';
+            input.removeAttribute('required');
+          } else {
+            group.style.display = 'block';
+            input.setAttribute('required', 'required');
+          }
+        }
+
         function openEditModal(mockId) {
           const mock = mocksData[mockId];
           if (!mock) return;
@@ -563,14 +599,16 @@
           document.getElementById('edit_title').value = mock.title;
           document.getElementById('edit_category').value = mock.category;
           document.getElementById('edit_batch_id').value = mock.batch_id;
-          document.getElementById('edit_batch_id').value = mock.batch_id;
           document.getElementById('edit_duration').value = mock.duration_minutes;
-          // document.getElementById('edit_total_marks').value = mock.total_marks; // Removed
-          document.getElementById('edit_passing_marks').value = mock.passing_marks;
           document.getElementById('edit_passing_marks').value = mock.passing_marks;
 
-          document.getElementById('edit_available_from').value = mock.available_from;
-          // document.getElementById('edit_available_until').value = mock.available_until; // Removed
+          const isAnytimeCheck = document.getElementById('edit_is_anytime');
+          isAnytimeCheck.checked = mock.is_anytime;
+          toggleDateInput(isAnytimeCheck, 'edit_date_input_group');
+
+          if (!mock.is_anytime) {
+            document.getElementById('edit_available_from').value = mock.available_from;
+          }
 
           editModal.classList.remove('hidden');
           setTimeout(() => {

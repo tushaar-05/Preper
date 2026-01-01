@@ -25,6 +25,7 @@ class MockTest(db.Model):
     # Availability
     is_active = db.Column(db.Boolean, default=True)
     is_free = db.Column(db.Boolean, default=False)
+    is_anytime = db.Column(db.Boolean, default=False)
     
     # Schedule
     available_from = db.Column(db.DateTime)

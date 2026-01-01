@@ -628,8 +628,9 @@ def mock():
         ).first()
         
         # Determine status
-        status = 'Live'
-        if test.available_from and test.available_until:
+        if test.is_anytime:
+            status = 'Live'
+        elif test.available_from and test.available_until:
             if now < test.available_from:
                 status = 'Upcoming'
             elif now > test.available_until:
@@ -646,8 +647,8 @@ def mock():
         formatted_tests.append({
             'id': test.id,
             'title': test.title,
-            'date': test.available_from.strftime('%b %d, %Y') if test.available_from else 'Anytime',
-            'time': test.available_from.strftime('%I:%M %p') if test.available_from else 'Flexible',
+            'date': test.available_from.strftime('%b %d, %Y') if test.available_from else ('Anytime' if test.is_anytime else 'N/A'),
+            'time': test.available_from.strftime('%I:%M %p') if test.available_from else ('Flexible' if test.is_anytime else 'N/A'),
             'duration': f"{test.duration_minutes} mins",
             'questions': test.total_questions,
             'status': status,

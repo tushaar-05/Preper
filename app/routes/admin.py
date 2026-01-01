@@ -676,8 +676,10 @@ def mocks():
             .scalar()
         
         # Determine status based on availability
-        now = datetime.now()
-        if mock.available_from and now < mock.available_from:
+        if mock.is_anytime:
+            status = 'Live'
+            status_color = 'bg-green-100 text-green-700'
+        elif mock.available_from and now < mock.available_from:
             status = 'Scheduled'
             status_color = 'bg-blue-100 text-blue-700'
         elif mock.available_until and now > mock.available_until:
@@ -697,9 +699,10 @@ def mocks():
             'passing_marks': mock.passing_marks,
             'batch_id': mock.batch_id or '',
             'batch': mock.batch.name if (mock.batch_id and mock.batch) else 'All Batches',
+            'is_anytime': mock.is_anytime,
             'available_from': mock.available_from.strftime('%Y-%m-%dT%H:%M') if mock.available_from else '',
             'available_until': mock.available_until.strftime('%Y-%m-%dT%H:%M') if mock.available_until else '',
-            'date': mock.available_from.strftime('%b %d, %Y') if mock.available_from else 'N/A',
+            'date': mock.available_from.strftime('%b %d, %Y') if mock.available_from else ('Anytime' if mock.is_anytime else 'N/A'),
             'attempts': attempts_count,
             'avg_score': f'{avg_score:.0f}%' if avg_score else '-',
             'status': status,
@@ -721,11 +724,14 @@ def mocks_create():
         total_marks = 0 
         sections = request.form.getlist('sections')
         
-        available_from_str = request.form.get('available_from')
-        # available_until is auto-calculated based on duration
+        is_anytime = request.form.get('is_anytime') == 'on'
+        available_from = None
+        available_until = None
         
-        available_from = datetime.fromisoformat(available_from_str) if available_from_str else None
-        available_until = available_from + timedelta(minutes=duration) if available_from else None
+        if not is_anytime:
+            available_from_str = request.form.get('available_from')
+            available_from = datetime.fromisoformat(available_from_str) if available_from_str else None
+            available_until = available_from + timedelta(minutes=duration) if available_from else None
         
         batch_id = request.form.get('batch_id')
         batch_id = int(batch_id) if batch_id else None
@@ -739,6 +745,7 @@ def mocks_create():
             sections=sections,
             available_from=available_from,
             available_until=available_until,
+            is_anytime=is_anytime,
             is_active=True
         )
         
@@ -770,15 +777,19 @@ def mocks_update(mock_id):
         batch_id = request.form.get('batch_id')
         mock.batch_id = int(batch_id) if batch_id else None
         
-        available_from_str = request.form.get('available_from')
-        # available_until is auto-calculated based on duration
+        mock.is_anytime = request.form.get('is_anytime') == 'on'
         
-        if available_from_str:
-            mock.available_from = datetime.fromisoformat(available_from_str)
-            mock.available_until = mock.available_from + timedelta(minutes=mock.duration_minutes)
-        else:
+        if mock.is_anytime:
             mock.available_from = None
             mock.available_until = None
+        else:
+            available_from_str = request.form.get('available_from')
+            if available_from_str:
+                mock.available_from = datetime.fromisoformat(available_from_str)
+                mock.available_until = mock.available_from + timedelta(minutes=mock.duration_minutes)
+            else:
+                mock.available_from = None
+                mock.available_until = None
         
         db.session.commit()
         flash('Mock test updated successfully!', 'success')

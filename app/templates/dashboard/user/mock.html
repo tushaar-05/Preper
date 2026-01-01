@@ -263,8 +263,8 @@
             <div class="flex justify-between items-start mb-4">
               {% if test.status == 'Live' %}
               <span
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-600 animate-pulse">
-                LIVE NOW
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold {% if test.date == 'Anytime' %}bg-green-100 text-green-600{% else %}bg-red-100 text-red-600 animate-pulse{% endif %}">
+                {% if test.date == 'Anytime' %}AVAILABLE ANYTIME{% else %}LIVE NOW{% endif %}
               </span>
               {% elif test.status == 'Ended' %}
               <span
