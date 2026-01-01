@@ -708,24 +708,35 @@ def mock_take(test_id):
         status='in_progress'
     ).first()
     
+    now = datetime.now(IST).replace(tzinfo=None)
+    
+    if attempt:
+        # Check if attempt is expired
+        elapsed = (now - attempt.started_at).total_seconds() / 60
+        if elapsed > test.duration_minutes:
+            if not attempt.answers:
+                # Stale/bugged attempt (likely from timezone mismatch) - clear it
+                db.session.delete(attempt)
+                db.session.commit()
+                attempt = None
+            else:
+                # Real expiration - redirect to submit to process what they have
+                flash('Time limit exceeded. Submitting your progress.', 'warning')
+                return redirect(url_for('user.mock_submit', test_id=test.id))
+    
     if not attempt:
         attempt = TestAttempt(
             student_id=student.id,
             mock_test_id=test.id,
             status='in_progress',
-            started_at=datetime.now(IST).replace(tzinfo=None)
+            started_at=now
         )
         db.session.add(attempt)
         db.session.commit()
     
-    # Calculate remaining time
-    now = datetime.now(IST).replace(tzinfo=None)
+    # Calculate remaining time (re-calculating for consistency)
     elapsed = (now - attempt.started_at).total_seconds() / 60
     remaining_minutes = max(0, test.duration_minutes - elapsed)
-    
-    if remaining_minutes <= 0:
-        flash('Time limit exceeded for this test.', 'warning')
-        return redirect(url_for('user.mock'))
         
     # Get questions
     questions = test.questions.order_by(Question.question_number).all()
