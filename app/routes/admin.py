@@ -676,6 +676,7 @@ def mocks():
             .scalar()
         
         # Determine status based on availability
+        now = datetime.now()
         if mock.is_anytime:
             status = 'Live'
             status_color = 'bg-green-100 text-green-700'
