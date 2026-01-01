@@ -62,22 +62,48 @@
     </div>
   </header>
 
+  <!-- Section Navigation Tabs -->
+  <div class="bg-white border-b border-gray-100 px-6 py-2 flex items-center gap-2 overflow-x-auto no-scrollbar z-[5]">
+    {% set sections = [] %}
+    {% for q in questions %}
+    {% if q.section not in sections %}
+    {% set _ = sections.append(q.section) %}
+    {% endif %}
+    {% endfor %}
+
+    {% for section in sections %}
+    <button onclick="goToSection('{{ section }}')" id="section-tab-{{ section|replace(' ', '-') }}"
+      class="section-tab whitespace-nowrap px-6 py-2 rounded-xl text-sm font-bold transition-all border-2 border-transparent hover:bg-gray-50 text-gray-500">
+      {{ section }}
+    </button>
+    {% endfor %}
+  </div>
+
   <main class="flex-1 flex overflow-hidden">
     <!-- Left Sidebar: Question Navigation -->
     <aside class="w-80 bg-white border-r border-gray-100 flex flex-col hidden lg:flex">
-      <div class="p-6 border-b border-gray-50">
-        <h3 class="font-bold text-gray-900 mb-4">Question Palette</h3>
-        <div class="grid grid-cols-5 gap-2" id="palette">
-          {% for q in questions %}
-          <button onclick="goToQuestion({{ loop.index0 }})" id="palette-btn-{{ loop.index0 }}"
-            class="question-btn w-10 h-10 rounded-lg border border-gray-100 text-sm font-bold flex items-center justify-center transition-all hover:border-[var(--purple)]">
-            {{ loop.index }}
-          </button>
-          {% endfor %}
+      <div class="flex-1 overflow-y-auto">
+        {% for section in sections %}
+        <div class="p-6 {% if not loop.last %}border-b border-gray-50{% endif %}">
+          <h3 class="font-bold text-gray-900 mb-4 flex items-center justify-between">
+            <span>{{ section }}</span>
+            <span
+              class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full uppercase tracking-wider">Group</span>
+          </h3>
+          <div class="grid grid-cols-5 gap-2">
+            {% for q in questions if q.section == section %}
+            <button onclick="goToQuestion({{ loop.index0 if loop.index0 is defined else questions.index(q) }})"
+              id="palette-btn-{{ questions.index(q) }}"
+              class="question-btn w-10 h-10 rounded-lg border border-gray-100 text-sm font-bold flex items-center justify-center transition-all hover:border-[var(--purple)]">
+              {{ questions.index(q) + 1 }}
+            </button>
+            {% endfor %}
+          </div>
         </div>
+        {% endfor %}
       </div>
 
-      <div class="flex-1 p-6 overflow-y-auto">
+      <div class="p-6 bg-gray-50/50 border-t border-gray-100">
         <h3 class="font-bold text-gray-900 mb-4">Legend</h3>
         <div class="space-y-3">
           <div class="flex items-center gap-3 text-sm">
@@ -86,7 +112,7 @@
           </div>
           <div class="flex items-center gap-3 text-sm">
             <div class="w-4 h-4 rounded bg-[var(--purple)]"></div>
-            <span class="text-gray-600">Current Question</span>
+            <span class="text-gray-600">Current</span>
           </div>
           <div class="flex items-center gap-3 text-sm">
             <div class="w-4 h-4 rounded bg-[#10b981]"></div>
@@ -104,11 +130,15 @@
         {% for q in questions %}
         {% set q_index = loop.index0 %}
         <div class="question-card bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-6"
-          id="q-card-{{ q_index }}">
+          id="q-card-{{ q_index }}" data-section="{{ q.section }}">
           <div class="p-6 md:p-8">
             <div class="flex justify-between items-center mb-6">
-              <span class="text-xs font-bold text-gray-400 tracking-widest uppercase">Question {{ loop.index }} of {{
-                questions|length }}</span>
+              <div class="flex items-center gap-3">
+                <span class="text-xs font-bold text-gray-400 tracking-widest uppercase">Question {{ loop.index }} of {{
+                  questions|length }}</span>
+                <span class="h-1 w-1 rounded-full bg-gray-300"></span>
+                <span class="text-xs font-bold text-[var(--purple)] uppercase tracking-wider">{{ q.section }}</span>
+              </div>
               <span class="px-3 py-1 bg-gray-50 rounded-full text-xs font-bold text-gray-500">+{{ q.marks or 1 }}
                 Marks</span>
             </div>
@@ -171,6 +201,11 @@
     let currentQuestion = 0;
     const totalQuestions = {{ questions| length }};
     let remainingSeconds = {{ remaining_seconds }};
+    const questionsSections = {
+      {% for q in questions %}
+    "{{ loop.index0 }}": "{{ q.section }}",
+      {% endfor %}
+    };
 
     function updateTimer() {
       const h = Math.floor(remainingSeconds / 3600);
@@ -193,23 +228,50 @@
 
       // Update UI
       document.querySelectorAll('.question-card').forEach(c => c.classList.remove('active'));
-      document.getElementById(`q-card-${index}`).classList.add('active');
+      const card = document.getElementById(`q-card-${index}`);
+      card.classList.add('active');
 
       document.querySelectorAll('.question-btn').forEach(b => b.classList.remove('active'));
       document.getElementById(`palette-btn-${index}`).classList.add('active');
+
+      // Update section tab
+      const section = card.getAttribute('data-section');
+      document.querySelectorAll('.section-tab').forEach(t => {
+        t.classList.remove('bg-[var(--purple)]', 'text-white', 'border-[var(--purple)]');
+        t.classList.add('text-gray-500');
+      });
+      const sectionTab = document.getElementById(`section-tab-${section.replace(/\s+/g, '-')}`);
+      if (sectionTab) {
+        sectionTab.classList.remove('text-gray-500');
+        sectionTab.classList.add('bg-[var(--purple)]', 'text-white', 'border-[var(--purple)]');
+      }
 
       currentQuestion = index;
 
       // Update nav buttons
       document.getElementById('prev-btn').disabled = (index === 0);
       document.getElementById('next-btn').innerText = (index === totalQuestions - 1) ? 'Review Summary' : 'Next Question';
+
+      // Scroll card into view on mobile
+      if (window.innerWidth < 1024) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function goToSection(sectionName) {
+      // Find first question of this section
+      for (let i = 0; i < totalQuestions; i++) {
+        if (questionsSections[i] === sectionName) {
+          goToQuestion(i);
+          break;
+        }
+      }
     }
 
     function nextQuestion() {
       if (currentQuestion < totalQuestions - 1) {
         goToQuestion(currentQuestion + 1);
       } else {
-        // Option to open summary palette on mobile or confirm
         confirmSubmit();
       }
     }
