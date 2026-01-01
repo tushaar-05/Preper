@@ -1194,7 +1194,7 @@ def resources_create():
                     file_path = None # No local path
                     file_url = upload_result.get('secure_url')
                     file_size = upload_result.get('bytes', 0)
-                    file_type = upload_result.get('format', filename.split('.')[-1].lower())
+                    file_type = upload_result.get('format', file.filename.split('.')[-1].lower())
                 except Exception as e:
                     print(f"Resource upload failed: {e}")
                     flash(f'Error uploading resource: {str(e)}', 'error')
