@@ -181,6 +181,13 @@ def edit_registration():
 # ---------------- STUDENT LOGIN ----------------
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == 'GET':
+        # Redirect if already logged in
+        if 'student_id' in session:
+            return redirect(url_for('user.dashboard'))
+        # Clear stale flash messages from other tabs
+        session.pop('_flashes', None)
+        
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
@@ -210,6 +217,13 @@ def login():
 # ---------------- ADMIN LOGIN ----------------
 @bp.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
+    if request.method == 'GET':
+        # Redirect if already logged in
+        if 'admin_id' in session:
+            return redirect(url_for('admin.dashboard'))
+        # Clear stale flash messages
+        session.pop('_flashes', None)
+
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
