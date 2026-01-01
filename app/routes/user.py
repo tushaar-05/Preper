@@ -326,11 +326,16 @@ def prepkit():
         else:
             size = 'N/A'
         
+        link = resource.file_url or resource.file_path or '#'
+        if link and 'cloudinary.com' in link and resource.file_type and resource.file_type.lower() == 'pdf':
+            if '/upload/' in link and '/fl_attachment' not in link:
+                link = link.replace('/upload/', '/upload/fl_attachment/')
+
         resources[category].append({
             'title': resource.title,
             'type': resource.file_type.upper() if resource.file_type else 'Link',
             'size': size,
-            'link': resource.file_url or resource.file_path or '#'
+            'link': link
         })
     
     return render_template('dashboard/user/prepkit.html', resources=resources, student=student)
