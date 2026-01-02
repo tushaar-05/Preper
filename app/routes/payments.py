@@ -265,11 +265,14 @@ def verify_payment():
         # Update Enrollment
         enrollment = Enrollment.query.get(payment.enrollment_id)
         if enrollment:
+            # Check if this is first time completion BEFORE updating
+            is_first_completion = enrollment.payment_status != 'completed'
+            
             enrollment.payment_status = 'completed'
             enrollment.amount_paid = payment.amount
             
             # Update Batch Count (only if first time completion)
-            if enrollment.payment_status != 'completed':
+            if is_first_completion:
                  batch = Batch.query.get(enrollment.batch_id)
                  if batch:
                      batch.current_enrollment += 1
