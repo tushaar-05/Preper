@@ -41,7 +41,7 @@ def payment():
         subscription = {
             'status': 'Active' if active_enrollment.payment_status == 'completed' else 'Partial',
             'plan': active_enrollment.batch.name,
-            'amount': format_currency(active_enrollment.total_amount),
+            'amount': format_currency(active_enrollment.batch.discounted_price),
             'next_billing': 'Lifetime Access',
             'card_last4': '****'  # Placeholder
         }

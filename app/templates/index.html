@@ -228,7 +228,8 @@
                 class="ml-32 bg-[var(--black)] rounded-2xl p-8 border border-white/10 group-hover:border-[var(--purple)]/50 transition-all">
                 <h3 class="text-3xl font-[BwGradual-Bold] mb-3">Join the Program</h3>
                 <p class="text-gray-400 font-[BwGradual-Regular] text-lg leading-relaxed">
-                  Complete your registration form and make the payment of ₹599 to access all study materials and
+                  Complete your registration form and make the payment of ₹{{ batch.discounted_price|int if batch else
+                  599 }} to access all study materials and
                   mentorship.
                   Get instant access to our comprehensive resources and join our community of NST aspirants.
                 </p>
@@ -720,8 +721,9 @@
 
                 <div class="mb-10">
                   <h3 class="text-4xl font-bold text-[var(--purple)]">
-                    ₹599
-                    <span class="text-lg text-gray-400 line-through ml-2">₹899</span>
+                    ₹{{ batch.discounted_price|int if batch else 599 }}
+                    <span class="text-lg text-gray-400 line-through ml-2">₹{{ batch.original_price|int if batch else 899
+                      }}</span>
                   </h3>
                 </div>
 

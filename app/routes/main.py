@@ -5,7 +5,13 @@ bp = Blueprint('main', __name__)
 @bp.route('/')
 def index():
     """Landing page"""
-    return render_template('index.html')
+    from app.models import Batch
+    # Get Neumann batch or first active batch
+    batch = Batch.query.filter(Batch.name.ilike('%neumann%')).first()
+    if not batch:
+        batch = Batch.query.filter_by(status='active').first()
+    
+    return render_template('index.html', batch=batch)
 
 @bp.route('/terms')
 def terms():
