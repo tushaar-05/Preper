@@ -93,10 +93,9 @@
           </h3>
           <div class="grid grid-cols-5 gap-2">
             {% for q in questions if q.section == section %}
-            <button onclick="goToQuestion({{ loop.index0 if loop.index0 is defined else questions.index(q) }})"
-              id="palette-btn-{{ questions.index(q) }}"
+            <button onclick="goToQuestion({{ q.abs_index }})" id="palette-btn-{{ q.abs_index }}"
               class="question-btn w-10 h-10 rounded-lg border border-gray-100 text-sm font-bold flex items-center justify-center transition-all hover:border-[var(--purple)]">
-              {{ questions.index(q) + 1 }}
+              {{ q.rel_index }}
             </button>
             {% endfor %}
           </div>
@@ -135,8 +134,8 @@
           <div class="p-6 md:p-8">
             <div class="flex justify-between items-center mb-6">
               <div class="flex items-center gap-3">
-                <span class="text-xs font-bold text-gray-400 tracking-widest uppercase">Question {{ loop.index }} of {{
-                  questions|length }}</span>
+                <span class="text-xs font-bold text-gray-400 tracking-widest uppercase">Question {{ q.rel_index }} of {{
+                  q.section_total }}</span>
                 <span class="h-1 w-1 rounded-full bg-gray-300"></span>
                 <span class="text-xs font-bold text-[var(--purple)] uppercase tracking-wider">{{ q.section }}</span>
               </div>

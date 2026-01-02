@@ -740,7 +740,23 @@ def mock_take(test_id):
         
     # Get questions
     questions = test.questions.order_by(Question.question_number).all()
-    questions_data = [q.to_dict() for q in questions]
+    
+    # Pre-calculate section info and relative indices
+    section_counts = {}
+    for q in questions:
+        section_counts[q.section] = section_counts.get(q.section, 0) + 1
+    
+    current_section_indices = {}
+    questions_data = []
+    for i, q in enumerate(questions):
+        rel_idx = current_section_indices.get(q.section, 0) + 1
+        current_section_indices[q.section] = rel_idx
+        
+        q_dict = q.to_dict()
+        q_dict['abs_index'] = i
+        q_dict['rel_index'] = rel_idx
+        q_dict['section_total'] = section_counts[q.section]
+        questions_data.append(q_dict)
     
     return render_template('dashboard/user/mock_take.html', 
                          test=test, 
