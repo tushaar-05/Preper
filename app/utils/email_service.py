@@ -2,7 +2,7 @@
 Email Service Utility
 Handles sending OTP emails and other email communications
 """
-from flask import current_app
+from flask import current_app, url_for
 from flask_mail import Mail, Message
 import requests
 import json
@@ -462,4 +462,172 @@ def send_welcome_email(email, full_name):
         
     except Exception as e:
         print(f"Error sending welcome email: {str(e)}")
+        return False
+
+def send_password_reset_email(email, token):
+    """
+    Send password reset email
+    
+    Args:
+        email (str): Recipient email address
+        token (str): Reset token
+    
+    Returns:
+        bool: True if email sent successfully, False otherwise
+    """
+    try:
+        reset_url = url_for('auth.reset_password', token=token, _external=True)
+        subject = "Reset Your PREPER Password"
+        
+        html_body = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    background-color: #000000;
+                    color: #ffffff;
+                    margin: 0;
+                    padding: 0;
+                }}
+                .container {{
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 40px 20px;
+                }}
+                .header {{
+                    text-align: center;
+                    margin-bottom: 40px;
+                }}
+                .logo {{
+                    font-size: 32px;
+                    font-weight: bold;
+                    color: #9685fe;
+                    letter-spacing: 1px;
+                }}
+                .content {{
+                    background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+                    border: 1px solid rgba(150, 133, 254, 0.2);
+                    border-radius: 16px;
+                    padding: 40px;
+                    text-align: center;
+                }}
+                .title {{
+                    font-size: 24px;
+                    font-weight: 600;
+                    margin-bottom: 16px;
+                    color: #ffffff;
+                }}
+                .message {{
+                    font-size: 16px;
+                    color: #a0a0a0;
+                    margin-bottom: 32px;
+                    line-height: 1.6;
+                }}
+                .button {{
+                    display: inline-block;
+                    background-color: #9685fe;
+                    color: #ffffff;
+                    padding: 14px 32px;
+                    border-radius: 8px;
+                    text-decoration: none;
+                    font-weight: 600;
+                    margin: 24px 0;
+                }}
+                .expiry {{
+                    font-size: 14px;
+                    color: #808080;
+                    margin-top: 24px;
+                }}
+                .footer {{
+                    text-align: center;
+                    margin-top: 40px;
+                    padding-top: 24px;
+                    border-top: 1px solid #2a2a2a;
+                    color: #606060;
+                    font-size: 14px;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="logo">PREPER</div>
+                </div>
+                
+                <div class="content">
+                    <div class="title">Password Reset Request</div>
+                    
+                    <div class="message">
+                        We received a request to reset your password. Click the button below to create a new password.
+                    </div>
+                    
+                    <a href="{reset_url}" class="button">Reset Password</a>
+                    
+                    <div class="message" style="margin-top: 24px; font-size: 14px;">
+                        Or copy this link: <br>
+                        <a href="{reset_url}" style="color: #9685fe;">{reset_url}</a>
+                    </div>
+                    
+                    <div class="expiry">
+                        This link will expire in 1 hour.
+                    </div>
+                    
+                    <div class="expiry">
+                        If you didn't request this change, you can safely ignore this email.
+                    </div>
+                </div>
+                
+                <div class="footer">
+                    <p>© 2025 PREPER. All rights reserved.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        text_body = f"""
+        Reset Your PREPER Password
+        
+        We received a request to reset your password.
+        
+        Click here to reset: {reset_url}
+        
+        This link will expire in 1 hour.
+        
+        If you didn't request this change, you can safely ignore this email.
+        """
+        
+        # Try Resend first
+        if current_app.config.get('RESEND_API_KEY'):
+            try:
+                resend.api_key = current_app.config['RESEND_API_KEY']
+                params = {
+                    "from": "PREPER <onboarding@resend.dev>",
+                    "to": [email],
+                    "subject": subject,
+                    "html": html_body,
+                    "text": text_body
+                }
+                resend.Emails.send(params)
+                return True
+            except Exception as e:
+                print(f"Resend failed, falling back to SMTP: {e}")
+
+        msg = Message(
+            subject=subject,
+            recipients=[email],
+            html=html_body,
+            body=text_body
+        )
+        
+        mail.send(msg)
+        return True
+        
+    except Exception as e:
+        print(f"Error sending password reset email: {str(e)}")
+        if current_app.debug:
+            print(f"Reset Link: {reset_url}")
+            return True
         return False

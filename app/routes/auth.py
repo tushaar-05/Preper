@@ -2,7 +2,8 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from datetime import datetime
 from app.extensions import db
 from app.models import User, Student, Batch, Enrollment
-from app.utils.email_service import send_mojoauth_otp, verify_mojoauth_otp, send_welcome_email
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired
+from app.utils.email_service import send_mojoauth_otp, verify_mojoauth_otp, send_welcome_email, send_password_reset_email
 from authlib.integrations.flask_client import OAuth
 from flask import current_app
 import secrets
@@ -375,3 +376,66 @@ def google_callback():
         print(f"Google OAuth error: {e}")
         flash('Authentication failed. Please try again.', 'danger')
         return redirect(url_for('auth.login'))
+
+# ---------------- FORGOT PASSWORD ----------------
+@bp.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        if not email:
+            flash('Please provide an email address.', 'danger')
+            return redirect(url_for('auth.forgot_password'))
+        
+        email = email.strip().lower()
+        user = User.query.filter_by(email=email).first()
+        
+        # Security: Always look like it worked to prevent email enumeration
+        if user:
+            s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+            token = s.dumps(email, salt='password-reset-salt')
+            send_password_reset_email(email, token)
+        
+        flash('If an account exists for that email, we have sent a password reset link.', 'success')
+        return redirect(url_for('auth.login'))
+        
+    return render_template('forgot_password.html')
+
+@bp.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    try:
+        email = s.loads(token, salt='password-reset-salt', max_age=3600) # 1 hour expiration
+    except SignatureExpired:
+        flash('The password reset link has expired.', 'danger')
+        return redirect(url_for('auth.forgot_password'))
+    except Exception:
+        flash('Invalid password reset link.', 'danger')
+        return redirect(url_for('auth.forgot_password'))
+    
+    if request.method == 'POST':
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if not password or not confirm_password:
+            flash('Please fill in all fields.', 'danger')
+            return render_template('reset_password.html')
+            
+        if password != confirm_password:
+             flash('Passwords do not match.', 'danger')
+             return render_template('reset_password.html')
+             
+        if len(password) < 6:
+             flash('Password must be at least 6 characters.', 'danger')
+             return render_template('reset_password.html')
+        
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.set_password(password)
+            db.session.commit()
+            flash('Your password has been reset. You can now login.', 'success')
+            return redirect(url_for('auth.login'))
+        else:
+            flash('User not found.', 'danger')
+            return redirect(url_for('auth.login'))
+            
+    return render_template('reset_password.html')
