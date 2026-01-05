@@ -165,13 +165,18 @@ def profile():
         try:
             student.full_name = request.form.get('full_name', student.full_name)
             student.phone = request.form.get('phone', student.phone)
+            student.city = request.form.get('city', student.city)
+            student.state = request.form.get('state', student.state)
+            student.preferred_batch = request.form.get('preferred_batch', student.preferred_batch)
+            student.education_level = request.form.get('education_level', student.education_level)
+            student.institution_name = request.form.get('institution_name', student.institution_name)
 
-            new_email = request.form.get('email')
-            if new_email and new_email != user.email:
-                if User.query.filter_by(email=new_email).first():
-                    flash('Email already exists', 'danger')
-                else:
-                    user.email = new_email
+            dob_str = request.form.get('date_of_birth')
+            if dob_str:
+                try:
+                    student.date_of_birth = datetime.strptime(dob_str, '%Y-%m-%d').date()
+                except ValueError:
+                    pass
 
             db.session.commit()
             flash('Profile updated successfully', 'success')
@@ -204,10 +209,12 @@ def profile():
         'email': user.email if user else 'N/A',
         'phone': student.phone or 'Not set',
         'date_of_birth': dob_formatted,
-        'city': f"{student.city}, {student.state}" if student.city and student.state else student.city or student.state or 'Not set',
-        'preferred_batch': preferred_campus,
+        'preferred_batch': student.preferred_batch or 'Not set',
         'member_since': member_since,
         'batch_name': batch_name,
+        'city': student.city or 'Not set',
+        'state': student.state or 'Not set',
+        'dob_for_input': student.date_of_birth.strftime('%Y-%m-%d') if student.date_of_birth else '',
         'education_level': student.education_level or 'Not set',
         'institution_name': student.institution_name or 'Not set'
     }
