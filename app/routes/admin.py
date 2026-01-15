@@ -238,9 +238,9 @@ def sync_db():
     """Emergency route to sync database schema in production"""
     try:
         from sqlalchemy import text
-        # Attempt to add the image_url column to the mentor table
+        # Attempt to add the image_url column to the mentors table
         # We try to add it, if it fails because it exists, that's fine.
-        db.session.execute(text('ALTER TABLE mentor ADD COLUMN image_url VARCHAR(500)'))
+        db.session.execute(text('ALTER TABLE mentors ADD COLUMN image_url VARCHAR(500)'))
         db.session.commit()
         flash('Database schema updated successfully!', 'success')
     except Exception as e:
