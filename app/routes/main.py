@@ -13,6 +13,11 @@ def index():
     
     return render_template('index.html', batch=batch)
 
+@bp.route('/about')
+def about():
+    """About Us page"""
+    return render_template('about.html')
+
 @bp.route('/terms')
 def terms():
     """Terms and Conditions"""
