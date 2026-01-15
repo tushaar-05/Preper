@@ -126,7 +126,7 @@ def add_mentor():
         
         if not full_name:
             flash('Mentor name is required', 'error')
-            return redirect(url_for('admin.dashboard'))
+            return redirect(url_for('admin.mentors'))
             
         new_mentor = Mentor(
             full_name=full_name,
@@ -144,7 +144,7 @@ def add_mentor():
         print(f"Error adding mentor: {str(e)}")
         flash('Error adding mentor. Please try again.', 'error')
         
-    return redirect(url_for('admin.dashboard'))
+    return redirect(url_for('admin.mentors'))
 
 
 @bp.route('/students')
@@ -240,6 +240,41 @@ def mentors():
         })
     
     return render_template('dashboard/admin/mentors.html', mentors=mentors_list)
+
+@bp.route('/mentors/edit/<int:mentor_id>', methods=['POST'])
+@admin_required
+def edit_mentor(mentor_id):
+    """Edit an existing mentor"""
+    try:
+        mentor = Mentor.query.get_or_404(mentor_id)
+        mentor.full_name = request.form.get('full_name')
+        mentor.email = request.form.get('email')
+        mentor.role = request.form.get('role')
+        mentor.is_active = request.form.get('status') == 'active'
+        
+        db.session.commit()
+        flash(f'Mentor {mentor.full_name} updated successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error updating mentor: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.mentors'))
+
+@bp.route('/mentors/delete/<int:mentor_id>', methods=['POST'])
+@admin_required
+def delete_mentor(mentor_id):
+    """Delete a mentor"""
+    try:
+        mentor = Mentor.query.get_or_404(mentor_id)
+        name = mentor.full_name
+        db.session.delete(mentor)
+        db.session.commit()
+        flash(f'Mentor {name} deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting mentor: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.mentors'))
 
 
 @bp.route('/batches')
