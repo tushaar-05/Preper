@@ -205,27 +205,37 @@
                         <p class="text-gray-500 text-lg">Learn from those who have already succeeded.</p>
                     </div>
 
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {% for mentor in mentors %}
-                        <div class="glass-card rounded-2xl p-6 text-center">
+                        <div
+                            class="glass-card rounded-3xl p-8 flex flex-col md:flex-row items-center md:items-start gap-8 group">
                             <div
-                                class="w-20 h-20 mx-auto mb-4 rounded-full bg-[var(--purple)]/10 flex items-center justify-center border border-white/5 overflow-hidden">
+                                class="w-24 h-24 rounded-2xl bg-[var(--purple)]/10 flex items-center justify-center border border-white/5 overflow-hidden flex-shrink-0 mb-6 md:mb-0">
                                 {% if mentor.image_url %}
                                 <img src="{{ mentor.image_url }}" alt="{{ mentor.full_name }}"
                                     class="w-full h-full object-cover">
                                 {% else %}
-                                <svg class="w-10 h-10 text-[var(--purple)]/30" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-12 h-12 text-[var(--purple)]/30" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 10a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                                         clip-rule="evenodd" />
                                 </svg>
                                 {% endif %}
                             </div>
-                            <h4 class="font-bold text-white mb-1">{{ mentor.full_name }}</h4>
-                            <p class="text-[var(--purple)] text-xs font-semibold uppercase">{{ mentor.role }}</p>
+                            <div class="text-center md:text-left">
+                                <h3 class="text-xl font-bold mb-1 font-[BwGradual-Medium] text-white">{{
+                                    mentor.full_name }}</h3>
+                                <p class="text-[var(--purple)] text-xs font-semibold uppercase tracking-wider mb-4">{{
+                                    mentor.role }}</p>
+                                {% if mentor.description %}
+                                <p class="text-gray-400 text-sm leading-relaxed">
+                                    {{ mentor.description }}
+                                </p>
+                                {% endif %}
+                            </div>
                         </div>
                         {% else %}
                         <!-- No mentors found fallback -->
-                        <div class="col-span-full text-center text-gray-500 py-10">
+                        <div class="col-span-full text-center text-gray-400 py-10 italic">
                             Our mentors will be updated here shortly.
                         </div>
                         {% endfor %}

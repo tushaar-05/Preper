@@ -123,6 +123,7 @@ def add_mentor():
         full_name = request.form.get('full_name')
         email = request.form.get('email')
         role = request.form.get('role', 'Guide')
+        description = request.form.get('description')
         
         if not full_name:
             flash('Mentor name is required', 'error')
@@ -144,7 +145,8 @@ def add_mentor():
             email=email,
             role=role,
             rating=5.0,
-            image_url=image_url
+            image_url=image_url,
+            description=description
         )
         
         db.session.add(new_mentor)
@@ -238,9 +240,16 @@ def sync_db():
     """Emergency route to sync database schema in production"""
     try:
         from sqlalchemy import text
-        # Attempt to add the image_url column to the mentors table
-        # We try to add it, if it fails because it exists, that's fine.
-        db.session.execute(text('ALTER TABLE mentors ADD COLUMN image_url VARCHAR(500)'))
+        # Attempt to add the image_url and description columns to the mentors table
+        # We try to add them, if they fail because they exist, that's fine.
+        try:
+            db.session.execute(text('ALTER TABLE mentors ADD COLUMN image_url VARCHAR(500)'))
+        except: pass
+        
+        try:
+            db.session.execute(text('ALTER TABLE mentors ADD COLUMN description TEXT'))
+        except: pass
+        
         db.session.commit()
         flash('Database schema updated successfully!', 'success')
     except Exception as e:
@@ -276,7 +285,8 @@ def mentors():
                 'status': 'Active' if mentor.is_active else 'Inactive',
                 'joined_date': mentor.created_at.strftime('%b %d, %Y'),
                 'initial': mentor.full_name[0] if mentor.full_name else '?',
-                'image_url': image_url
+                'image_url': image_url,
+                'description': getattr(mentor, 'description', None)
             })
         
         return render_template('dashboard/admin/mentors.html', mentors=mentors_list)
@@ -297,6 +307,7 @@ def edit_mentor(mentor_id):
         mentor.full_name = request.form.get('full_name')
         mentor.email = request.form.get('email')
         mentor.role = request.form.get('role')
+        mentor.description = request.form.get('description')
         mentor.is_active = request.form.get('status') == 'active'
         
         # Handle Image Upload

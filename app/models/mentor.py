@@ -10,6 +10,7 @@ class Mentor(db.Model):
     email = db.Column(db.String(120), unique=True)
     rating = db.Column(db.Float, default=5.0)
     image_url = db.Column(db.String(500))
+    description = db.Column(db.Text)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
