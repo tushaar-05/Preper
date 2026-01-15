@@ -239,16 +239,18 @@ def sync_db():
     try:
         from sqlalchemy import text
         # Attempt to add the image_url column to the mentor table
-        # We use a try-except block in SQL or just catch the python exception
+        # We try to add it, if it fails because it exists, that's fine.
         db.session.execute(text('ALTER TABLE mentor ADD COLUMN image_url VARCHAR(500)'))
         db.session.commit()
         flash('Database schema updated successfully!', 'success')
     except Exception as e:
         db.session.rollback()
-        if 'duplicate column' in str(e).lower() or 'already exists' in str(e).lower():
+        error_msg = str(e).lower()
+        if 'duplicate column' in error_msg or 'already exists' in error_msg or '1060' in error_msg:
             flash('Database is already up to date.', 'info')
         else:
             flash(f'Error updating database: {str(e)}', 'error')
+            print(f"Sync DB error: {e}")
     
     return redirect(url_for('admin.mentors'))
 
@@ -256,24 +258,35 @@ def sync_db():
 @bp.route('/mentors')
 @admin_required
 def mentors():
-    """List all mentors"""
-    mentors_data = Mentor.query.order_by(Mentor.created_at.desc()).all()
-    
-    mentors_list = []
-    for mentor in mentors_data:
-        mentors_list.append({
-            'id': mentor.id,
-            'name': mentor.full_name,
-            'email': mentor.email,
-            'role': mentor.role,
-            'rating': f"{mentor.rating:.1f}",
-            'status': 'Active' if mentor.is_active else 'Inactive',
-            'joined_date': mentor.created_at.strftime('%b %d, %Y'),
-            'initial': mentor.full_name[0] if mentor.full_name else '?',
-            'image_url': mentor.image_url
-        })
-    
-    return render_template('dashboard/admin/mentors.html', mentors=mentors_list)
+    """List all mentors with fail-safe for schema updates"""
+    try:
+        mentors_data = Mentor.query.order_by(Mentor.created_at.desc()).all()
+        
+        mentors_list = []
+        for mentor in mentors_data:
+            # Safely get image_url in case the column is somehow not loaded
+            image_url = getattr(mentor, 'image_url', None)
+            
+            mentors_list.append({
+                'id': mentor.id,
+                'name': mentor.full_name,
+                'email': mentor.email,
+                'role': mentor.role,
+                'rating': f"{mentor.rating:.1f}",
+                'status': 'Active' if mentor.is_active else 'Inactive',
+                'joined_date': mentor.created_at.strftime('%b %d, %Y'),
+                'initial': mentor.full_name[0] if mentor.full_name else '?',
+                'image_url': image_url
+            })
+        
+        return render_template('dashboard/admin/mentors.html', mentors=mentors_list)
+        
+    except Exception as e:
+        print(f"Mentors list error: {e}")
+        db.session.rollback()
+        # If we get a database error, show a more helpful page or flash
+        flash('Notice: Database schema might need sync. Click the button below if problems persist.', 'warning')
+        return render_template('dashboard/admin/mentors.html', mentors=[], db_error=True)
 
 @bp.route('/mentors/edit/<int:mentor_id>', methods=['POST'])
 @admin_required
