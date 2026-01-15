@@ -17,7 +17,7 @@
         <div class="relative w-[420px] h-[420px] scale-[2.5]">
 
           <div class="w-full h-full rounded-full overflow-hidden">
-            <video class="w-full h-full object-cover" autoplay loop muted playsinline preload="auto">
+            <video id="bgVideo" class="w-full h-full object-cover" autoplay loop muted playsinline preload="metadata">
               <source src="../static/video/DotVid.mp4" type="video/mp4">
               Your browser does not support the video tag.
             </video>
@@ -121,7 +121,7 @@
                 src="https://www.youtube.com/embed/7mETCG-uFvU?si=nozI3PO17Bc-yVlK" title="YouTube video player"
                 frameborder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy">
               </iframe>
             </div>
           </div>
@@ -978,21 +978,24 @@
         });
       });
     });
-
-    // Safari Video Autoplay Failsafe
-    window.addEventListener('load', () => {
-      const bgVideo = document.querySelector('video[autoplay]');
-      if (bgVideo) {
-        // Try to play immediately
-        const bPlay = bgVideo.play();
-        if (bPlay !== undefined) {
-          bPlay.catch(error => {
-            // Auto-play was prevented
-            console.log("Autoplay prevented:", error);
-          });
-        }
+    // Video Autoplay Failsafe
+    function attemptPlay() {
+      const bgVideo = document.getElementById('bgVideo');
+      if (bgVideo && bgVideo.paused) {
+        bgVideo.muted = true;
+        bgVideo.play().catch(err => console.log("Playback prevented:", err));
       }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      attemptPlay();
+      // Also try again after a short delay to catch any race conditions
+      setTimeout(attemptPlay, 1000);
     });
+
+    // Final fallback: play on first user interaction
+    window.addEventListener('touchstart', attemptPlay, { once: true });
+    window.addEventListener('mousedown', attemptPlay, { once: true });
   </script>
 </body>
 
