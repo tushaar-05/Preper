@@ -17,8 +17,10 @@
         <div class="relative w-[420px] h-[420px] scale-[2.5]">
 
           <div class="w-full h-full rounded-full overflow-hidden">
-            <video class="w-full h-full object-cover" src="../static/video/DotVid.mp4" autoplay loop muted
-              playsinline></video>
+            <video class="w-full h-full object-cover" autoplay loop muted playsinline preload="auto">
+              <source src="../static/video/DotVid.mp4" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
           </div>
           <div class="pointer-events-none absolute inset-0 rounded-full
             bg-[radial-gradient(circle,rgba(0,0,0,0.35)_35%,rgba(0,0,0,0.85)_65%,rgba(0,0,0,1)_100%)]">
@@ -975,6 +977,21 @@
           s.style.opacity = '1';
         });
       });
+    });
+
+    // Safari Video Autoplay Failsafe
+    window.addEventListener('load', () => {
+      const bgVideo = document.querySelector('video[autoplay]');
+      if (bgVideo) {
+        // Try to play immediately
+        const bPlay = bgVideo.play();
+        if (bPlay !== undefined) {
+          bPlay.catch(error => {
+            // Auto-play was prevented
+            console.log("Autoplay prevented:", error);
+          });
+        }
+      }
     });
   </script>
 </body>
