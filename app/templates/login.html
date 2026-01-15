@@ -319,10 +319,9 @@
             </div>
           </div>
 
-          <!-- Testimonial Slider -->
+          <!-- Testimonial Slider Commented Out
           <div class="mt-12 relative h-[180px] sm:h-[160px]">
             <div id="testimonial-slider" class="relative h-full">
-              <!-- Slide 1 -->
               <div class="testimonial-slide active p-6 bg-[#0a0a0a] rounded-2xl border border-white/10">
                 <div class="flex items-center gap-3 mb-3">
                   <img src="../static/images/Tushar.jpeg" alt="Student"
@@ -337,6 +336,7 @@
               </div>
             </div>
           </div>
+          -->
         </div>
 
         <!-- Right Side - Login Form -->
@@ -501,12 +501,13 @@
       });
     });
 
-    // Testimonial Slider Logic
+    /* Testimonial Slider Logic Commented Out
     document.addEventListener('DOMContentLoaded', () => {
       const slides = document.querySelectorAll('.testimonial-slide');
       let currentSlide = 0;
 
       function nextSlide() {
+        if (!slides.length) return;
         slides[currentSlide].classList.remove('active');
         slides[currentSlide].classList.add('exit');
 
@@ -516,14 +517,16 @@
         slides[currentSlide].classList.remove('exit');
         slides[currentSlide].classList.add('active');
 
-        // Reset exit class after animation
         setTimeout(() => {
           slides[prevSlide].classList.remove('exit');
         }, 1000);
       }
 
-      setInterval(nextSlide, 7000);
+      if (slides.length > 1) {
+          setInterval(nextSlide, 7000);
+      }
     });
+    */
   </script>
 </body>
 
