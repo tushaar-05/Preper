@@ -8,7 +8,7 @@ from app.utils.decorators import admin_required
 from app.models import (
     User, Student, Batch, Enrollment, Interview,
     MockTest, Question, TestAttempt, Announcement, Resource, Payment, Mentor,
-    SiteConfig
+    SiteConfig, TeamMember
 )
 from app.utils import admin_required, get_batch_status_color, get_interview_status_color
 from datetime import datetime, timedelta, timezone
@@ -250,6 +250,25 @@ def sync_db():
             db.session.execute(text('ALTER TABLE mentors ADD COLUMN description TEXT'))
         except: pass
         
+        # Create TeamMember table if it doesn't exist
+        try:
+            db.create_all()
+            # If for some reason create_all doesn't work for one table in this env
+            # we can use raw SQL as a backup for the specific table
+            db.session.execute(text("""
+                CREATE TABLE IF NOT EXISTS team_members (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    full_name VARCHAR(100) NOT NULL,
+                    role VARCHAR(100) NOT NULL,
+                    description TEXT,
+                    image_url VARCHAR(500),
+                    display_order INTEGER DEFAULT 0,
+                    is_active BOOLEAN DEFAULT 1,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                )
+            """))
+        except: pass
+        
         db.session.commit()
         flash('Database schema updated successfully!', 'success')
     except Exception as e:
@@ -268,6 +287,7 @@ def sync_db():
 @admin_required
 def mentors():
     """List all mentors with fail-safe for schema updates"""
+    admin = User.query.get(session.get('admin_id'))
     try:
         mentors_data = Mentor.query.order_by(Mentor.created_at.desc()).all()
         
@@ -289,14 +309,14 @@ def mentors():
                 'description': getattr(mentor, 'description', None)
             })
         
-        return render_template('dashboard/admin/mentors.html', mentors=mentors_list)
+        return render_template('dashboard/admin/mentors.html', mentors=mentors_list, admin=admin)
         
     except Exception as e:
         print(f"Mentors list error: {e}")
         db.session.rollback()
         # If we get a database error, show a more helpful page or flash
         flash('Notice: Database schema might need sync. Click the button below if problems persist.', 'warning')
-        return render_template('dashboard/admin/mentors.html', mentors=[], db_error=True)
+        return render_template('dashboard/admin/mentors.html', mentors=[], db_error=True, admin=admin)
 
 @bp.route('/mentors/edit/<int:mentor_id>', methods=['POST'])
 @admin_required
@@ -343,6 +363,117 @@ def delete_mentor(mentor_id):
         flash(f'Error deleting mentor: {str(e)}', 'error')
         
     return redirect(url_for('admin.mentors'))
+
+
+@bp.route('/team')
+@admin_required
+def team():
+    """List all core team members"""
+    team_data = TeamMember.query.order_by(TeamMember.display_order.asc(), TeamMember.created_at.desc()).all()
+    
+    team_list = []
+    for member in team_data:
+        team_list.append({
+            'id': member.id,
+            'name': member.full_name,
+            'role': member.role,
+            'description': member.description,
+            'image_url': member.image_url,
+            'status': 'Active' if member.is_active else 'Inactive',
+            'initial': member.full_name[0] if member.full_name else '?',
+            'display_order': member.display_order
+        })
+    
+    admin = User.query.get(session.get('admin_id'))
+    return render_template('dashboard/admin/team.html', team=team_list, admin=admin)
+
+@bp.route('/team/add', methods=['POST'])
+@admin_required
+def add_team_member():
+    """Add a new team member"""
+    try:
+        full_name = request.form.get('full_name')
+        role = request.form.get('role')
+        description = request.form.get('description')
+        display_order = request.form.get('display_order', 0)
+        
+        if not full_name or not role:
+            flash('Name and Role are required', 'error')
+            return redirect(url_for('admin.team'))
+            
+        # Handle Image Upload
+        image_url = None
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                try:
+                    upload_result = upload_file(file, folder='team')
+                    image_url = upload_result.get('secure_url')
+                except Exception as e:
+                    print(f"Team member image upload failed: {e}")
+        
+        new_member = TeamMember(
+            full_name=full_name,
+            role=role,
+            description=description,
+            image_url=image_url,
+            display_order=display_order
+        )
+        
+        db.session.add(new_member)
+        db.session.commit()
+        flash(f'Team member {full_name} added successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error adding team member: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.team'))
+
+@bp.route('/team/edit/<int:member_id>', methods=['POST'])
+@admin_required
+def edit_team_member(member_id):
+    """Edit an existing team member"""
+    try:
+        member = TeamMember.query.get_or_404(member_id)
+        member.full_name = request.form.get('full_name')
+        member.role = request.form.get('role')
+        member.description = request.form.get('description')
+        member.display_order = request.form.get('display_order', 0)
+        member.is_active = request.form.get('status') == 'active'
+        
+        # Handle Image Upload
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                try:
+                    upload_result = upload_file(file, folder='team')
+                    member.image_url = upload_result.get('secure_url')
+                except Exception as e:
+                    print(f"Team member image update failed: {e}")
+        
+        db.session.commit()
+        flash(f'Team member {member.full_name} updated successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error updating team member: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.team'))
+
+@bp.route('/team/delete/<int:member_id>', methods=['POST'])
+@admin_required
+def delete_team_member(member_id):
+    """Delete a team member"""
+    try:
+        member = TeamMember.query.get_or_404(member_id)
+        name = member.full_name
+        db.session.delete(member)
+        db.session.commit()
+        flash(f'Team member {name} deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting team member: {str(e)}', 'error')
+        
+    return redirect(url_for('admin.team'))
 
 
 @bp.route('/batches')

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NST Prep - Manage Core Team</title>
+    <link rel="icon" type="image/png" href="../../static/images/android-chrome-192x192.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --admin-dark: #121212;
+            --admin-accent: #7c3aed;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+        .sidebar-link {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .sidebar-link:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .sidebar-link.active {
+            background-color: var(--admin-accent);
+            color: white;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+    </style>
+</head>
+
+<body class="text-gray-800 antialiased overflow-hidden">
+
+    <div class="flex h-screen w-full">
+
+        <!-- SIDEBAR -->
+        <div id="sidebar-overlay"
+            class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity duration-300">
+        </div>
+
+        <aside id="sidebar"
+            class="fixed md:sticky top-0 left-0 w-[280px] flex-shrink-0 bg-[#0a0a0a] text-gray-400 flex flex-col h-full z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out border-r border-gray-800">
+            <div class="px-6 py-8 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
+                        A</div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight text-white">NST Admin</h1>
+                        <p class="text-[10px] uppercase tracking-wider font-semibold text-gray-500">System Control</p>
+                    </div>
+                </div>
+                <button id="close-sidebar" class="md:hidden text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
+                <p class="px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2 mt-4">Overview</p>
+
+                <a href="/admin/dashboard"
+                    class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                        </path>
+                    </svg>
+                    Dashboard
+                </a>
+
+                <p class="px-4 text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Management</p>
+
+                <a href="/admin/team"
+                    class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <svg class="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                        </path>
+                    </svg>
+                    Core Team
+                </a>
+
+                <a href="/admin/mentors"
+                    class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                        </path>
+                    </svg>
+                    Mentors
+                </a>
+
+                <!-- Other links truncated for brevity but they exist in the actual admin menu -->
+                <a href="/admin/students"
+                    class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-500">Students</a>
+                <a href="/admin/batches"
+                    class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-500">Batches</a>
+            </nav>
+
+            <div class="p-4 mt-auto border-t border-gray-800">
+                <a href="/logout" class="text-red-400 text-xs font-semibold uppercase tracking-wide">Logout</a>
+            </div>
+        </aside>
+
+        <!-- CONTENT -->
+        <main class="flex-1 h-full overflow-y-auto bg-gray-50 p-4 sm:p-6 lg:p-8">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for category, message in messages %}
+                <div
+                    class="p-4 rounded-xl border {% if category == 'error' %}bg-red-50 text-red-700 border-red-100{% else %}bg-green-50 text-green-700 border-green-100{% endif %}">
+                    <span class="text-sm font-medium">{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">Manage Core Team</h2>
+                    <p class="text-gray-500 mt-1 text-sm sm:text-base">Manage the visionary leaders of Preper.</p>
+                </div>
+                <div class="flex gap-4">
+                    <button onclick="openAddModal()"
+                        class="bg-[var(--admin-accent)] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-violet-700 flex items-center gap-2 shadow-lg shadow-violet-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Add Team Member
+                    </button>
+                </div>
+            </header>
+
+            <!-- Team Table -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50/50 text-gray-500 text-xs uppercase tracking-wider">
+                                <th class="px-6 py-4 font-semibold">Member</th>
+                                <th class="px-6 py-4 font-semibold">Role</th>
+                                <th class="px-6 py-4 font-semibold">Order</th>
+                                <th class="px-6 py-4 font-semibold">Status</th>
+                                <th class="px-6 py-4 font-semibold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-sm">
+                            {% for member in team %}
+                            <tr class="hover:bg-gray-50/50 transition-colors group">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-10 h-10 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center font-bold text-sm overflow-hidden">
+                                            {% if member.image_url %}
+                                            <img src="{{ member.image_url }}" alt="{{ member.name }}"
+                                                class="w-full h-full object-cover">
+                                            {% else %}
+                                            {{ member.initial }}
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-gray-900">{{ member.name }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-gray-600 font-medium">{{ member.role }}</td>
+                                <td class="px-6 py-4 text-gray-500">{{ member.display_order }}</td>
+                                <td class="px-6 py-4">
+                                    {% if member.status == 'Active' %}
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <span class="w-1.5 h-1.5 bg-green-600 rounded-full mr-1.5"></span>Active
+                                    </span>
+                                    {% else %}
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                        <span class="w-1.5 h-1.5 bg-gray-500 rounded-full mr-1.5"></span>Inactive
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <div
+                                        class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button onclick='openEditModal(this)' data-member='{{ member|tojson|safe }}'
+                                            class="p-2 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                                </path>
+                                            </svg>
+                                        </button>
+                                        <form action="{{ url_for('admin.delete_team_member', member_id=member.id) }}"
+                                            method="POST"
+                                            onsubmit="return confirm('Are you sure you want to delete this team member?')">
+                                            <button type="submit"
+                                                class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                    </path>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="px-6 py-12 text-center text-gray-500">No team members added yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="member-modal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div
+            class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center">
+                <h3 id="modal-title" class="text-xl font-bold text-gray-900">Add Team Member</h3>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">&times;</button>
+            </div>
+            <form id="member-form" action="{{ url_for('admin.add_team_member') }}" method="POST"
+                enctype="multipart/form-data" class="p-8 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
+                    <input type="text" name="full_name" id="member-name" required
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 outline-none focus:border-violet-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Role / Designation</label>
+                    <input type="text" name="role" id="member-role" required
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 outline-none focus:border-violet-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Description / Bio</label>
+                    <textarea name="description" id="member-description" rows="3"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 outline-none focus:border-violet-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Display Order (lowest first)</label>
+                    <input type="number" name="display_order" id="member-order" value="0"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 outline-none focus:border-violet-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Profile Photo</label>
+                    <div class="flex items-center gap-4">
+                        <div id="image-preview"
+                            class="w-16 h-16 rounded-xl bg-gray-50 border border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+                            <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        </div>
+                        <input type="file" name="image" id="member-image" accept="image/*" class="text-xs">
+                    </div>
+                </div>
+                <div id="status-container" class="hidden">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+                    <select name="status" id="member-status"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 outline-none">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal()"
+                        class="flex-1 px-4 py-3 border border-gray-200 rounded-xl font-bold">Cancel</button>
+                    <button type="submit"
+                        class="flex-1 bg-violet-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-violet-200">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('member-modal');
+        const form = document.getElementById('member-form');
+        const modalTitle = document.getElementById('modal-title');
+        const nameInput = document.getElementById('member-name');
+        const roleInput = document.getElementById('member-role');
+        const descriptionInput = document.getElementById('member-description');
+        const orderInput = document.getElementById('member-order');
+        const statusContainer = document.getElementById('status-container');
+        const statusSelect = document.getElementById('member-status');
+
+        function openAddModal() {
+            modalTitle.innerText = 'Add Team Member';
+            form.action = "{{ url_for('admin.add_team_member') }}";
+            form.reset();
+            statusContainer.classList.add('hidden');
+            modal.classList.remove('hidden');
+        }
+
+        function openEditModal(el) {
+            const member = JSON.parse(el.getAttribute('data-member'));
+            modalTitle.innerText = 'Edit ' + member.name;
+            form.action = "/admin/team/edit/" + member.id;
+            nameInput.value = member.name;
+            roleInput.value = member.role;
+            descriptionInput.value = member.description || '';
+            orderInput.value = member.display_order;
+            statusSelect.value = member.status.toLowerCase();
+
+            if (member.image_url) {
+                document.getElementById('image-preview').innerHTML = `<img src="${member.image_url}" class="w-full h-full object-cover">`;
+            }
+
+            statusContainer.classList.remove('hidden');
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
+
+        document.getElementById('member-image').addEventListener('change', function () {
+            const preview = document.getElementById('image-preview');
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+
+</html>

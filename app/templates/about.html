@@ -157,41 +157,28 @@
                     </div>
 
                     <div class="team-grid">
-                        <!-- Devansh Saini -->
+                        {% for member in team %}
                         <div class="glass-card rounded-3xl p-6 text-center group">
                             <div
                                 class="w-32 h-32 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-[var(--purple)]/20 to-transparent flex items-center justify-center overflow-hidden border border-white/5">
+                                {% if member.image_url %}
+                                <img src="{{ member.image_url }}" alt="{{ member.full_name }}"
+                                    class="w-full h-full object-cover">
+                                {% else %}
                                 <svg class="w-16 h-16 text-[var(--purple)]/40" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                                         clip-rule="evenodd" />
                                 </svg>
+                                {% endif %}
                             </div>
-                            <h3 class="text-xl font-bold mb-1 font-[BwGradual-Medium]">Devansh Saini</h3>
-                            <p class="text-[var(--purple)] text-sm mb-4 font-medium uppercase tracking-wider">Founder &
-                                Visionary</p>
+                            <h3 class="text-xl font-bold mb-1 font-[BwGradual-Medium]">{{ member.full_name }}</h3>
+                            <p class="text-[var(--purple)] text-sm mb-4 font-medium uppercase tracking-wider">{{
+                                member.role }}</p>
                             <p class="text-gray-500 text-sm leading-relaxed whitespace-pre-line">
-                                The architect behind the vision. Devansh conceptualized Preper, validated the mission,
-                                and ensures every detail meets excellence.
+                                {{ member.description }}
                             </p>
                         </div>
-
-                        <!-- Tushar -->
-                        <div class="glass-card rounded-3xl p-6 text-center group">
-                            <div
-                                class="w-32 h-32 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-[var(--purple)]/20 to-transparent flex items-center justify-center overflow-hidden border border-white/5">
-                                <svg class="w-16 h-16 text-[var(--purple)]/40" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                            <h3 class="text-xl font-bold mb-1 font-[BwGradual-Medium]">Tushar</h3>
-                            <p class="text-[var(--purple)] text-sm mb-4 font-medium uppercase tracking-wider">Lead
-                                Designer & Developer</p>
-                            <p class="text-gray-500 text-sm leading-relaxed whitespace-pre-line">
-                                The creative engine. Tushar designed and built the core of the Preper platform, turning
-                                the vision into a stunning reality.
-                            </p>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </section>

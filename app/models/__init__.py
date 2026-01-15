@@ -15,6 +15,7 @@ from app.models.doubt import Doubt, DoubtReply  # noqa
 from .payment import Payment  # noqa
 from .mentor import Mentor  # noqa
 from .site_config import SiteConfig  # noqa
+from .team import TeamMember  # noqa
 from .otp import OTP  # noqa
 
 # Import mock test related models conditionally to avoid circular imports
@@ -39,6 +40,7 @@ __all__ = [
     'Payment',
     'Mentor',
     'SiteConfig',
+    'TeamMember',
     'OTP'
 ]
 
