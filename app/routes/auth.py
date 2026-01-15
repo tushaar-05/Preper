@@ -219,9 +219,6 @@ def login():
 @bp.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'GET':
-        # Redirect if already logged in
-        if 'admin_id' in session:
-            return redirect(url_for('admin.dashboard'))
         # Clear stale flash messages
         session.pop('_flashes', None)
 
