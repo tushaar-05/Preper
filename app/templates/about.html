@@ -157,7 +157,7 @@
                     </div>
 
                     <div class="team-grid">
-                        <!-- Placeholder Core Member 1 -->
+                        <!-- Devansh Saini -->
                         <div class="glass-card rounded-3xl p-6 text-center group">
                             <div
                                 class="w-32 h-32 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-[var(--purple)]/20 to-transparent flex items-center justify-center overflow-hidden border border-white/5">
@@ -166,15 +166,16 @@
                                         clip-rule="evenodd" />
                                 </svg>
                             </div>
-                            <h3 class="text-xl font-bold mb-1 font-[BwGradual-Medium]">Alex Chen</h3>
+                            <h3 class="text-xl font-bold mb-1 font-[BwGradual-Medium]">Devansh Saini</h3>
                             <p class="text-[var(--purple)] text-sm mb-4 font-medium uppercase tracking-wider">Founder &
-                                Tech Lead</p>
+                                Visionary</p>
                             <p class="text-gray-500 text-sm leading-relaxed">
-                                A visionary leader with a passion for educational technology and engineering excellence.
+                                The architect behind the vision. Devansh conceptualized Preper, validated the mission,
+                                and ensures every detail meets excellence.
                             </p>
                         </div>
 
-                        <!-- Placeholder Core Member 2 -->
+                        <!-- Tushar -->
                         <div class="glass-card rounded-3xl p-6 text-center group">
                             <div
                                 class="w-32 h-32 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-[var(--purple)]/20 to-transparent flex items-center justify-center overflow-hidden border border-white/5">
@@ -183,28 +184,12 @@
                                         clip-rule="evenodd" />
                                 </svg>
                             </div>
-                            <h3 class="text-xl font-bold mb-1 font-[BwGradual-Medium]">Sarah Johnson</h3>
-                            <p class="text-[var(--purple)] text-sm mb-4 font-medium uppercase tracking-wider">Academic
-                                Director</p>
+                            <h3 class="text-xl font-bold mb-1 font-[BwGradual-Medium]">Tushar</h3>
+                            <p class="text-[var(--purple)] text-sm mb-4 font-medium uppercase tracking-wider">Lead
+                                Designer & Developer</p>
                             <p class="text-gray-500 text-sm leading-relaxed">
-                                Ensuring our curriculum remains at the absolute cutting edge of the NSAT requirements.
-                            </p>
-                        </div>
-
-                        <!-- Placeholder Core Member 3 -->
-                        <div class="glass-card rounded-3xl p-6 text-center group">
-                            <div
-                                class="w-32 h-32 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-[var(--purple)]/20 to-transparent flex items-center justify-center overflow-hidden border border-white/5">
-                                <svg class="w-16 h-16 text-[var(--purple)]/40" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                            <h3 class="text-xl font-bold mb-1 font-[BwGradual-Medium]">David Kumar</h3>
-                            <p class="text-[var(--purple)] text-sm mb-4 font-medium uppercase tracking-wider">Community
-                                Head</p>
-                            <p class="text-gray-500 text-sm leading-relaxed">
-                                Building the most supportive network of aspirants across the country.
+                                The creative engine. Tushar designed and built the core of the Preper platform, turning
+                                the vision into a stunning reality.
                             </p>
                         </div>
                     </div>
@@ -221,7 +206,7 @@
                     </div>
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        <!-- Mentor 1 -->
+                        {% for mentor in mentors %}
                         <div class="glass-card rounded-2xl p-6 text-center">
                             <div
                                 class="w-20 h-20 mx-auto mb-4 rounded-full bg-[var(--purple)]/10 flex items-center justify-center border border-white/5">
@@ -230,45 +215,15 @@
                                         clip-rule="evenodd" />
                                 </svg>
                             </div>
-                            <h4 class="font-bold text-white mb-1">Mentor A</h4>
-                            <p class="text-[var(--purple)] text-xs font-semibold uppercase">NST Scholar</p>
+                            <h4 class="font-bold text-white mb-1">{{ mentor.full_name }}</h4>
+                            <p class="text-[var(--purple)] text-xs font-semibold uppercase">{{ mentor.role }}</p>
                         </div>
-                        <!-- Mentor 2 -->
-                        <div class="glass-card rounded-2xl p-6 text-center">
-                            <div
-                                class="w-20 h-20 mx-auto mb-4 rounded-full bg-[var(--purple)]/10 flex items-center justify-center border border-white/5">
-                                <svg class="w-10 h-10 text-[var(--purple)]/30" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 10a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                            <h4 class="font-bold text-white mb-1">Mentor B</h4>
-                            <p class="text-[var(--purple)] text-xs font-semibold uppercase">Math Expert</p>
+                        {% else %}
+                        <!-- No mentors found fallback -->
+                        <div class="col-span-full text-center text-gray-500 py-10">
+                            Our mentors will be updated here shortly.
                         </div>
-                        <!-- Mentor 3 -->
-                        <div class="glass-card rounded-2xl p-6 text-center">
-                            <div
-                                class="w-20 h-20 mx-auto mb-4 rounded-full bg-[var(--purple)]/10 flex items-center justify-center border border-white/5">
-                                <svg class="w-10 h-10 text-[var(--purple)]/30" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 10a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                            <h4 class="font-bold text-white mb-1">Mentor C</h4>
-                            <p class="text-[var(--purple)] text-xs font-semibold uppercase">Logic Lead</p>
-                        </div>
-                        <!-- Mentor 4 -->
-                        <div class="glass-card rounded-2xl p-6 text-center">
-                            <div
-                                class="w-20 h-20 mx-auto mb-4 rounded-full bg-[var(--purple)]/10 flex items-center justify-center border border-white/5">
-                                <svg class="w-10 h-10 text-[var(--purple)]/30" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 10a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                            <h4 class="font-bold text-white mb-1">Mentor D</h4>
-                            <p class="text-[var(--purple)] text-xs font-semibold uppercase">Interview Coach</p>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </section>

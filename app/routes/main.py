@@ -16,7 +16,9 @@ def index():
 @bp.route('/about')
 def about():
     """About Us page"""
-    return render_template('about.html')
+    from app.models import Mentor
+    mentors = Mentor.query.filter_by(is_active=True).all()
+    return render_template('about.html', mentors=mentors)
 
 @bp.route('/terms')
 def terms():
