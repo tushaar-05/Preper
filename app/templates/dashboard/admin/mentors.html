@@ -305,8 +305,12 @@
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-3">
                     <div
-                      class="w-10 h-10 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center font-bold text-sm">
+                      class="w-10 h-10 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center font-bold text-sm overflow-hidden">
+                      {% if mentor.image_url %}
+                      <img src="{{ mentor.image_url }}" alt="{{ mentor.name }}" class="w-full h-full object-cover">
+                      {% else %}
                       {{ mentor.initial }}
+                      {% endif %}
                     </div>
                     <div>
                       <p class="font-bold text-gray-900">{{ mentor.name }}</p>
@@ -397,7 +401,8 @@
           </svg>
         </button>
       </div>
-      <form id="mentor-form" action="{{ url_for('admin.add_mentor') }}" method="POST" class="p-8 space-y-4">
+      <form id="mentor-form" action="{{ url_for('admin.add_mentor') }}" method="POST" enctype="multipart/form-data"
+        class="p-8 space-y-4">
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
           <input type="text" name="full_name" id="mentor-name" required
@@ -415,6 +420,20 @@
           <input type="text" name="role" id="mentor-role" required
             class="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all outline-none"
             placeholder="e.g. Guide, Senior Mentor">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Profile Photo</label>
+          <div class="flex items-center gap-4">
+            <div id="image-preview"
+              class="w-16 h-16 rounded-xl bg-gray-50 border border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+              <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <input type="file" name="image" id="mentor-image" accept="image/*"
+              class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 transition-all">
+          </div>
         </div>
         <div id="status-container" class="hidden">
           <label class="block text-sm font-semibold text-gray-700 mb-1">Status</label>
@@ -465,6 +484,15 @@
       emailInput.value = mentor.email;
       roleInput.value = mentor.role;
       statusSelect.value = mentor.status.toLowerCase();
+
+      // Update preview if image exists
+      const preview = document.getElementById('image-preview');
+      if (mentor.image_url) {
+        preview.innerHTML = `<img src="${mentor.image_url}" class="w-full h-full object-cover">`;
+      } else {
+        preview.innerHTML = `<svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>`;
+      }
+
       statusContainer.classList.remove('hidden');
       modal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
@@ -474,6 +502,20 @@
       modal.classList.add('hidden');
       document.body.style.overflow = 'auto';
     }
+
+    // Image preview listener
+    const imageInput = document.getElementById('mentor-image');
+    imageInput.addEventListener('change', function () {
+      const preview = document.getElementById('image-preview');
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          preview.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+        }
+        reader.readAsDataURL(file);
+      }
+    });
 
     // Close on outside click
     modal.addEventListener('click', (e) => {

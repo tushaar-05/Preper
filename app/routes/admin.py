@@ -128,11 +128,23 @@ def add_mentor():
             flash('Mentor name is required', 'error')
             return redirect(url_for('admin.mentors'))
             
+        # Handle Image Upload
+        image_url = None
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                try:
+                    upload_result = upload_file(file, folder='mentors')
+                    image_url = upload_result.get('secure_url')
+                except Exception as e:
+                    print(f"Mentor image upload failed: {e}")
+            
         new_mentor = Mentor(
             full_name=full_name,
             email=email,
             role=role,
-            rating=5.0
+            rating=5.0,
+            image_url=image_url
         )
         
         db.session.add(new_mentor)
@@ -236,7 +248,8 @@ def mentors():
             'rating': f"{mentor.rating:.1f}",
             'status': 'Active' if mentor.is_active else 'Inactive',
             'joined_date': mentor.created_at.strftime('%b %d, %Y'),
-            'initial': mentor.full_name[0] if mentor.full_name else '?'
+            'initial': mentor.full_name[0] if mentor.full_name else '?',
+            'image_url': mentor.image_url
         })
     
     return render_template('dashboard/admin/mentors.html', mentors=mentors_list)
@@ -251,6 +264,16 @@ def edit_mentor(mentor_id):
         mentor.email = request.form.get('email')
         mentor.role = request.form.get('role')
         mentor.is_active = request.form.get('status') == 'active'
+        
+        # Handle Image Upload
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                try:
+                    upload_result = upload_file(file, folder='mentors')
+                    mentor.image_url = upload_result.get('secure_url')
+                except Exception as e:
+                    print(f"Mentor image update failed: {e}")
         
         db.session.commit()
         flash(f'Mentor {mentor.full_name} updated successfully!', 'success')
