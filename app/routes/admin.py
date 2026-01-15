@@ -232,6 +232,27 @@ def students():
                           selected_status=status_filter)
 
 
+@bp.route('/sync-db')
+@admin_required
+def sync_db():
+    """Emergency route to sync database schema in production"""
+    try:
+        from sqlalchemy import text
+        # Attempt to add the image_url column to the mentor table
+        # We use a try-except block in SQL or just catch the python exception
+        db.session.execute(text('ALTER TABLE mentor ADD COLUMN image_url VARCHAR(500)'))
+        db.session.commit()
+        flash('Database schema updated successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        if 'duplicate column' in str(e).lower() or 'already exists' in str(e).lower():
+            flash('Database is already up to date.', 'info')
+        else:
+            flash(f'Error updating database: {str(e)}', 'error')
+    
+    return redirect(url_for('admin.mentors'))
+
+
 @bp.route('/mentors')
 @admin_required
 def mentors():
