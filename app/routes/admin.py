@@ -1760,3 +1760,20 @@ def doubt_reply(doubt_id):
         print(f"Error posting reply: {e}")
     
     return redirect(url_for('admin.doubt_detail', doubt_id=doubt_id))
+
+@bp.route('/doubts/delete/<int:doubt_id>', methods=['POST'])
+@admin_required
+def delete_doubt(doubt_id):
+    """Delete a doubt (admin)"""
+    from app.models.doubt import Doubt
+    try:
+        doubt = Doubt.query.get_or_404(doubt_id)
+        db.session.delete(doubt)
+        db.session.commit()
+        flash('Doubt deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('Failed to delete doubt. Please try again.', 'danger')
+        print(f"Error deleting doubt: {e}")
+    
+    return redirect(url_for('admin.doubts'))

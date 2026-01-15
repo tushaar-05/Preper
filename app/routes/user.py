@@ -447,7 +447,8 @@ def doubts():
             'timestamp': timestamp,
             'replies': doubt.replies.count(),
             'views': doubt.views,
-            'category': doubt.category
+            'category': doubt.category,
+            'student_id': doubt.student_id
         })
     
     return render_template('dashboard/user/doubts.html', doubts=doubts_list, student=student)
@@ -606,6 +607,32 @@ def post_reply(doubt_id):
         print(f"Error posting reply: {e}")
     
     return redirect(url_for('user.doubt_detail', doubt_id=doubt_id))
+
+@bp.route('/doubts/delete/<int:doubt_id>', methods=['POST'])
+@student_required
+def delete_doubt(doubt_id):
+    """Delete own doubt (student)"""
+    from app.models.doubt import Doubt
+    student = get_current_student()
+    
+    try:
+        doubt = Doubt.query.get_or_404(doubt_id)
+        
+        # Verify ownership
+        if doubt.student_id != student.id:
+            flash('You can only delete your own doubts.', 'danger')
+            return redirect(url_for('user.doubts'))
+            
+        db.session.delete(doubt)
+        db.session.commit()
+        flash('Your doubt has been deleted successfully.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('Failed to delete doubt. Please try again.', 'danger')
+        print(f"Error deleting student doubt: {e}")
+    
+    return redirect(url_for('user.doubts'))
+
 @bp.route('/mock')
 @paid_student_required
 def mock():
