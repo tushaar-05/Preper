@@ -369,23 +369,29 @@ def delete_mentor(mentor_id):
 @admin_required
 def team():
     """List all core team members"""
-    team_data = TeamMember.query.order_by(TeamMember.display_order.asc(), TeamMember.created_at.desc()).all()
-    
-    team_list = []
-    for member in team_data:
-        team_list.append({
-            'id': member.id,
-            'name': member.full_name,
-            'role': member.role,
-            'description': member.description,
-            'image_url': member.image_url,
-            'status': 'Active' if member.is_active else 'Inactive',
-            'initial': member.full_name[0] if member.full_name else '?',
-            'display_order': member.display_order
-        })
-    
     admin = User.query.get(session.get('admin_id'))
-    return render_template('dashboard/admin/team.html', team=team_list, admin=admin)
+    try:
+        team_data = TeamMember.query.order_by(TeamMember.display_order.asc(), TeamMember.created_at.desc()).all()
+        
+        team_list = []
+        for member in team_data:
+            team_list.append({
+                'id': member.id,
+                'name': member.full_name,
+                'role': member.role,
+                'description': member.description,
+                'image_url': member.image_url,
+                'status': 'Active' if member.is_active else 'Inactive',
+                'initial': member.full_name[0] if member.full_name else '?',
+                'display_order': member.display_order
+            })
+        
+        return render_template('dashboard/admin/team.html', team=team_list, admin=admin)
+    except Exception as e:
+        print(f"Team list error: {e}")
+        db.session.rollback()
+        flash('Notice: Database schema might need sync.', 'warning')
+        return render_template('dashboard/admin/team.html', team=[], db_error=True, admin=admin)
 
 @bp.route('/team/add', methods=['POST'])
 @admin_required
