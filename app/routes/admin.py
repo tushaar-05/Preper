@@ -1478,7 +1478,33 @@ def resources_create():
         flash('Resource uploaded successfully!', 'success')
     except Exception as e:
         db.session.rollback()
-        flash(f'Error uploading resource: {str(e)}', 'error')
+    return redirect(url_for('admin.resources'))
+
+
+@bp.route('/resources/edit/<int:resource_id>', methods=['POST'])
+@admin_required
+def resources_edit(resource_id):
+    """Edit an existing resource"""
+    from app.models.resource import Resource
+    try:
+        resource = Resource.query.get_or_404(resource_id)
+        
+        resource.title = request.form.get('title', resource.title)
+        resource.description = request.form.get('description', resource.description)
+        resource.category = request.form.get('category', resource.category)
+        resource.access_level = request.form.get('access_level', resource.access_level)
+        
+        target_batch_id = request.form.get('target_batch_id')
+        if resource.access_level == 'batch_specific' and target_batch_id:
+            resource.target_batch_id = target_batch_id
+        else:
+            resource.target_batch_id = None
+            
+        db.session.commit()
+        flash('Resource updated successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error updating resource: {str(e)}', 'error')
         
     return redirect(url_for('admin.resources'))
 
