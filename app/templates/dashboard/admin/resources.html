@@ -448,9 +448,22 @@
             </div>
 
             <div id="fileFields">
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Select File</label>
-              <input type="file" name="resource_file"
+              <div class="flex items-center justify-between mb-2">
+                <label class="block text-sm font-semibold text-gray-700">Select File</label>
+                <span
+                  class="text-[10px] font-medium text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100 italic">Max
+                  4MB (Vercel Limit)</span>
+              </div>
+              <input type="file" name="resource_file" id="resource_file"
                 class="w-full px-4 py-2 border border-gray-200 rounded-xl bg-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100">
+              <p id="fileSizeError" class="mt-2 text-xs text-red-500 font-medium hidden flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                  </path>
+                </svg>
+                File is too large! Please compress it or use an external link.
+              </p>
             </div>
 
             <div id="urlFields" class="hidden">
@@ -531,6 +544,43 @@
       } else {
         batchField.classList.add('hidden');
       }
+    }
+
+    // File Size Validation
+    const resourceFile = document.getElementById('resource_file');
+    const fileSizeError = document.getElementById('fileSizeError');
+    const uploadForm = document.querySelector('form[action*="resources_create"]');
+
+    if (resourceFile) {
+      resourceFile.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+          const fileSize = file.size / 1024 / 1024; // in MB
+          if (fileSize > 4) {
+            fileSizeError.classList.remove('hidden');
+            this.value = ''; // Clear selection
+          } else {
+            fileSizeError.classList.add('hidden');
+          }
+        }
+      });
+    }
+
+    if (uploadForm) {
+      uploadForm.addEventListener('submit', function (e) {
+        const type = document.getElementById('resource_type').value;
+        if (type === 'file') {
+          const file = resourceFile.files[0];
+          if (file) {
+            const fileSize = file.size / 1024 / 1024;
+            if (fileSize > 4) {
+              e.preventDefault();
+              fileSizeError.classList.remove('hidden');
+              alert('File size exceeds the 4MB limit. Please compress your PDF or upload it elsewhere and provide a link.');
+            }
+          }
+        }
+      });
     }
 
     // Filter Logic
