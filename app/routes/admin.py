@@ -1403,14 +1403,18 @@ def resources():
         resources_list.append({
             'id': resource.id,
             'title': resource.title,
-            'category': resource.category.title(),
+            'category': resource.category,
             'batch': batch_name,
             'uploaded_date': resource.created_at.strftime('%b %d, %Y'),
             'file_size': file_size,
             'downloads': resource.download_count,
             'type': resource.file_type.upper() if resource.file_type else 'LINK',
             'file_path': resource.file_path,
-            'file_url': resource.file_url
+            'file_url': resource.file_url,
+            'description': resource.description,
+            'access_level': resource.access_level,
+            'target_batch_id': resource.target_batch_id,
+            'resource_type': resource.resource_type
         })
     
     # Fetch batches for dropdown

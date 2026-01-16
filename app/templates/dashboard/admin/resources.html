@@ -338,7 +338,7 @@
                 <td class="px-6 py-4">
                   <span
                     class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-violet-100 text-violet-700">
-                    {{ resource.category }}
+                    {{ resource.category|title }}
                   </span>
                 </td>
                 <td class="px-6 py-4 text-gray-500">{{ resource.batch }}</td>
@@ -368,14 +368,10 @@
                     </a>
                     {% endif %}
 
-                    <button type="button" onclick='openEditModal({{ {
-                        "id": resource.id,
-                        "title": resource.title,
-                        "description": resource.description,
-                        "category": resource.category,
-                        "access_level": resource.access_level,
-                        "target_batch_id": resource.target_batch_id or ""
-                      } | tojson }})'
+                    <button type="button" onclick="openEditModal(this)" data-id="{{ resource.id }}"
+                      data-title="{{ resource.title }}" data-description="{{ resource.description or '' }}"
+                      data-category="{{ resource.category }}" data-access_level="{{ resource.access_level }}"
+                      data-target_batch_id="{{ resource.target_batch_id or '' }}"
                       class="p-2 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
                       title="Edit">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -645,17 +641,24 @@
     const editModal = document.getElementById('editModal');
     const editContainer = document.getElementById('editModalContainer');
 
-    function openEditModal(resource) {
-      document.getElementById('editForm').action = "/admin/resources/edit/" + resource.id;
-      document.getElementById('edit_title').value = resource.title;
-      document.getElementById('edit_description').value = resource.description || '';
-      document.getElementById('edit_category').value = resource.category;
-      document.getElementById('edit_access_level').value = resource.access_level;
+    function openEditModal(btn) {
+      const resourceId = btn.getAttribute('data-id');
+      const title = btn.getAttribute('data-title');
+      const description = btn.getAttribute('data-description');
+      const category = btn.getAttribute('data-category');
+      const accessLevel = btn.getAttribute('data-access_level');
+      const targetBatchId = btn.getAttribute('data-target_batch_id');
+
+      document.getElementById('editForm').action = "/admin/resources/edit/" + resourceId;
+      document.getElementById('edit_title').value = title;
+      document.getElementById('edit_description').value = description || '';
+      document.getElementById('edit_category').value = category;
+      document.getElementById('edit_access_level').value = accessLevel;
 
       const batchField = document.getElementById('editBatchField');
-      if (resource.access_level === 'batch_specific') {
+      if (accessLevel === 'batch_specific') {
         batchField.classList.remove('hidden');
-        document.getElementById('edit_target_batch_id').value = resource.target_batch_id;
+        document.getElementById('edit_target_batch_id').value = targetBatchId;
       } else {
         batchField.classList.add('hidden');
       }
