@@ -111,7 +111,7 @@
           <span class="text-xs font-medium text-gray-400">{{ q.section }}</span>
         </div>
 
-        <h3 class="text-lg font-semibold text-gray-900 mb-6">{{ q.question_text }}</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-6 whitespace-pre-wrap">{{ q.question_text }}</h3>
 
         <div class="space-y-3 mb-6">
           {% for opt in q.options %}
@@ -124,7 +124,7 @@
               <span class="{% if loop.index|string == user_ans and is_correct %} text-green-700 font-bold 
                           {% elif loop.index|string == user_ans and not is_correct %} text-red-700 font-bold 
                           {% elif loop.index|string == q.correct_answer and not is_correct %} text-gray-700 font-semibold
-                          {% else %} text-gray-600 {% endif %}">
+                          {% else %} text-gray-600 {% endif %} whitespace-pre-wrap">
                 {{ opt.text }}
               </span>
               {% if loop.index|string == q.correct_answer %}
@@ -143,7 +143,7 @@
         {% if q.explanation %}
         <div class="p-6 bg-blue-50/50 rounded-2xl border border-blue-100">
           <h4 class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2">Explanation</h4>
-          <div class="text-sm text-blue-900 leading-relaxed">{{ q.explanation }}</div>
+          <div class="text-sm text-blue-900 leading-relaxed whitespace-pre-wrap">{{ q.explanation }}</div>
         </div>
         {% endif %}
       </div>

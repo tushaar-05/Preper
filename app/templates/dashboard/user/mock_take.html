@@ -143,7 +143,7 @@
                 Marks</span>
             </div>
 
-            <h3 class="text-xl md:text-2xl font-semibold text-gray-900 mb-8 leading-relaxed">
+            <h3 class="text-xl md:text-2xl font-semibold text-gray-900 mb-8 leading-relaxed whitespace-pre-wrap">
               {{ q.question_text }}
             </h3>
 
@@ -165,7 +165,7 @@
                       class="w-8 h-8 rounded-full border-2 border-gray-200 bg-white flex items-center justify-center text-sm font-bold text-gray-400 transition-all peer-checked:border-[var(--purple)] peer-checked:text-[var(--purple)]">
                       {{ ['A', 'B', 'C', 'D'][loop.index0] }}
                     </span>
-                    <span class="text-gray-700 font-medium">{{ opt.text }}</span>
+                    <span class="text-gray-700 font-medium whitespace-pre-wrap">{{ opt.text }}</span>
                   </div>
                 </div>
               </label>
