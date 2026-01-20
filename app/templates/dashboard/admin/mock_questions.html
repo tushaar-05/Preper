@@ -277,19 +277,27 @@
             <div class="space-y-6">
               <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest">Answer Options</label>
 
-              <div class="space-y-4">
+              <div class="space-y-4" id="add-options-container">
                 {% for i in range(1, 5) %}
                 <div
-                  class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-4 group transition-all hover:border-violet-100 hover:shadow-lg">
+                  class="option-block bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-4 group transition-all hover:border-violet-100 hover:shadow-lg relative">
                   <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                       <span
-                        class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center text-xs font-bold">#{{
+                        class="option-number w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center text-xs font-bold">#{{
                         i }}</span>
                       <input type="radio" name="correct_answer" value="{{ i }}" {% if i==1 %}checked{% endif %}
                         class="w-5 h-5 text-emerald-500 rounded-full border-slate-200 focus:ring-emerald-500">
                       <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Correct?</span>
                     </div>
+                    <button type="button" onclick="removeOption(this)"
+                      class="remove-opt-btn p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all {% if i <= 2 %}hidden{% endif %}">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                        </path>
+                      </svg>
+                    </button>
                   </div>
 
                   <input type="text" name="option_{{ i }}_text" required placeholder="Option text..."
@@ -314,6 +322,13 @@
                 </div>
                 {% endfor %}
               </div>
+              <button type="button" onclick="addOption('add-options-container')"
+                class="w-full py-3 border-2 border-dashed border-slate-200 rounded-2xl text-slate-500 font-bold hover:border-violet-300 hover:text-violet-600 hover:bg-violet-50/30 transition-all flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Add Another Option
+              </button>
             </div>
           </div>
 
@@ -409,54 +424,29 @@
           <!-- Right Side: Options -->
           <div class="space-y-6">
             <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest">Answer Options</label>
-            <div class="space-y-4">
-              {% for i in range(1, 5) %}
-              <div
-                class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-4 group transition-all hover:border-violet-100 hover:shadow-lg">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <span
-                      class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center text-xs font-bold">#{{
-                      i }}</span>
-                    <input type="radio" name="correct_answer" id="edit_opt_radio_{{ i }}" value="{{ i }}"
-                      class="w-5 h-5 text-emerald-500 rounded-full border-slate-200 focus:ring-emerald-500">
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Correct?</span>
-                  </div>
-                </div>
-                <input type="text" name="option_{{ i }}_text" id="edit_opt_text_{{ i }}" required
-                  placeholder="Option text..."
-                  class="w-full px-4 py-3 border border-slate-100 rounded-xl bg-slate-50 focus:bg-white focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 transition-all font-medium">
-
-                <div
-                  class="relative flex items-center gap-3 p-3 border border-slate-100 rounded-2xl bg-slate-50/50 hover:bg-white hover:border-violet-200 transition-colors cursor-pointer overflow-hidden">
-                  <input type="file" name="option_{{ i }}_image" class="absolute inset-0 opacity-0 cursor-pointer z-10"
-                    onchange="previewImg(this, 'edit_opt_{{ i }}_preview')">
-                  <div id="edit_opt_{{ i }}_preview_placeholder" class="flex items-center gap-2">
-                    <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                      </path>
-                    </svg>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase">Attach New Image</span>
-                  </div>
-                  <img id="edit_opt_{{ i }}_preview"
-                    class="hidden h-10 w-10 object-cover rounded-lg border border-slate-200">
-                </div>
-              </div>
-              {% endfor %}
+            <div class="space-y-4" id="edit-options-container">
+              <!-- Options will be dynamically populated here -->
             </div>
+            <button type="button" onclick="addOption('edit-options-container', true)"
+              class="w-full py-3 border-2 border-dashed border-slate-200 rounded-2xl text-slate-500 font-bold hover:border-violet-300 hover:text-violet-600 hover:bg-violet-50/30 transition-all flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              Add Another Option
+            </button>
           </div>
         </div>
-
-        <div class="pt-8 border-t border-slate-100 flex gap-4">
-          <button type="button" onclick="document.getElementById('editQuestionModal').classList.add('hidden')"
-            class="flex-1 py-4 px-6 border border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancel</button>
-          <button type="submit"
-            class="flex-[2] py-4 px-6 bg-violet-600 text-white rounded-2xl font-bold shadow-xl shadow-violet-200 hover:shadow-2xl hover:-translate-y-1 transition-all">Save
-            Changes</button>
-        </div>
-      </form>
     </div>
+
+    <div class="pt-8 border-t border-slate-100 flex gap-4">
+      <button type="button" onclick="document.getElementById('editQuestionModal').classList.add('hidden')"
+        class="flex-1 py-4 px-6 border border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancel</button>
+      <button type="submit"
+        class="flex-[2] py-4 px-6 bg-violet-600 text-white rounded-2xl font-bold shadow-xl shadow-violet-200 hover:shadow-2xl hover:-translate-y-1 transition-all">Save
+        Changes</button>
+    </div>
+    </form>
+  </div>
   </div>
 
   <script>
@@ -467,12 +457,13 @@
       document.getElementById('edit_question_text').value = q.question_text;
       document.getElementById('edit_explanation').value = q.explanation || '';
 
-      // Correct answer radio
-      document.getElementById('edit_opt_radio_' + q.correct_answer).checked = true;
+      // Populate Options
+      const container = document.getElementById('edit-options-container');
+      container.innerHTML = '';
 
-      // Options
-      const options = q.options; // q.options is already parsed list from tojson|safe
+      const options = q.options || [];
       options.forEach((opt, index) => {
+        addOption('edit-options-container', true);
         const i = index + 1;
         document.getElementById('edit_opt_text_' + i).value = opt.text;
         const preview = document.getElementById('edit_opt_' + i + '_preview');
@@ -481,9 +472,10 @@
           preview.src = opt.image;
           preview.classList.remove('hidden');
           placeholder.classList.add('hidden');
-        } else {
-          preview.classList.add('hidden');
-          placeholder.classList.remove('hidden');
+        }
+
+        if (q.correct_answer === String(i)) {
+          document.getElementById('edit_opt_radio_' + i).checked = true;
         }
       });
 
@@ -501,6 +493,95 @@
 
       document.getElementById('editQuestionForm').action = `/admin/mocks/{{ mock.id }}/questions/${q.id}/edit`;
       modal.classList.remove('hidden');
+    }
+
+    function addOption(containerId, isEdit = false) {
+      const container = document.getElementById(containerId);
+      const index = container.querySelectorAll('.option-block').length + 1;
+      const prefix = isEdit ? 'edit_' : '';
+
+      const div = document.createElement('div');
+      div.className = 'option-block bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm space-y-4 group transition-all hover:border-violet-100 hover:shadow-lg relative';
+
+      div.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="option-number w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center text-xs font-bold">#${index}</span>
+            <input type="radio" name="correct_answer" id="${prefix}opt_radio_${index}" value="${index}" 
+              class="w-5 h-5 text-emerald-500 rounded-full border-slate-200 focus:ring-emerald-500">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Correct?</span>
+          </div>
+          <button type="button" onclick="removeOption(this)" class="remove-opt-btn p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all ${index <= 2 ? 'hidden' : ''}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+          </button>
+        </div>
+
+        <input type="text" name="option_${index}_text" id="${prefix}opt_text_${index}" required placeholder="Option text..."
+          class="w-full px-4 py-3 border border-slate-100 rounded-xl bg-slate-50 focus:bg-white focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 transition-all font-medium">
+
+        <div class="relative flex items-center gap-3 p-3 border border-slate-100 rounded-2xl bg-slate-50/50 hover:bg-white hover:border-violet-200 transition-colors cursor-pointer overflow-hidden">
+          <input type="file" name="option_${index}_image" class="absolute inset-0 opacity-0 cursor-pointer z-10"
+            onchange="previewImg(this, '${prefix}opt_${index}_preview')">
+          <div id="${prefix}opt_${index}_preview_placeholder" class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+              </path>
+            </svg>
+            <span class="text-[10px] font-bold text-slate-400 uppercase">Attach ${isEdit ? 'New ' : ''}Image</span>
+          </div>
+          <img id="${prefix}opt_${index}_preview" class="hidden h-10 w-10 object-cover rounded-lg border border-slate-200">
+        </div>
+      `;
+
+      container.appendChild(div);
+
+      // If it's the first option in a new question, check it
+      if (index === 1 && !isEdit) {
+        div.querySelector('input[type="radio"]').checked = true;
+      }
+    }
+
+    function removeOption(btn) {
+      const container = btn.closest('.space-y-4');
+      btn.closest('.option-block').remove();
+
+      // Re-index remaining options
+      const blocks = container.querySelectorAll('.option-block');
+      const isEdit = container.id === 'edit-options-container';
+      const prefix = isEdit ? 'edit_' : '';
+
+      blocks.forEach((block, idx) => {
+        const i = idx + 1;
+        block.querySelector('.option-number').innerText = '#' + i;
+
+        const radio = block.querySelector('input[type="radio"]');
+        radio.id = `${prefix}opt_radio_${i}`;
+        radio.value = i;
+
+        const textInput = block.querySelector('input[type="text"]');
+        textInput.name = `option_${i}_text`;
+        textInput.id = `${prefix}opt_text_${i}`;
+
+        const fileInput = block.querySelector('input[type="file"]');
+        fileInput.name = `option_${i}_image`;
+        fileInput.setAttribute('onchange', `previewImg(this, '${prefix}opt_${i}_preview')`);
+
+        const placeholder = block.querySelector('[id$="_preview_placeholder"]');
+        placeholder.id = `${prefix}opt_${i}_preview_placeholder`;
+
+        const preview = block.querySelector('img[id$="_preview"]');
+        preview.id = `${prefix}opt_${i}_preview`;
+
+        const removeBtn = block.querySelector('.remove-opt-btn');
+        if (i <= 2) {
+          removeBtn.classList.add('hidden');
+        } else {
+          removeBtn.classList.remove('hidden');
+        }
+      });
     }
 
     async function previewImg(input, previewId) {

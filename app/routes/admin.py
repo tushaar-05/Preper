@@ -1079,8 +1079,12 @@ def mock_questions_add(mock_id):
 
         # Handle Options
         options = []
-        for i in range(1, 5):
+        i = 1
+        while True:
             opt_text = request.form.get(f'option_{i}_text')
+            if opt_text is None:
+                break
+            
             opt_image_url = None
             if f'option_{i}_image' in request.files:
                 file = request.files[f'option_{i}_image']
@@ -1097,6 +1101,7 @@ def mock_questions_add(mock_id):
                 'text': opt_text,
                 'image': opt_image_url
             })
+            i += 1
 
         # Get next question number
         last_q = Question.query.filter_by(mock_test_id=mock_id).order_by(Question.question_number.desc()).first()
@@ -1163,8 +1168,11 @@ def mock_questions_edit(mock_id, question_id):
         current_options = question.options or []
         updated_options = []
         
-        for i in range(1, 5):
+        i = 1
+        while True:
             opt_text = request.form.get(f'option_{i}_text')
+            if opt_text is None:
+                break
             
             # Keep existing image by default if it exists in current_options
             opt_image_url = current_options[i-1].get('image') if len(current_options) >= i else None
@@ -1185,7 +1193,8 @@ def mock_questions_edit(mock_id, question_id):
                 'text': opt_text,
                 'image': opt_image_url
             })
-
+            i += 1
+            
         question.options = updated_options
         db.session.commit()
         
