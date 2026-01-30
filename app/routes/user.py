@@ -343,6 +343,7 @@ def prepkit():
 
         resources[category].append({
             'title': resource.title,
+            'description': resource.description,
             'type': resource.file_type.upper() if resource.file_type else 'Link',
             'size': size,
             'link': link
