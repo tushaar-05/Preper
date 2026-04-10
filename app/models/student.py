@@ -38,5 +38,12 @@ class Student(db.Model):
     payments = db.relationship('Payment', backref='student', lazy='dynamic', cascade='all, delete-orphan')
     user = db.relationship('User', backref=db.backref('student_profile', uselist=False))
     
+    @property
+    def is_paid(self):
+        from app.models.enrollment import Enrollment
+        return self.enrollments.filter(
+            Enrollment.payment_status.in_(['completed', 'partial'])
+        ).first() is not None
+
     def __repr__(self):
         return f'<Student {self.full_name}>'

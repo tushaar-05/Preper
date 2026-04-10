@@ -200,3 +200,13 @@ def calculate_enrollment_progress(student_id, batch_id):
             'last_attempt': None,
             'error': str(e)
         }
+def handle_image_upload(file, folder):
+    """Refactored helper for Cloudinary uploads to keep routes clean."""
+    from app.utils.storage import upload_file
+    if file and file.filename:
+        try:
+            result = upload_file(file, folder=folder)
+            return result.get('secure_url')
+        except Exception as e:
+            current_app.logger.error(f"Upload to {folder} failed: {e}")
+    return None

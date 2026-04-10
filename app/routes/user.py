@@ -1,12 +1,10 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
-from datetime import datetime, timedelta, timezone
-
-# Define IST timezone
-IST = timezone(timedelta(hours=5, minutes=30))
-from app.extensions import db, cache
+from datetime import datetime, timedelta
+from sqlalchemy import or_
+from app.extensions import db, cache, IST
 from app.models import (
     User, Student, Batch, Enrollment, Interview,
-    MockTest, Question, TestAttempt, Announcement, AnnouncementRead, Resource
+    MockTest, Question, TestAttempt, Announcement, AnnouncementRead, Resource, Doubt, DoubtReply
 )
 from app.utils.decorators import student_required, paid_student_required
 from app.utils.helpers import get_current_student, get_user_batch_ids
@@ -17,17 +15,12 @@ bp = Blueprint('user', __name__)
 @bp.context_processor
 def inject_payment_status():
     student = get_current_student()
-    is_paid = False
-    if student:
-        is_paid = _check_payment_status_cached(student.id)
-    return dict(is_paid=is_paid)
+    return dict(is_paid=_check_payment_cached(student.id) if student else False)
 
 @cache.memoize(timeout=60)
-def _check_payment_status_cached(student_id):
-    enrollment = Enrollment.query.filter_by(student_id=student_id)\
-        .filter(Enrollment.payment_status.in_(['completed', 'partial']))\
-        .first()
-    return enrollment is not None
+def _check_payment_cached(student_id):
+    student = Student.query.get(student_id)
+    return student.is_paid if student else False
 
 @bp.route('/dashboard')
 @student_required
@@ -37,126 +30,52 @@ def dashboard():
         flash('Student profile not found', 'danger')
         return redirect(url_for('auth.login'))
 
-    enrollments = db.session.query(Enrollment, Batch)\
-        .join(Batch, Enrollment.batch_id == Batch.id)\
-        .filter(Enrollment.student_id == student.id)\
-        .all()
-
-    # Get batch IDs
     batch_ids = get_user_batch_ids(student.id)
+    enrollments = db.session.query(Enrollment, Batch).join(Batch).filter(Enrollment.student_id == student.id).all()
 
-    # Get unread announcements count
-    unread_announcements_count = Announcement.query\
-        .filter(
-            (Announcement.target_audience == 'all') |
-            (Announcement.target_audience == 'students') |
-            (Announcement.target_batch_id.in_(batch_ids) if batch_ids else False)
-        )\
-        .filter(Announcement.is_published == True)\
+    # Announcements Logic
+    ann_filter = (Announcement.target_audience.in_(['all', 'students'])) | (Announcement.target_batch_id.in_(batch_ids) if batch_ids else False)
+    unread_count = Announcement.query.filter(ann_filter, Announcement.is_published == True)\
         .outerjoin(AnnouncementRead, (AnnouncementRead.announcement_id == Announcement.id) & (AnnouncementRead.student_id == student.id))\
-        .filter(AnnouncementRead.id == None)\
-        .count()
-
-    # Get latest announcements for dashboard display
-    announcements = Announcement.query\
-        .filter(
-            (Announcement.target_audience == 'all') |
-            (Announcement.target_audience == 'students') |
-            (Announcement.target_batch_id.in_(batch_ids) if batch_ids else False)
-        )\
-        .filter(Announcement.is_published == True)\
-        .order_by(Announcement.published_at.desc())\
-        .limit(5)\
-        .all()
-
-    # Determine enrollment status for group interviews
-    is_enrolled = False
-    for enrollment, batch in enrollments:
-        if enrollment.payment_status in ['completed', 'partial']:
-            is_enrolled = True
-            break
-
-    # Fetch queries
-    from sqlalchemy import or_
+        .filter(AnnouncementRead.id == None).count()
     
+    announcements = Announcement.query.filter(ann_filter, Announcement.is_published == True)\
+        .order_by(Announcement.published_at.desc()).limit(5).all()
+
+    # Interviews Logic
     interview_filters = [Interview.student_id == student.id, Interview.target_audience == 'all_registered']
-    if is_enrolled:
+    if student.is_paid:
         interview_filters.append(Interview.target_audience == 'all_enrolled')
         
-    upcoming_interviews = Interview.query\
-        .filter(or_(*interview_filters))\
-        .filter(Interview.scheduled_date >= datetime.utcnow())\
-        .filter(Interview.status.in_(['scheduled', 'confirmed']))\
-        .order_by(Interview.scheduled_date)\
-        .limit(3)\
-        .all()
+    upcoming_interviews = Interview.query.filter(or_(*interview_filters), Interview.scheduled_date >= datetime.utcnow(), Interview.status.in_(['scheduled', 'confirmed']))\
+        .order_by(Interview.scheduled_date).limit(3).all()
 
-    # Format upcoming interviews
-    formatted_interviews = []
-    for interview in upcoming_interviews:
-        formatted_interviews.append({
-            'id': interview.id,
-            'title': interview.title,
-            'date': interview.scheduled_date.strftime('%b %d, %Y'),
-            'time': interview.scheduled_date.strftime('%I:%M %p'),
-            'mentor': interview.interviewer_name or 'TBD',
-            'type': interview.interview_type.replace('_', ' ').title(),
-            'image_url': interview.image_url,  # New field
-            'link': interview.meeting_link or '#',
-            'status': interview.status
-        })
+    formatted_interviews = [{
+        'id': i.id, 'title': i.title, 'mentor': i.interviewer_name or 'TBD',
+        'date': i.scheduled_date.strftime('%b %d, %Y'), 'time': i.scheduled_date.strftime('%I:%M %p'),
+        'type': i.interview_type.replace('_', ' ').title(), 'image_url': i.image_url,
+        'link': i.meeting_link or '#', 'status': i.status
+    } for i in upcoming_interviews]
         
     # Calculate Statistics
-    from sqlalchemy import or_
-    total_mocks_count = MockTest.query.filter(
-        MockTest.is_active == True
-    ).filter(
-        or_(
-            MockTest.is_free == True,
-            MockTest.batch_id.in_(batch_ids) if batch_ids else False,
-            MockTest.batch_id == None
-        )
+    total_mocks = MockTest.query.filter(MockTest.is_active == True).filter(
+        or_(MockTest.is_free == True, MockTest.batch_id.in_(batch_ids) if batch_ids else False, MockTest.batch_id == None)
     ).count()
     
-    attempted_mocks_count = TestAttempt.query.filter_by(
-        student_id=student.id,
-        status='completed'
-    ).count()
-    
-    interviews_done_count = Interview.query.filter_by(student_id=student.id, status='completed').count()
-    
-    # Calculate pending doubts
-    from app.models.doubt import Doubt
+    attempts = TestAttempt.query.filter_by(student_id=student.id, status='completed').count()
+    interviews_done = Interview.query.filter_by(student_id=student.id, status='completed').count()
     pending_doubts = Doubt.query.filter_by(student_id=student.id, status='pending').count()
     
     # Simple readiness logic
-    if attempted_mocks_count > 5:
-        interview_readiness = "Excellent"
-        readiness_color = "green"
-    elif attempted_mocks_count > 0:
-        interview_readiness = "Good"
-        readiness_color = "blue"
-    else:
-        interview_readiness = "Beginner"
-        readiness_color = "yellow"
+    readiness = "Excellent" if attempts > 5 else "Good" if attempts > 0 else "Beginner"
+    color = "green" if attempts > 5 else "blue" if attempts > 0 else "yellow"
 
-    return render_template(
-        'dashboard/user/user.html',
-        student=student,
-        announcements=announcements,
-        unread_announcements_count=unread_announcements_count,
-        enrollments=enrollments,
-        upcoming_interviews=formatted_interviews,
-        stats={
-            'total_mocks': total_mocks_count,
-            'attempted_mocks': attempted_mocks_count,
-            'interviews_done': interviews_done_count,
-            'readiness': interview_readiness,
-            'readiness_color': readiness_color,
-            'pending_doubts': pending_doubts
-        }
+    return render_template('dashboard/user/user.html',
+        student=student, announcements=announcements, unread_announcements_count=unread_count,
+        enrollments=enrollments, upcoming_interviews=formatted_interviews,
+        stats={'total_mocks': total_mocks, 'attempted_mocks': attempts, 'interviews_done': interviews_done,
+               'readiness': readiness, 'readiness_color': color, 'pending_doubts': pending_doubts}
     )
-
 
 @bp.route('/profile', methods=['GET', 'POST'])
 @student_required
@@ -166,64 +85,31 @@ def profile():
 
     if request.method == 'POST':
         try:
-            student.full_name = request.form.get('full_name', student.full_name)
-            student.phone = request.form.get('phone', student.phone)
-            student.city = request.form.get('city', student.city)
-            student.state = request.form.get('state', student.state)
-            student.preferred_batch = request.form.get('preferred_batch', student.preferred_batch)
-            student.education_level = request.form.get('education_level', student.education_level)
-            student.institution_name = request.form.get('institution_name', student.institution_name)
+            for field in ['full_name', 'phone', 'city', 'state', 'preferred_batch', 'education_level', 'institution_name']:
+                setattr(student, field, request.form.get(field, getattr(student, field)))
 
-            dob_str = request.form.get('date_of_birth')
-            if dob_str:
-                try:
-                    student.date_of_birth = datetime.strptime(dob_str, '%Y-%m-%d').date()
-                except ValueError:
-                    pass
+            dob = request.form.get('date_of_birth')
+            if dob:
+                try: student.date_of_birth = datetime.strptime(dob, '%Y-%m-%d').date()
+                except ValueError: pass
 
             db.session.commit()
             flash('Profile updated successfully', 'success')
-        except Exception as e:
+        except Exception:
             db.session.rollback()
             flash('Update failed', 'danger')
-            print(e)
 
-    # Format date of birth
-    dob_formatted = student.date_of_birth.strftime('%d %B %Y') if student.date_of_birth else 'Not set'
-    
-    # Format member since
-    member_since = student.created_at.strftime('%b %Y') if student.created_at else 'N/A'
-    
-    # Get enrollment info - check if student is actually enrolled
-    enrollment = Enrollment.query.filter_by(student_id=student.id).first()
-    if enrollment and enrollment.batch:
-        batch_name = enrollment.batch.name
-    else:
-        batch_name = 'Not enrolled'
-    
-    # Display campus preference with proper capitalization
-    if student.preferred_batch:
-        preferred_campus = student.preferred_batch.capitalize()
-    else:
-        preferred_campus = 'Not set'
-    
     profile_data = {
-        'full_name': student.full_name,
-        'email': user.email if user else 'N/A',
-        'phone': student.phone or 'Not set',
-        'date_of_birth': dob_formatted,
+        'full_name': student.full_name, 'email': user.email if user else 'N/A', 'phone': student.phone or 'Not set',
+        'date_of_birth': student.date_of_birth.strftime('%d %B %Y') if student.date_of_birth else 'Not set',
         'preferred_batch': student.preferred_batch or 'Not set',
-        'member_since': member_since,
-        'batch_name': batch_name,
-        'city': student.city or 'Not set',
-        'state': student.state or 'Not set',
+        'member_since': student.created_at.strftime('%b %Y') if student.created_at else 'N/A',
+        'batch_name': getattr(Enrollment.query.filter_by(student_id=student.id).first(), 'batch', None).name if Enrollment.query.filter_by(student_id=student.id).first() else 'Not enrolled',
+        'city': student.city or 'Not set', 'state': student.state or 'Not set',
         'dob_for_input': student.date_of_birth.strftime('%Y-%m-%d') if student.date_of_birth else '',
-        'education_level': student.education_level or 'Not set',
-        'institution_name': student.institution_name or 'Not set'
+        'education_level': student.education_level or 'Not set', 'institution_name': student.institution_name or 'Not set'
     }
-
     return render_template('dashboard/user/profile.html', student=student, user=user, profile=profile_data)
-
 
 @bp.route('/announcement')
 @paid_student_required
@@ -232,665 +118,244 @@ def announcement():
     student = get_current_student()
     batch_ids = get_user_batch_ids(student.id)
     
-    # Get all relevant announcements with read status
     announcements_query = db.session.query(Announcement, AnnouncementRead.id.label('is_read'))\
-        .filter(
-            (Announcement.target_audience == 'all') |
-            (Announcement.target_audience == 'students') |
-            (Announcement.target_batch_id.in_(batch_ids) if batch_ids else False)
-        )\
+        .filter((Announcement.target_audience.in_(['all', 'students'])) | (Announcement.target_batch_id.in_(batch_ids) if batch_ids else False))\
         .filter(Announcement.is_published == True)\
         .outerjoin(AnnouncementRead, (AnnouncementRead.announcement_id == Announcement.id) & (AnnouncementRead.student_id == student.id))\
-        .order_by(Announcement.is_pinned.desc(), Announcement.published_at.desc())\
-        .all()
+        .order_by(Announcement.is_pinned.desc(), Announcement.published_at.desc()).all()
         
-    # Serialize for frontend
-    announcements_data = []
-    for ann, read_id in announcements_query:
-        announcements_data.append({
-            'id': ann.id,
-            'title': ann.title,
-            'description': ann.content[:100] + '...' if len(ann.content) > 100 else ann.content,
-            'content': ann.content,
-            'date': ann.published_at.strftime('%b %d, %Y'),
-            'category': 'System' if ann.priority == 'medium' else 'Academic' if ann.priority == 'high' else 'Important',
-            'priority': ann.priority,
-            'unread': read_id is None
-        })
+    announcements_data = [{
+        'id': ann.id, 'title': ann.title, 'description': ann.content[:100] + '...' if len(ann.content) > 100 else ann.content,
+        'content': ann.content, 'date': ann.published_at.strftime('%b %d, %Y'),
+        'category': 'Important' if ann.priority == 'urgent' else 'Academic' if ann.priority == 'high' else 'System',
+        'priority': ann.priority, 'unread': read_id is None
+    } for ann, read_id in announcements_query]
     
     return render_template('dashboard/user/announcement.html', announcements=announcements_data, student=student)
-
 
 @bp.route('/announcement/mark-read/<int:ann_id>', methods=['POST'])
 @student_required
 def mark_announcement_read(ann_id):
-    """Mark a single announcement as read"""
     student = get_current_student()
-    if not student:
-        return {"error": "Unauthorized"}, 401
-    
-    # Check if a record already exists
-    existing = AnnouncementRead.query.filter_by(student_id=student.id, announcement_id=ann_id).first()
-    if not existing:
-        new_read = AnnouncementRead(student_id=student.id, announcement_id=ann_id)
-        db.session.add(new_read)
+    if not AnnouncementRead.query.filter_by(student_id=student.id, announcement_id=ann_id).first():
+        db.session.add(AnnouncementRead(student_id=student.id, announcement_id=ann_id))
         db.session.commit()
-    
     return {"status": "success"}
-
 
 @bp.route('/announcement/mark-all-read', methods=['POST'])
 @student_required
 def mark_all_announcements_read():
-    """Mark all relevant announcements as read for the student"""
-    student = get_current_student()
-    if not student:
-        return {"error": "Unauthorized"}, 401
-    
-    batch_ids = get_user_batch_ids(student.id)
-    
-    # Get all unread relevant announcements
-    unread_announcements = Announcement.query\
-        .filter(
-            (Announcement.target_audience == 'all') |
-            (Announcement.target_audience == 'students') |
-            (Announcement.target_batch_id.in_(batch_ids) if batch_ids else False)
-        )\
+    student, batch_ids = get_current_student(), get_user_batch_ids(get_current_student().id)
+    unread = Announcement.query.filter((Announcement.target_audience.in_(['all', 'students'])) | (Announcement.target_batch_id.in_(batch_ids) if batch_ids else False))\
         .filter(Announcement.is_published == True)\
         .outerjoin(AnnouncementRead, (AnnouncementRead.announcement_id == Announcement.id) & (AnnouncementRead.student_id == student.id))\
-        .filter(AnnouncementRead.id == None)\
-        .all()
+        .filter(AnnouncementRead.id == None).all()
     
-    for ann in unread_announcements:
-        read_record = AnnouncementRead(student_id=student.id, announcement_id=ann.id)
-        db.session.add(read_record)
-    
+    for ann in unread: db.session.add(AnnouncementRead(student_id=student.id, announcement_id=ann.id))
     db.session.commit()
     return {"status": "success"}
-
 
 @bp.route('/prepkit')
 @paid_student_required
 def prepkit():
-    """View resources/prep kit"""
-    student = get_current_student()
-    batch_ids = get_user_batch_ids(student.id)
+    student, batch_ids = get_current_student(), get_user_batch_ids(get_current_student().id)
+    resources_query = Resource.query.filter(Resource.is_active == True).filter((Resource.access_level == 'free') | (Resource.target_batch_id.in_(batch_ids) if batch_ids else False)).order_by(Resource.created_at.desc()).all()
     
-    # Get accessible resources
-    resources_query = Resource.query\
-        .filter(Resource.is_active == True)\
-        .filter(
-            (Resource.access_level == 'free') |
-            (Resource.target_batch_id.in_(batch_ids) if batch_ids else False)
-        )\
-        .order_by(Resource.created_at.desc())\
-        .all()
-    
-    # Group resources by category
     resources = {}
-    for resource in resources_query:
-        category = resource.category.title()
-        if category not in resources:
-            resources[category] = []
+    for res in resources_query:
+        category = res.category.title()
+        if category not in resources: resources[category] = []
         
-        # Format file size
-        if resource.file_size:
-            size_mb = resource.file_size / (1024 * 1024)
-            size = f'{size_mb:.1f} MB'
-        else:
-            size = 'N/A'
-        
-        link = resource.file_url or resource.file_path or '#'
-        if link and 'cloudinary.com' in link and resource.file_type and resource.file_type.lower() == 'pdf':
-            link = get_download_url(link)
+        link = res.file_url or res.file_path or '#'
+        if link and 'cloudinary.com' in link and res.file_type == 'pdf': link = get_download_url(link)
 
         resources[category].append({
-            'title': resource.title,
-            'description': resource.description,
-            'type': resource.file_type.upper() if resource.file_type else 'Link',
-            'size': size,
-            'link': link
+            'title': res.title, 'description': res.description, 'type': res.file_type.upper() if res.file_type else 'Link',
+            'size': f'{res.file_size / (1024*1024):.1f} MB' if res.file_size else 'N/A', 'link': link
         })
-    
     return render_template('dashboard/user/prepkit.html', resources=resources, student=student)
-
 
 @bp.route('/interview')
 @student_required
 def interview():
-    """View interviews"""
     student = get_current_student()
-    
-    # Check enrollment status for group interviews
-    enrollments = db.session.query(Enrollment).filter_by(student_id=student.id).all()
-    is_enrolled = any(e.payment_status in ['completed', 'partial'] for e in enrollments)
-    
-    # Build query for upcoming interviews
-    # Fetch queries
-    from sqlalchemy import or_
-    
-    interview_filters = [Interview.student_id == student.id, Interview.target_audience == 'all_registered']
-    if is_enrolled:
-        interview_filters.append(Interview.target_audience == 'all_enrolled')
+    is_enrolled = student.is_paid
+    filters = [Interview.student_id == student.id, Interview.target_audience == 'all_registered']
+    if is_enrolled: filters.append(Interview.target_audience == 'all_enrolled')
         
-    upcoming_interviews = Interview.query\
-        .filter(or_(*interview_filters))\
-        .filter(Interview.scheduled_date >= datetime.utcnow())\
-        .filter(Interview.status.in_(['scheduled', 'confirmed']))\
-        .order_by(Interview.scheduled_date)\
-        .all()
+    upcoming = [{
+        'id': i.id, 'title': i.title, 'date': i.scheduled_date.strftime('%b %d, %Y'), 'time': i.scheduled_date.strftime('%I:%M %p'),
+        'mentor': i.interviewer_name or 'TBD', 'type': i.interview_type.replace('_', ' ').title(),
+        'image': i.image_url or '/static/images/interview_default.png', 'link': i.meeting_link or '#'
+    } for i in Interview.query.filter(or_(*filters), Interview.scheduled_date >= datetime.utcnow(), Interview.status.in_(['scheduled', 'confirmed'])).order_by(Interview.scheduled_date).all()]
     
-    # Format for template
-    upcoming = []
-    for interview in upcoming_interviews:
-        upcoming.append({
-            'id': interview.id,
-            'title': interview.title,
-            'date': interview.scheduled_date.strftime('%b %d, %Y'),
-            'time': interview.scheduled_date.strftime('%I:%M %p'),
-            'mentor': interview.interviewer_name or 'TBD',
-            'type': interview.interview_type.replace('_', ' ').title(),
-            'image': interview.image_url or '/static/images/interview_default.png',
-            'link': interview.meeting_link or '#'
-        })
-    
-    # Get past interviews
-    past_interviews = Interview.query\
-        .filter(or_(*interview_filters))\
-        .filter(
-            (Interview.scheduled_date < datetime.utcnow()) |
-            (Interview.status == 'completed')
-        )\
-        .order_by(Interview.scheduled_date.desc())\
-        .all()
-    
-    # Format for template
-    past = []
-    for interview in past_interviews:
-        past.append({
-            'id': interview.id,
-            'title': interview.title,
-            'date': interview.scheduled_date.strftime('%b %d, %Y'),
-            'mentor': interview.interviewer_name or 'TBD',
-            'status': interview.status.title(),
-            'feedback_link': '#'
-        })
+    past = [{
+        'id': i.id, 'title': i.title, 'date': i.scheduled_date.strftime('%b %d, %Y'), 'mentor': i.interviewer_name or 'TBD',
+        'status': i.status.title(), 'feedback_link': '#'
+    } for i in Interview.query.filter(or_(*filters)).filter((Interview.scheduled_date < datetime.utcnow()) | (Interview.status == 'completed')).order_by(Interview.scheduled_date.desc()).all()]
     
     return render_template('dashboard/user/interview.html', upcoming=upcoming, past=past, student=student)
-
 
 @bp.route('/doubts')
 @paid_student_required
 def doubts():
-    """View doubts forum"""
-    from app.models.doubt import Doubt, DoubtReply
     student = get_current_student()
-    
-    # Fetch all doubts from database
-    doubts_query = Doubt.query.order_by(Doubt.created_at.desc()).all()
-    
-    # Format doubts for template
     doubts_list = []
-    for doubt in doubts_query:
-        # Calculate time ago
-        time_diff = datetime.utcnow() - doubt.created_at
-        if time_diff.days > 0:
-            timestamp = f"{time_diff.days} day{'s' if time_diff.days > 1 else ''} ago"
-        elif time_diff.seconds >= 3600:
-            hours = time_diff.seconds // 3600
-            timestamp = f"{hours} hour{'s' if hours > 1 else ''} ago"
-        else:
-            minutes = max(1, time_diff.seconds // 60)
-            timestamp = f"{minutes} minute{'s' if minutes > 1 else ''} ago"
-        
+    for d in Doubt.query.order_by(Doubt.created_at.desc()).all():
+        diff = datetime.utcnow() - d.created_at
+        ts = f"{diff.days} days ago" if diff.days > 0 else f"{diff.seconds // 3600} hours ago" if diff.seconds >= 3600 else f"{max(1, diff.seconds // 60)} mins ago"
         doubts_list.append({
-            'id': doubt.id,
-            'title': doubt.title,
-            'content': doubt.content,
-            'author': doubt.student.full_name,
-            'timestamp': timestamp,
-            'replies': doubt.replies.count(),
-            'views': doubt.views,
-            'category': doubt.category,
-            'student_id': doubt.student_id
+            'id': d.id, 'title': d.title, 'content': d.content, 'author': d.student.full_name, 'timestamp': ts,
+            'replies': d.replies.count(), 'views': d.views, 'category': d.category, 'student_id': d.student_id
         })
-    
     return render_template('dashboard/user/doubts.html', doubts=doubts_list, student=student)
-
 
 @bp.route('/post_doubt', methods=['POST'])
 @student_required
 def post_doubt():
-    """Handle posting a new doubt"""
-    from app.models.doubt import Doubt
     student = get_current_student()
-    
-    # Get form data
-    title = request.form.get('title')
-    category = request.form.get('category', 'General Query')
-    content = request.form.get('content')
-    
-    # Validate input
+    title, content = request.form.get('title'), request.form.get('content')
     if not title or not content:
-        flash('Please provide both a title and description for your doubt.', 'danger')
+        flash('Title and description required', 'danger')
         return redirect(url_for('user.doubts'))
-    
     try:
-        # Create new doubt
-        new_doubt = Doubt(
-            student_id=student.id,
-            title=title,
-            category=category,
-            content=content,
-            status='pending'
-        )
-        
-        db.session.add(new_doubt)
+        db.session.add(Doubt(student_id=student.id, title=title, category=request.form.get('category', 'General Query'), content=content, status='pending'))
         db.session.commit()
-        
-        flash('Your doubt has been posted successfully! Our team will respond soon.', 'success')
-    except Exception as e:
+        flash('Doubt posted!', 'success')
+    except Exception:
         db.session.rollback()
-        flash('Failed to post doubt. Please try again.', 'danger')
-        print(f"Error posting doubt: {e}")
-    
+        flash('Failed to post', 'danger')
     return redirect(url_for('user.doubts'))
-
 
 @bp.route('/doubts/<int:doubt_id>')
 @student_required
 def doubt_detail(doubt_id):
-    """View individual doubt with replies"""
-    from app.models.doubt import Doubt, DoubtReply
-    student = get_current_student()
-    
-    # Get the doubt
-    doubt = Doubt.query.get_or_404(doubt_id)
-    
-    # Increment view count only once per session
-    viewed_doubts = session.get('viewed_doubts', [])
-    if doubt_id not in viewed_doubts:
+    student, doubt = get_current_student(), Doubt.query.get_or_404(doubt_id)
+    if doubt_id not in session.get('viewed_doubts', []):
         doubt.views += 1
-        viewed_doubts.append(doubt_id)
-        session['viewed_doubts'] = viewed_doubts
+        session.setdefault('viewed_doubts', []).append(doubt_id)
         db.session.commit()
     
-    # Calculate time ago for doubt
-    time_diff = datetime.utcnow() - doubt.created_at
-    if time_diff.days > 0:
-        doubt_timestamp = f"{time_diff.days} day{'s' if time_diff.days > 1 else ''} ago"
-    elif time_diff.seconds >= 3600:
-        hours = time_diff.seconds // 3600
-        doubt_timestamp = f"{hours} hour{'s' if hours > 1 else ''} ago"
-    else:
-        minutes = max(1, time_diff.seconds // 60)
-        doubt_timestamp = f"{minutes} minute{'s' if minutes > 1 else ''} ago"
+    diff = datetime.utcnow() - doubt.created_at
+    ts = f"{diff.days} days ago" if diff.days > 0 else f"{diff.seconds // 3600} hours ago" if diff.seconds >= 3600 else f"{max(1, diff.seconds // 60)} mins ago"
     
-    # Format doubt data
-    doubt_data = {
-        'id': doubt.id,
-        'title': doubt.title,
-        'content': doubt.content,
-        'category': doubt.category,
-        'status': doubt.status,
-        'author': doubt.student.full_name,
-        'timestamp': doubt_timestamp,
-        'created_at': doubt.created_at.strftime('%B %d, %Y at %I:%M %p'),
-        'views': doubt.views,
-        'replies_count': doubt.replies.count()
-    }
-    
-    # Get all replies
-    replies_query = doubt.replies.order_by(DoubtReply.created_at.asc()).all()
-    replies_list = []
-    for reply in replies_query:
-        # Calculate time ago for reply
-        reply_time_diff = datetime.utcnow() - reply.created_at
-        if reply_time_diff.days > 0:
-            reply_timestamp = f"{reply_time_diff.days} day{'s' if reply_time_diff.days > 1 else ''} ago"
-        elif reply_time_diff.seconds >= 3600:
-            reply_hours = reply_time_diff.seconds // 3600
-            reply_timestamp = f"{reply_hours} hour{'s' if reply_hours > 1 else ''} ago"
-        else:
-            reply_minutes = max(1, reply_time_diff.seconds // 60)
-            reply_timestamp = f"{reply_minutes} minute{'s' if reply_minutes > 1 else ''} ago"
-        
-        # Get user info
-        user = User.query.get(reply.user_id)
-        author_name = user.email.split('@')[0] if user else 'Unknown'
-        
-        replies_list.append({
-            'id': reply.id,
-            'content': reply.content,
-            'author': author_name,
-            'is_staff': reply.is_staff_reply,
-            'timestamp': reply_timestamp,
-            'created_at': reply.created_at.strftime('%B %d, %Y at %I:%M %p')
+    replies = []
+    for r in doubt.replies.order_by(DoubtReply.created_at.asc()).all():
+        r_diff = datetime.utcnow() - r.created_at
+        r_ts = f"{r_diff.days} days ago" if r_diff.days > 0 else f"{r_diff.seconds // 3600} hours ago" if r_diff.seconds >= 3600 else f"{max(1, r_diff.seconds // 60)} mins ago"
+        replies.append({
+            'id': r.id, 'content': r.content, 'author': User.query.get(r.user_id).email.split('@')[0], 'is_staff': r.is_staff_reply, 'timestamp': r_ts
         })
-    
-    return render_template('dashboard/user/doubt_detail.html', 
-                         doubt=doubt_data, 
-                         replies=replies_list,
-                         student=student)
-
+    return render_template('dashboard/user/doubt_detail.html', doubt={'id': doubt.id, 'title': doubt.title, 'content': doubt.content, 'category': doubt.category, 'status': doubt.status, 'author': doubt.student.full_name, 'timestamp': ts, 'views': doubt.views, 'replies_count': doubt.replies.count()}, replies=replies, student=student)
 
 @bp.route('/doubts/<int:doubt_id>/reply', methods=['POST'])
 @student_required
 def post_reply(doubt_id):
-    """Post a reply to a doubt"""
-    from app.models.doubt import Doubt, DoubtReply
-    student = get_current_student()
-    
-    # Get form data
     content = request.form.get('content')
-    
-    # Validate input
-    if not content:
-        flash('Please provide a reply.', 'danger')
-        return redirect(url_for('user.doubt_detail', doubt_id=doubt_id))
-    
+    if not content: return redirect(url_for('user.doubt_detail', doubt_id=doubt_id))
     try:
-        # Get the doubt
-        doubt = Doubt.query.get_or_404(doubt_id)
-        
-        # Create new reply
-        new_reply = DoubtReply(
-            doubt_id=doubt_id,
-            user_id=student.user_id,
-            content=content,
-            is_staff_reply=False
-        )
-        
-        db.session.add(new_reply)
+        db.session.add(DoubtReply(doubt_id=doubt_id, user_id=get_current_student().user_id, content=content, is_staff_reply=False))
         db.session.commit()
-        
-        flash('Your reply has been posted successfully!', 'success')
-    except Exception as e:
+        flash('Reply posted!', 'success')
+    except Exception:
         db.session.rollback()
-        flash('Failed to post reply. Please try again.', 'danger')
-        print(f"Error posting reply: {e}")
-    
+        flash('Failed to reply', 'danger')
     return redirect(url_for('user.doubt_detail', doubt_id=doubt_id))
 
 @bp.route('/doubts/delete/<int:doubt_id>', methods=['POST'])
 @student_required
 def delete_doubt(doubt_id):
-    """Delete own doubt (student)"""
-    from app.models.doubt import Doubt
-    student = get_current_student()
-    
-    try:
-        doubt = Doubt.query.get_or_404(doubt_id)
-        
-        # Verify ownership
-        if doubt.student_id != student.id:
-            flash('You can only delete your own doubts.', 'danger')
-            return redirect(url_for('user.doubts'))
-            
+    doubt = Doubt.query.get_or_404(doubt_id)
+    if doubt.student_id == get_current_student().id:
         db.session.delete(doubt)
         db.session.commit()
-        flash('Your doubt has been deleted successfully.', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash('Failed to delete doubt. Please try again.', 'danger')
-        print(f"Error deleting student doubt: {e}")
-    
+        flash('Doubt deleted', 'success')
     return redirect(url_for('user.doubts'))
 
 @bp.route('/mock')
 @paid_student_required
 def mock():
-    """View available mock tests"""
-    student = get_current_student()
-    batch_ids = get_user_batch_ids(student.id)
+    student, batch_ids = get_current_student(), get_user_batch_ids(get_current_student().id)
+    tests = MockTest.query.filter(MockTest.is_active == True).filter(or_(MockTest.is_free == True, MockTest.batch_id.in_(batch_ids) if batch_ids else False, MockTest.batch_id == None)).order_by(MockTest.available_from.desc()).all()
     
-    # Filter tests: either free or assigned to student's batches
-    # Filter for active tests only
-    from sqlalchemy import or_
-    tests_query = MockTest.query.filter(
-        MockTest.is_active == True
-    ).filter(
-        or_(
-            MockTest.is_free == True,
-            MockTest.batch_id.in_(batch_ids) if batch_ids else False,
-            MockTest.batch_id == None
-        )
-    ).order_by(MockTest.available_from.desc()).all()
-    
-    formatted_tests = []
     now = datetime.now(IST).replace(tzinfo=None)
-    
-    for test in tests_query:
-        # Check if attempt already exists
-        attempt = TestAttempt.query.filter_by(
-            student_id=student.id, 
-            mock_test_id=test.id,
-            status='completed'
-        ).first()
-        
-        # Determine status
-        if test.is_anytime:
-            status = 'Live'
-        elif test.available_from and test.available_until:
-            if now < test.available_from:
-                status = 'Upcoming'
-            elif now > test.available_until:
-                status = 'Ended'
-            else:
-                status = 'Live'
-        elif test.available_from:
-            status = 'Live' if now >= test.available_from else 'Upcoming'
-        elif test.available_until:
-            status = 'Live' if now <= test.available_until else 'Ended'
-        else:
-            status = 'Live'
-            
-        formatted_tests.append({
-            'id': test.id,
-            'title': test.title,
-            'date': test.available_from.strftime('%b %d, %Y') if test.available_from else ('Anytime' if test.is_anytime else 'N/A'),
-            'time': test.available_from.strftime('%I:%M %p') if test.available_from else ('Flexible' if test.is_anytime else 'N/A'),
-            'duration': f"{test.duration_minutes} mins",
-            'questions': test.total_questions,
-            'status': status,
-            'attempted': attempt is not None,
-            'attempt_id': attempt.id if attempt else None,
-            'syllabus_link': '#' # Can be added to model if needed
+    formatted = []
+    for t in tests:
+        attempt = TestAttempt.query.filter_by(student_id=student.id, mock_test_id=t.id, status='completed').first()
+        status = 'Live' if t.is_anytime or (t.available_from and t.available_from <= now and (not t.available_until or now <= t.available_until)) else 'Upcoming' if t.available_from and now < t.available_from else 'Ended'
+        formatted.append({
+            'id': t.id, 'title': t.title, 'date': t.available_from.strftime('%b %d, %Y') if t.available_from else 'Anytime',
+            'time': t.available_from.strftime('%I:%M %p') if t.available_from else 'Flexible',
+            'duration': f"{t.duration_minutes} mins", 'questions': t.total_questions, 'status': status, 'attempted': attempt is not None, 'attempt_id': attempt.id if attempt else None
         })
-        
-    return render_template('dashboard/user/mock.html', tests=formatted_tests, student=student)
-
+    return render_template('dashboard/user/mock.html', tests=formatted, student=student)
 
 @bp.route('/mock/<int:test_id>/start')
 @student_required
 def mock_start(test_id):
-    """View test instructions before starting"""
-    student = get_current_student()
-    test = MockTest.query.get_or_404(test_id)
-    
-    # Check if already attempted
-    attempt = TestAttempt.query.filter_by(
-        student_id=student.id, 
-        mock_test_id=test.id,
-        status='completed'
-    ).first()
-    
-    if attempt:
-        flash('You have already completed this test.', 'info')
-        return redirect(url_for('user.mock_result', attempt_id=attempt.id))
-        
+    student, test = get_current_student(), MockTest.query.get_or_404(test_id)
+    attempt = TestAttempt.query.filter_by(student_id=student.id, mock_test_id=test.id, status='completed').first()
+    if attempt: return redirect(url_for('user.mock_result', attempt_id=attempt.id))
     return render_template('dashboard/user/mock_start.html', test=test, student=student)
-
 
 @bp.route('/mock/<int:test_id>/take')
 @student_required
 def mock_take(test_id):
-    """The actual test taking interface"""
-    student = get_current_student()
-    test = MockTest.query.get_or_404(test_id)
-    
-    # Check if already attempted completed
-    existing_attempt = TestAttempt.query.filter_by(
-        student_id=student.id, 
-        mock_test_id=test.id,
-        status='completed'
-    ).first()
-    
-    if existing_attempt:
-        flash('You have already completed this test.', 'info')
-        return redirect(url_for('user.mock_result', attempt_id=existing_attempt.id))
-    
-    attempt = TestAttempt.query.filter_by(
-        student_id=student.id, 
-        mock_test_id=test.id,
-        status='in_progress'
-    ).first()
-    
+    student, test = get_current_student(), MockTest.query.get_or_404(test_id)
+    attempt = TestAttempt.query.filter_by(student_id=student.id, mock_test_id=test.id, status='in_progress').first()
     now = datetime.now(IST).replace(tzinfo=None)
     
-    if attempt:
-        # Check if attempt is expired
-        elapsed = (now - attempt.started_at).total_seconds() / 60
-        if elapsed > test.duration_minutes:
-            if not attempt.answers:
-                # Stale/bugged attempt (likely from timezone mismatch) - clear it
-                db.session.delete(attempt)
-                db.session.commit()
-                attempt = None
-            else:
-                # Real expiration - redirect to submit to process what they have
-                flash('Time limit exceeded. Submitting your progress.', 'warning')
-                return redirect(url_for('user.mock_submit', test_id=test.id))
-    
+    if attempt and (now - attempt.started_at).total_seconds() / 60 > test.duration_minutes:
+        return redirect(url_for('user.mock_submit', test_id=test.id))
     if not attempt:
-        attempt = TestAttempt(
-            student_id=student.id,
-            mock_test_id=test.id,
-            status='in_progress',
-            started_at=now
-        )
-        db.session.add(attempt)
-        db.session.commit()
+        attempt = TestAttempt(student_id=student.id, mock_test_id=test.id, status='in_progress', started_at=now)
+        db.session.add(attempt); db.session.commit()
     
-    # Calculate remaining time (re-calculating for consistency)
-    elapsed = (now - attempt.started_at).total_seconds() / 60
-    remaining_minutes = max(0, test.duration_minutes - elapsed)
-        
-    # Get questions
     questions = test.questions.order_by(Question.question_number).all()
+    q_data, counts = [], {}
+    for q in questions: counts[q.section] = counts.get(q.section, 0) + 1
     
-    # Pre-calculate section info and relative indices
-    section_counts = {}
-    for q in questions:
-        section_counts[q.section] = section_counts.get(q.section, 0) + 1
-    
-    current_section_indices = {}
-    questions_data = []
+    curr_indices = {}
     for i, q in enumerate(questions):
-        rel_idx = current_section_indices.get(q.section, 0) + 1
-        current_section_indices[q.section] = rel_idx
+        idx = curr_indices.get(q.section, 0) + 1
+        curr_indices[q.section] = idx
+        d = q.to_dict()
+        d.update({'abs_index': i, 'rel_index': idx, 'section_total': counts[q.section]})
+        q_data.append(d)
         
-        q_dict = q.to_dict()
-        q_dict['abs_index'] = i
-        q_dict['rel_index'] = rel_idx
-        q_dict['section_total'] = section_counts[q.section]
-        questions_data.append(q_dict)
-    
-    return render_template('dashboard/user/mock_take.html', 
-                         test=test, 
-                         attempt=attempt, 
-                         questions=questions_data,
-                         remaining_seconds=int(remaining_minutes * 60),
-                         student=student)
-
+    return render_template('dashboard/user/mock_take.html', test=test, attempt=attempt, questions=q_data, remaining_seconds=int(max(0, test.duration_minutes - (now - attempt.started_at).total_seconds() / 60) * 60), student=student)
 
 @bp.route('/mock/<int:test_id>/submit', methods=['POST'])
 @student_required
 def mock_submit(test_id):
-    """Process test submission"""
-    student = get_current_student()
-    test = MockTest.query.get_or_404(test_id)
+    student, test = get_current_student(), MockTest.query.get_or_404(test_id)
+    attempt = TestAttempt.query.filter_by(student_id=student.id, mock_test_id=test.id, status='in_progress').first()
+    if not attempt: return redirect(url_for('user.mock'))
     
-    attempt = TestAttempt.query.filter_by(
-        student_id=student.id, 
-        mock_test_id=test.id,
-        status='in_progress'
-    ).first()
+    answers = {k.split('_')[1]: v for k, v in request.form.items() if k.startswith('q_')}
+    attempt.answers, attempt.submitted_at, attempt.status = answers, datetime.now(IST).replace(tzinfo=None), 'completed'
     
-    if not attempt:
-        flash('No active attempt found for this test.', 'danger')
-        return redirect(url_for('user.mock'))
-        
-    # Process answers from form
-    user_answers = {}
-    for key, value in request.form.items():
-        if key.startswith('q_'):
-            q_id = key.split('_')[1]
-            user_answers[q_id] = value
+    correct, wrong, score = 0, 0, 0.0
+    for q in test.questions.all():
+        ans = answers.get(str(q.id))
+        if ans == q.correct_answer: correct +=1; score += (q.marks or 1)
+        elif ans: wrong += 1; score -= (q.negative_marks or 0)
             
-    attempt.answers = user_answers
-    attempt.submitted_at = datetime.now(IST).replace(tzinfo=None)
-    attempt.status = 'completed'
-    
-    # Grading logic
-    correct_count = 0
-    wrong_count = 0
-    total_score = 0.0
-    questions = test.questions.all()
-    
-    for q in questions:
-        ans = user_answers.get(str(q.id))
-        if ans == q.correct_answer:
-            correct_count += 1
-            total_score += q.marks if q.marks else 1
-        elif ans:
-            wrong_count += 1
-            total_score -= q.negative_marks if q.negative_marks else 0
-            
-    attempt.correct_answers = correct_count
-    attempt.wrong_answers = wrong_count
-    attempt.unanswered = len(questions) - (correct_count + wrong_count)
-    attempt.score = total_score
-    attempt.total_marks = test.total_marks
-    attempt.percentage = (total_score / test.total_marks * 100) if test.total_marks > 0 else 0
-    
-    # Calculate time taken
-    time_taken = (attempt.submitted_at - attempt.started_at).seconds // 60
-    attempt.time_taken_minutes = time_taken
-    
+    attempt.correct_answers, attempt.wrong_answers, attempt.score = correct, wrong, score
+    attempt.unanswered = test.total_questions - (correct + wrong)
+    attempt.total_marks, attempt.percentage = test.total_marks, (score / test.total_marks * 100) if test.total_marks > 0 else 0
+    attempt.time_taken_minutes = (attempt.submitted_at - attempt.started_at).seconds // 60
     db.session.commit()
-    
-    flash('Test submitted successfully! Here are your results.', 'success')
     return redirect(url_for('user.mock_result', attempt_id=attempt.id))
-
 
 @bp.route('/mock/result/<int:attempt_id>')
 @student_required
 def mock_result(attempt_id):
-    """View test attempt results"""
-    student = get_current_student()
-    attempt = TestAttempt.query.get_or_404(attempt_id)
-    
-    if attempt.student_id != student.id:
-        flash('Unauthorized access to test results.', 'danger')
-        return redirect(url_for('user.mock'))
-        
-    test = attempt.mock_test
-    questions = test.questions.order_by(Question.question_number).all()
-    
-    # Map answers for easy lookup in template
-    answers = attempt.answers
-    
-    return render_template('dashboard/user/mock_result.html', 
-                         attempt=attempt, 
-                         test=test, 
-                         questions=questions, 
-                         answers=answers,
-                         student=student)
+    student, attempt = get_current_student(), TestAttempt.query.get_or_404(attempt_id)
+    if attempt.student_id != student.id: return redirect(url_for('user.mock'))
+    return render_template('dashboard/user/mock_result.html', attempt=attempt, test=attempt.mock_test, questions=attempt.mock_test.questions.order_by(Question.question_number).all(), answers=attempt.answers, student=student)
 
 @bp.route('/enrollment-required')
 @student_required
 def enrollment_required_page():
-    """Show page asking user to enroll"""
-    student = get_current_student()
-    return render_template('dashboard/user/enrollment_required.html', student=student)
+    return render_template('dashboard/user/enrollment_required.html', student=get_current_student())
