@@ -42,6 +42,10 @@ class Announcement(db.Model):
             return False
         return True
     
+    __table_args__ = (
+        db.Index('idx_announcement_targeting', 'target_audience', 'target_batch_id', 'is_published'),
+    )
+
     def __repr__(self):
         return f'<Announcement {self.title} - {self.priority}>'
 
@@ -60,6 +64,7 @@ class AnnouncementRead(db.Model):
     
     __table_args__ = (
         db.UniqueConstraint('student_id', 'announcement_id', name='unique_student_announcement_read'),
+        db.Index('idx_annread_student_ann', 'student_id', 'announcement_id'),
     )
 
     def __repr__(self):

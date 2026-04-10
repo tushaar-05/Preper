@@ -39,5 +39,10 @@ class Interview(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     completed_at = db.Column(db.DateTime)
     
+    __table_args__ = (
+        db.Index('idx_interview_student_status', 'student_id', 'status'),
+        db.Index('idx_interview_audience', 'target_audience', 'status'),
+    )
+
     def __repr__(self):
         return f'<Interview {self.title} - {self.status}>'

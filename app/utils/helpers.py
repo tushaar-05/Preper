@@ -3,6 +3,7 @@ from flask import current_app
 from babel.numbers import format_currency as babel_format_currency
 from datetime import datetime
 from app.models import Student, Enrollment, Batch, MockTest, TestAttempt
+from app.extensions import cache
 
 def get_current_student():
     user_id = session.get('student_id')
@@ -10,6 +11,7 @@ def get_current_student():
         return None
     return Student.query.filter_by(user_id=user_id).first()
 
+@cache.memoize(timeout=300)
 def get_user_batch_ids(student_id):
     return [e.batch_id for e in Enrollment.query.filter_by(student_id=student_id).all()]
 

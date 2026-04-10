@@ -62,6 +62,11 @@ class MockTest(db.Model):
         """Set sections from a Python list"""
         self.sections_json = json.dumps(sections_list)
     
+    __table_args__ = (
+        db.Index('idx_mocktest_batch_active', 'batch_id', 'is_active'),
+        db.Index('idx_mocktest_free_active', 'is_free', 'is_active'),
+    )
+
     def __repr__(self):
         return f'<MockTest {self.title}>'
 
@@ -178,5 +183,9 @@ class TestAttempt(db.Model):
             return self.percentage >= passing_percentage
         return False
     
+    __table_args__ = (
+        db.Index('idx_attempt_student_test', 'student_id', 'mock_test_id', 'status'),
+    )
+
     def __repr__(self):
         return f'<TestAttempt Student:{self.student_id} Test:{self.mock_test_id}>'

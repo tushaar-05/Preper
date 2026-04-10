@@ -1,8 +1,10 @@
 from flask import Blueprint, render_template
+from app.extensions import cache
 
 bp = Blueprint('main', __name__)
 
 @bp.route('/')
+@cache.cached(timeout=300)
 def index():
     """Landing page"""
     from app.models import Batch
@@ -14,6 +16,7 @@ def index():
     return render_template('index.html', batch=batch)
 
 @bp.route('/about')
+@cache.cached(timeout=600)
 def about():
     """About Us page"""
     from app.models import Mentor, TeamMember

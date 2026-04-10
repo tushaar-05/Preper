@@ -25,6 +25,10 @@ class Doubt(db.Model):
     student = db.relationship('Student', backref='doubts', foreign_keys=[student_id])
     replies = db.relationship('DoubtReply', backref='doubt', lazy='dynamic', cascade='all, delete-orphan')
     
+    __table_args__ = (
+        db.Index('idx_doubt_student_status', 'student_id', 'status'),
+    )
+
     def __repr__(self):
         return f'<Doubt {self.title}>'
 

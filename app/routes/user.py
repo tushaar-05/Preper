@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 # Define IST timezone
 IST = timezone(timedelta(hours=5, minutes=30))
-from app.extensions import db
+from app.extensions import db, cache
 from app.models import (
     User, Student, Batch, Enrollment, Interview,
     MockTest, Question, TestAttempt, Announcement, AnnouncementRead, Resource
@@ -19,12 +19,15 @@ def inject_payment_status():
     student = get_current_student()
     is_paid = False
     if student:
-        enrollment = Enrollment.query.filter_by(student_id=student.id)\
-            .filter(Enrollment.payment_status.in_(['completed', 'partial']))\
-            .first()
-        if enrollment:
-            is_paid = True
+        is_paid = _check_payment_status_cached(student.id)
     return dict(is_paid=is_paid)
+
+@cache.memoize(timeout=60)
+def _check_payment_status_cached(student_id):
+    enrollment = Enrollment.query.filter_by(student_id=student_id)\
+        .filter(Enrollment.payment_status.in_(['completed', 'partial']))\
+        .first()
+    return enrollment is not None
 
 @bp.route('/dashboard')
 @student_required

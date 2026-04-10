@@ -31,6 +31,7 @@ class Enrollment(db.Model):
     # Unique constraint: one student can enroll in a batch only once
     __table_args__ = (
         db.UniqueConstraint('student_id', 'batch_id', name='unique_student_batch'),
+        db.Index('idx_enrollment_student_status', 'student_id', 'payment_status'),
     )
     
     @property
