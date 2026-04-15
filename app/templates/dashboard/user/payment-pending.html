@@ -471,6 +471,8 @@
           }
 
           // 2. Open Razorpay
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+          
           const options = {
             "key": data.key,
             "amount": data.amount,
@@ -478,7 +480,23 @@
             "name": "NST Prep",
             "description": data.description,
             "order_id": data.order_id,
-            "handler": async function (response) {
+            "prefill": data.prefill,
+            "theme": {
+              "color": "#9685fe"
+            },
+            "modal": {
+              "ondismiss": function () {
+                resetButton();
+              }
+            }
+          };
+
+          // Use Redirect Flow for Mobile/Safari to avoid deep-link issues
+          if (isMobile) {
+            options.callback_url = window.location.origin + "/payment/verify";
+            options.redirect = true;
+          } else {
+            options.handler = async function (response) {
               // 3. Verify Payment
               try {
                 const verifyResponse = await fetch('/payment/verify', {
@@ -507,17 +525,8 @@
                 alert('Payment verification failed. Please contact support.');
                 resetButton();
               }
-            },
-            "prefill": data.prefill,
-            "theme": {
-              "color": "#9685fe"
-            },
-            "modal": {
-              "ondismiss": function () {
-                resetButton();
-              }
-            }
-          };
+            };
+          }
 
           const rzp1 = new Razorpay(options);
           rzp1.on('payment.failed', function (response) {

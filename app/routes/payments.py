@@ -226,14 +226,21 @@ def initiate_payment():
 @student_required
 def verify_payment():
     """Verify payment signature from Razorpay"""
-    data = request.json
+    if request.is_json:
+        data = request.json
+    else:
+        data = request.form
     
     razorpay_payment_id = data.get('razorpay_payment_id')
     razorpay_order_id = data.get('razorpay_order_id')
     razorpay_signature = data.get('razorpay_signature')
     
     if not all([razorpay_payment_id, razorpay_order_id, razorpay_signature]):
-        return jsonify({'success': False, 'message': 'Missing payment details'}), 400
+        if request.is_json:
+            return jsonify({'success': False, 'message': 'Missing payment details'}), 400
+        else:
+            flash('Missing payment details. Please try again.', 'danger')
+            return redirect(url_for('payments.payment_pending'))
         
     try:
         # Initialize Razorpay Client
@@ -285,15 +292,27 @@ def verify_payment():
         db.session.commit()
         
         flash('Payment successful! You are now enrolled.', 'success')
-        return jsonify({'success': True, 'redirect_url': url_for('payments.payment')})
+        
+        if request.is_json:
+            return jsonify({'success': True, 'redirect_url': url_for('payments.payment')})
+        else:
+            return redirect(url_for('payments.payment'))
         
     except razorpay.errors.SignatureVerificationError:
-        return jsonify({'success': False, 'message': 'Payment signature verification failed'}), 400
+        if request.is_json:
+            return jsonify({'success': False, 'message': 'Payment signature verification failed'}), 400
+        else:
+            flash('Payment verification failed. Please contact support.', 'danger')
+            return redirect(url_for('payments.payment_pending'))
         
     except Exception as e:
         db.session.rollback()
         print(f"Payment verification error: {e}")
-        return jsonify({'success': False, 'message': 'Error verifying payment'}), 500
+        if request.is_json:
+            return jsonify({'success': False, 'message': 'Error verifying payment'}), 500
+        else:
+            flash('An error occurred during verification.', 'danger')
+            return redirect(url_for('payments.payment_pending'))
 
 
 
