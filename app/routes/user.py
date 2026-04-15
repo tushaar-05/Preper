@@ -22,7 +22,7 @@ def inject_payment_status():
         is_paid = _check_payment_status_cached(student.id)
     return dict(is_paid=is_paid)
 
-@cache.memoize(timeout=60)
+@cache.memoize(timeout=300)
 def _check_payment_status_cached(student_id):
     enrollment = Enrollment.query.filter_by(student_id=student_id)\
         .filter(Enrollment.payment_status.in_(['completed', 'partial']))\
@@ -57,7 +57,7 @@ def dashboard():
         .filter(AnnouncementRead.id == None)\
         .count()
 
-    # Get latest announcements for dashboard display
+    # Get latest announcements
     announcements = Announcement.query\
         .filter(
             (Announcement.target_audience == 'all') |
@@ -69,16 +69,11 @@ def dashboard():
         .limit(5)\
         .all()
 
-    # Determine enrollment status for group interviews
-    is_enrolled = False
-    for enrollment, batch in enrollments:
-        if enrollment.payment_status in ['completed', 'partial']:
-            is_enrolled = True
-            break
+    # Determine enrollment status
+    is_enrolled = any(e.payment_status in ['completed', 'partial'] for e, b in enrollments)
 
-    # Fetch queries
+    # Fetch interviews
     from sqlalchemy import or_
-    
     interview_filters = [Interview.student_id == student.id, Interview.target_audience == 'all_registered']
     if is_enrolled:
         interview_filters.append(Interview.target_audience == 'all_enrolled')
@@ -91,7 +86,6 @@ def dashboard():
         .limit(3)\
         .all()
 
-    # Format upcoming interviews
     formatted_interviews = []
     for interview in upcoming_interviews:
         formatted_interviews.append({
@@ -101,13 +95,29 @@ def dashboard():
             'time': interview.scheduled_date.strftime('%I:%M %p'),
             'mentor': interview.interviewer_name or 'TBD',
             'type': interview.interview_type.replace('_', ' ').title(),
-            'image_url': interview.image_url,  # New field
+            'image_url': interview.image_url,
             'link': interview.meeting_link or '#',
             'status': interview.status
         })
         
-    # Calculate Statistics
+    # Optimized statistics with caching
+    stats = _get_dashboard_stats_cached(student.id, tuple(batch_ids or []))
+
+    return render_template(
+        'dashboard/user/user.html',
+        student=student,
+        announcements=announcements,
+        unread_announcements_count=unread_announcements_count,
+        enrollments=enrollments,
+        upcoming_interviews=formatted_interviews,
+        stats=stats
+    )
+
+@cache.memoize(timeout=300)
+def _get_dashboard_stats_cached(student_id, batch_ids):
     from sqlalchemy import or_
+    from app.models.doubt import Doubt
+    
     total_mocks_count = MockTest.query.filter(
         MockTest.is_active == True
     ).filter(
@@ -119,43 +129,31 @@ def dashboard():
     ).count()
     
     attempted_mocks_count = TestAttempt.query.filter_by(
-        student_id=student.id,
+        student_id=student_id,
         status='completed'
     ).count()
     
-    interviews_done_count = Interview.query.filter_by(student_id=student.id, status='completed').count()
+    interviews_done_count = Interview.query.filter_by(student_id=student_id, status='completed').count()
+    pending_doubts = Doubt.query.filter_by(student_id=student_id, status='pending').count()
     
-    # Calculate pending doubts
-    from app.models.doubt import Doubt
-    pending_doubts = Doubt.query.filter_by(student_id=student.id, status='pending').count()
-    
-    # Simple readiness logic
     if attempted_mocks_count > 5:
-        interview_readiness = "Excellent"
-        readiness_color = "green"
+        readiness = "Excellent"
+        color = "green"
     elif attempted_mocks_count > 0:
-        interview_readiness = "Good"
-        readiness_color = "blue"
+        readiness = "Good"
+        color = "blue"
     else:
-        interview_readiness = "Beginner"
-        readiness_color = "yellow"
+        readiness = "Beginner"
+        color = "yellow"
 
-    return render_template(
-        'dashboard/user/user.html',
-        student=student,
-        announcements=announcements,
-        unread_announcements_count=unread_announcements_count,
-        enrollments=enrollments,
-        upcoming_interviews=formatted_interviews,
-        stats={
-            'total_mocks': total_mocks_count,
-            'attempted_mocks': attempted_mocks_count,
-            'interviews_done': interviews_done_count,
-            'readiness': interview_readiness,
-            'readiness_color': readiness_color,
-            'pending_doubts': pending_doubts
-        }
-    )
+    return {
+        'total_mocks': total_mocks_count,
+        'attempted_mocks': attempted_mocks_count,
+        'interviews_done': interviews_done_count,
+        'readiness': readiness,
+        'readiness_color': color,
+        'pending_doubts': pending_doubts
+    }
 
 
 @bp.route('/profile', methods=['GET', 'POST'])

@@ -9,6 +9,10 @@ def get_current_student():
     user_id = session.get('student_id')
     if not user_id:
         return None
+    return _get_student_cached(user_id)
+
+@cache.memoize(timeout=300)
+def _get_student_cached(user_id):
     return Student.query.filter_by(user_id=user_id).first()
 
 @cache.memoize(timeout=300)
