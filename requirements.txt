@@ -48,3 +48,4 @@ cloudinary
 flask-compress==1.15
 flask-caching==2.1.0
 gunicorn==21.2.0
+redis==5.0.1
